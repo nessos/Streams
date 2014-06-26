@@ -8,7 +8,7 @@ let data = [|1..10000000|]
 let result = 
   data
   |> Stream.ofArray
-  |> Stream.filter (fun x -> x % 2L = 0L)
-  |> Stream.map (fun x -> x + 1L)
+  |> Stream.filter (fun x -> x % 2 = 0)
+  |> Stream.map (fun x -> x * x)
   |> Stream.sum
 ```
