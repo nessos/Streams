@@ -1,4 +1,4 @@
-﻿namespace Streams.Core
+﻿namespace Nessos.Streams.Core
 
 module Stream =
     

@@ -1,7 +1,8 @@
 ﻿#time
 
 #load "Streams.fs"
-open Streams.Core
+
+open Nessos.Streams.Core
 
 
 let data = [|1..10000000|] |> Array.map int64
