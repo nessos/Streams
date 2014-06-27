@@ -7,7 +7,7 @@ is inspired by Java 8 Streams and is based on the observation that functional pi
 source/generator |> lazy |> lazy |> lazy |> eager/reduce
 ```
 * Source/generator are functions that create Streams like Stream.ofArray/Stream.init.
-* Lazy functions take in streams and return streams like Stream.map/Stream.filter, these operatinos are fused together for efficient iteration.
+* Lazy functions take in streams and return streams like Stream.map/Stream.filter, these operations are fused together for efficient iteration.
 * Eager/reduce are functions like Stream.iter/Stream.sum that force the Stream to evaluate up to that point.
 
 The surface api follows the familiar F# pipelining
