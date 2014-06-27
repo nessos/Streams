@@ -1,6 +1,6 @@
 ﻿#time
 
-#load "Streams.fs"
+#r "bin/Release/Streams.Core.dll"
 
 open Nessos.Streams.Core
 
