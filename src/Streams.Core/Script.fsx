@@ -25,12 +25,4 @@ data
 |> Stream.map (fun x -> x + 1L)
 |> Stream.sum
 
-let baseline () = 
-    let mutable acc = 0L
-    for i = 0 to data.Length - 1 do
-        let x = data.[i]
-        if x % 2L = 0L then
-            acc <- acc + (x + 1L)
-    acc
 
-baseline()
