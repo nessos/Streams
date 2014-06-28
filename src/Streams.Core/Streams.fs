@@ -21,7 +21,7 @@ module Stream =
             let (Stream streamf) = stream 
             streamf (fun value -> iterf (f value)))
 
-    let inline flatmap (f : 'T -> Stream<'R>) (stream : Stream<'T>) : Stream<'R> =
+    let inline flatMap (f : 'T -> Stream<'R>) (stream : Stream<'T>) : Stream<'R> =
         Stream (fun iterf -> 
             let (Stream streamf) = stream 
             streamf (fun value -> 
@@ -29,7 +29,7 @@ module Stream =
                         streamf' iterf))
 
     let inline collect (f : 'T -> Stream<'R>) (stream : Stream<'T>) : Stream<'R> =
-        flatmap f stream
+        flatMap f stream
 
     let inline filter (p : 'T -> bool) (stream : Stream<'T>) : Stream<'T> =
         Stream (fun iterf -> 
@@ -43,5 +43,14 @@ module Stream =
         streamf (fun value -> accRef := reducef value !accRef)
         !accRef
 
-    let inline sum (stream : Stream<int64>) : int64 = 
-        reduce (+) 0L stream
+    let inline sum (stream : Stream< ^T >) : ^T 
+            when ^T : (static member ( + ) : ^T * ^T -> ^T) 
+            and  ^T : (static member Zero : ^T) = 
+        reduce (+) LanguagePrimitives.GenericZero stream
+
+    let inline length (stream : Stream<'T>) : int =
+        reduce (fun _ acc -> 1 + acc) 0 stream
+
+    let inline iter (f : 'T -> unit) (stream : Stream<'T>) : unit = 
+        let (Stream streamf) = stream 
+        streamf f
