@@ -1,8 +1,10 @@
 ﻿namespace Nessos.Streams.Core
+open System.Collections.Generic
+open System.Linq
 
 module Stream =
     
-    type Stream<'T> = Stream of (('T -> unit) -> unit)
+    type Stream<'T> = Stream of (('T -> unit) -> unit) 
         
     // generator functions
     let inline ofArray (values : 'T []) : Stream<'T> =
@@ -54,3 +56,13 @@ module Stream =
     let inline iter (f : 'T -> unit) (stream : Stream<'T>) : unit = 
         let (Stream streamf) = stream 
         streamf f
+
+    let inline toArray (stream : Stream<'T>) : 'T[] =
+        let list = 
+            reduce (fun value (acc : List<'T>) -> acc.Add(value); acc) (new List<'T>()) stream 
+        list.ToArray()
+
+    let inline sortBy (f : 'T -> 'Key) (stream : Stream<'T>) : 'T [] =
+        let array = toArray stream
+        Array.sortInPlaceBy f array
+        array
