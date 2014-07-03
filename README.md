@@ -1,4 +1,4 @@
-Streams
+Streams [![Build status](https://ci.appveyor.com/api/projects/status/w1avtn54cl6f4eo8/branch/master)](https://ci.appveyor.com/project/nessos/streams)
 =======
 
 A lightweight F# library for efficient functional-style pipelines on streams of data. The main design behind Streams
