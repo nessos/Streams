@@ -1,13 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio Express 2012 for Web
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{15DAA044-35EF-41F9-AB85-9D341CCC7B47}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Streams.Core", "src\Streams.Core\Streams.Core.fsproj", "{F3482666-F39C-4F49-8D0B-3583328D2C42}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Streams.Tests", "tests\Streams.Tests\Streams.Tests.fsproj", "{8038FF4D-0D3C-413A-AF87-35C7F905D117}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{43130C96-3849-4D0F-BA94-1097E8600A42}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
