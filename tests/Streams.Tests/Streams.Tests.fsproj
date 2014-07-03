@@ -53,6 +53,7 @@
     <None Include="Script.fsx" />
     <Compile Include="StreamsTests.fs" />
     <None Include="packages.config" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FsCheck">
