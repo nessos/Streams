@@ -61,7 +61,7 @@ Target "AssemblyInfo" (fun _ ->
             Attribute.FileVersion release.AssemblyVersion
         ]
 
-    CreateCSharpAssemblyInfo "src/Streams.Core/Properties/AssemblyInfo.cs" attributes
+    CreateFSharpAssemblyInfo "src/Streams.Core/Properties/AssemblyInfo.cs" attributes
     
 )
 
