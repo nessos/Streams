@@ -10,8 +10,7 @@ source/generator |> lazy |> lazy |> lazy |> eager/reduce
 * Lazy functions take in streams and return streams like Stream.map/Stream.filter, these operations are fused together for efficient iteration.
 * Eager/reduce are functions like Stream.iter/Stream.sum that force the Stream to evaluate up to that point.
 
-The surface api follows the familiar F# pipelining and for simple pipelines we have observed performance improvements
-of as much as a factor of four and for more compicated pipelines the performance gains are even greater.
+For simple pipelines we have observed performance improvements of as much as a factor of four and for more compicated pipelines the performance gains are even greater.
 ```fsharp
 let data = [|1..10000000|] |> Array.map int64
 
