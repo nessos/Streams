@@ -4,7 +4,7 @@ open System.Linq
 
 module Stream =
     
-    type Stream<'T> = (('T -> bool) -> bool) 
+    type Stream<'T> = (('T -> bool) -> unit) 
         
     // generator functions
     let inline ofArray (values : 'T []) : Stream<'T> =
@@ -13,16 +13,14 @@ module Stream =
                 let mutable next = true
                 while i < values.Length && next do
                     next <- iterf values.[i]
-                    i <- i + 1
-                next)
+                    i <- i + 1)
 
     let inline ofSeq (values : seq<'T>) : Stream<'T> =
         (fun iterf -> 
                 use enumerator = values.GetEnumerator()
                 let mutable next = true
                 while enumerator.MoveNext() && next do
-                    next <- iterf enumerator.Current
-                next)
+                    next <- iterf enumerator.Current)
 
     // intermediate functions
     let inline map (f : 'T -> 'R) (stream : Stream<'T>) : Stream<'R> =
@@ -31,7 +29,7 @@ module Stream =
 
     let inline flatMap (f : 'T -> Stream<'R>) (stream : Stream<'T>) : Stream<'R> =
         (fun iterf -> 
-            stream (fun value -> f value iterf))
+            stream (fun value -> f value iterf; true))
 
     let inline collect (f : 'T -> Stream<'R>) (stream : Stream<'T>) : Stream<'R> =
         flatMap f stream
@@ -59,7 +57,7 @@ module Stream =
     // terminal functions
     let inline reduce (reducef : 'T -> 'R -> 'R) (init : 'R) (stream : Stream<'T>) : 'R = 
         let accRef = ref init
-        stream (fun value -> accRef := reducef value !accRef; true) |> ignore
+        stream (fun value -> accRef := reducef value !accRef; true) 
         !accRef
 
     let inline sum (stream : Stream< ^T >) : ^T 
@@ -71,7 +69,7 @@ module Stream =
         reduce (fun _ acc -> 1 + acc) 0 stream
 
     let inline iter (f : 'T -> unit) (stream : Stream<'T>) : unit = 
-        stream (fun value -> f value; true) |> ignore
+        stream (fun value -> f value; true) 
 
     let inline toArray (stream : Stream<'T>) : 'T[] =
         let list = 

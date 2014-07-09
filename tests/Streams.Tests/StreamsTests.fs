@@ -90,6 +90,14 @@
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``collect/take`` () =
+            Spec.ForAny<int[] * int>(fun (xs, (n : int)) ->
+                let n = System.Math.Abs(n) 
+                let x = xs |> Stream.ofArray |> Stream.collect(fun x -> xs |> Stream.ofArray |> Stream.take n) |> Stream.length
+                let y = xs.SelectMany(fun x -> xs.Take(n)).Count()
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
         member __.``skip`` () =
             Spec.ForAny<int[] * int>(fun (xs, (n : int)) -> 
                 let x = xs |> Stream.ofArray |> Stream.skip n |> Stream.length
