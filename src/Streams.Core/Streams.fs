@@ -4,18 +4,25 @@ open System.Linq
 
 module Stream =
     
-    type Stream<'T> = (('T -> unit) -> unit) 
+    type Stream<'T> = (('T -> bool) -> bool) 
         
     // generator functions
     let inline ofArray (values : 'T []) : Stream<'T> =
         (fun iterf -> 
-                for i = 0 to values.Length - 1 do
-                    iterf values.[i])
+                let mutable i = 0
+                let mutable next = true
+                while i < values.Length && next do
+                    next <- iterf values.[i]
+                    i <- i + 1
+                next)
 
     let inline ofSeq (values : seq<'T>) : Stream<'T> =
         (fun iterf -> 
-                for value in values do
-                    iterf value)
+                use enumerator = values.GetEnumerator()
+                let mutable next = true
+                while enumerator.MoveNext() && next do
+                    next <- iterf enumerator.Current
+                next)
 
     // intermediate functions
     let inline map (f : 'T -> 'R) (stream : Stream<'T>) : Stream<'R> =
@@ -31,12 +38,28 @@ module Stream =
 
     let inline filter (p : 'T -> bool) (stream : Stream<'T>) : Stream<'T> =
         (fun iterf -> 
-            stream (fun value -> if p value then iterf value))
+            stream (fun value -> if p value then iterf value else true))
+
+    let inline take (n : int) (stream : Stream<'T>) : Stream<'T> =
+        if n < 0 then
+            raise <| new System.ArgumentException("The input must be non-negative.")
+        (fun iterf -> 
+            let counter = ref 0
+            stream (fun value -> 
+                incr counter
+                if !counter <= n then iterf value else false))
+
+    let inline skip (n : int) (stream : Stream<'T>) : Stream<'T> =
+        (fun iterf -> 
+            let counter = ref 0
+            stream (fun value -> 
+                incr counter
+                if !counter > n then iterf value else true))
         
     // terminal functions
     let inline reduce (reducef : 'T -> 'R -> 'R) (init : 'R) (stream : Stream<'T>) : 'R = 
         let accRef = ref init
-        stream (fun value -> accRef := reducef value !accRef)
+        stream (fun value -> accRef := reducef value !accRef; true) |> ignore
         !accRef
 
     let inline sum (stream : Stream< ^T >) : ^T 
@@ -48,7 +71,7 @@ module Stream =
         reduce (fun _ acc -> 1 + acc) 0 stream
 
     let inline iter (f : 'T -> unit) (stream : Stream<'T>) : unit = 
-        stream f
+        stream (fun value -> f value; true) |> ignore
 
     let inline toArray (stream : Stream<'T>) : 'T[] =
         let list = 

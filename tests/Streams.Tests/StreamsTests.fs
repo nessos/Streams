@@ -9,6 +9,20 @@
     type ``Streams tests`` () =
 
         [<Test>]
+        member __.``ofArray`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.toArray
+                let y = xs |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``ofSeq`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofSeq |> Stream.toArray
+                let y = xs |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
         member __.``map`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> Stream.ofArray |> Stream.map (fun n -> 2 * n) |> Stream.toArray
@@ -64,4 +78,20 @@
                         |> Seq.groupBy id 
                         |> Seq.map (fun (key, values) -> (key, values |> Seq.length))
                         |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
+        member __.``take`` () =
+            Spec.ForAny<int[] * int>(fun (xs, (n : int)) ->
+                let n = System.Math.Abs(n) 
+                let x = xs |> Stream.ofArray |> Stream.take n |> Stream.length
+                let y = xs.Take(n).Count()
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``skip`` () =
+            Spec.ForAny<int[] * int>(fun (xs, (n : int)) -> 
+                let x = xs |> Stream.ofArray |> Stream.skip n |> Stream.length
+                let y = xs.Skip(n).Count()
                 x = y).QuickCheckThrowOnFailure()

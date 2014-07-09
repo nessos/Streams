@@ -6,12 +6,10 @@ module Program =
 
     [<EntryPoint>]
     let main argv = 
-        let data = [|1..1000000|] |> Array.map int64
+        let data = [|1..10|] |> Array.map int64
         let result = 
             data
             |> Stream.ofArray
-            |> Stream.filter (fun x -> x % 2L = 0L)
-            |> Stream.map (fun x -> x + 1L)
-            |> Stream.sum
+            |> Stream.toArray
         0
 
