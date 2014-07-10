@@ -51,6 +51,7 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Streams.fsi" />
     <Compile Include="Streams.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>
