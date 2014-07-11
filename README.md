@@ -12,6 +12,8 @@ source/generator |> lazy |> lazy |> lazy |> eager/reduce
 
 For simple pipelines we have observed performance improvements of a factor of four and for more complex pipelines the performance gains are even greater.
 ```fsharp
+open Nessos.Streams.Core
+
 let data = [|1..10000000|] |> Array.map int64
 
 // Real: 00:00:00.044, CPU: 00:00:00.046, GC gen0: 0, gen1: 0, gen2: 0
