@@ -35,3 +35,9 @@ data
 |> Array.map (fun x -> x + 1L)
 |> Array.sum
 ```
+
+### Install via NuGet
+
+```
+Install-Package Streams
+```
