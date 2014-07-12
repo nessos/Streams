@@ -2,7 +2,7 @@ Streams [![Build status](https://ci.appveyor.com/api/projects/status/w1avtn54cl6
 =======
 
 A lightweight F# library for efficient batch processing of functional-style pipelines on streams of data. The main design behind Streams
-is inspired by Java 8 Streams and is based on the observation that functional pipelines follow the pattern
+is inspired by Java 8 Streams and is based on the observation that many functional pipelines follow the pattern
 ```fsharp 
 source/generator |> lazy |> lazy |> lazy |> eager/reduce
 ```
