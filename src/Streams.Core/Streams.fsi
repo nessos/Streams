@@ -50,6 +50,12 @@ module Stream =
     /// <returns>The result stream.</returns>
     val inline take: n: int -> stream: Stream<'T> -> Stream<'T> 
 
+    /// <summary>Returns the elements of the stream while the given predicate returns true.</summary>
+    /// <param name="pred">The predicate function.</param>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The result stream.</returns>
+    val inline takeWhile: pred : ('T -> bool) -> stream : Stream<'T> -> Stream<'T>
+
     /// <summary>Returns a stream that skips N elements of the input stream and then yields the remaining elements of the stream.</summary>
     /// <param name="n">The number of items to skip.</param>
     /// <param name="stream">The input stream.</param>

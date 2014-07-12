@@ -88,13 +88,20 @@
                         |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
-
         [<Test>]
         member __.``take`` () =
             Spec.ForAny<int[] * int>(fun (xs, (n : int)) ->
                 let n = System.Math.Abs(n) 
                 let x = xs |> Stream.ofArray |> Stream.take n |> Stream.length
                 let y = xs.Take(n).Count()
+                x = y).QuickCheckThrowOnFailure()
+                
+        [<Test>]
+        member __.``takeWhile`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let pred = (fun value -> value % 2 = 0)
+                let x = xs |> Stream.ofArray |> Stream.takeWhile pred |> Stream.length
+                let y = xs.TakeWhile(pred).Count()
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]

@@ -4,7 +4,6 @@
 
 open Nessos.Streams.Core
 
-
 let data = [|1..10000000|] |> Array.map int64
 
 data
@@ -12,12 +11,10 @@ data
 |> Seq.map (fun x -> x + 1L)
 |> Seq.sum
 
-
 data
 |> Array.filter (fun x -> x % 2L = 0L)
 |> Array.map (fun x -> x + 1L)
 |> Array.sum
-
 
 data
 |> Stream.ofArray

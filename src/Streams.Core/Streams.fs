@@ -69,6 +69,13 @@ module Stream =
                 if !counter <= n then iterf value else false)
         Stream (iter, Some n)
 
+    let inline takeWhile pred (stream : Stream<'T>) : Stream<'T> = 
+        let (Stream (streamf, size)) = stream
+        let iter iterf = 
+            streamf (fun value -> 
+                if pred value then iterf value else false)
+        Stream (iter, None)
+
     let inline skip (n : int) (stream : Stream<'T>) : Stream<'T> =
         let (Stream (streamf, size)) = stream
         let iter iterf = 
