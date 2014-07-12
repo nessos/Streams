@@ -2,12 +2,18 @@
 
 /// <summary>Operations on Streams.</summary>
 module Stream =
-    type Stream<'T> = ('T -> bool) -> unit
+    type Size = int option
+    type Stream<'T> = Stream of (('T -> bool) -> unit) * Size
 
     /// <summary>Wraps array as a stream.</summary>
     /// <param name="source">The input array.</param>
     /// <returns>The result stream.</returns>
     val inline ofArray: source:'T [] -> Stream<'T>
+
+    /// <summary>Wraps ResizeArray as a stream.</summary>
+    /// <param name="source">The input array.</param>
+    /// <returns>The result stream.</returns>
+    val inline ofResizeArray: source:ResizeArray<'T> -> Stream<'T>
 
     /// <summary>Wraps seq as a stream.</summary>
     /// <param name="source">The input seq.</param>
@@ -78,6 +84,11 @@ module Stream =
     /// <param name="stream">The input stream.</param>
     /// <returns>The result array.</returns>    
     val inline toArray: stream: Stream<'T> -> 'T[] 
+
+    /// <summary>Creates an ResizeArray from the given stream.</summary>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The result ResizeArray.</returns>    
+    val inline toResizeArray: stream: Stream<'T> -> ResizeArray<'T> 
 
     /// <summary>Applies a key-generating function to each element of the input stream and yields an array ordered by keys. The keys are compared using generic comparison as implemented by Operators.compare.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>

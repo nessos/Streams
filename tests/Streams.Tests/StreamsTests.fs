@@ -1,5 +1,6 @@
 ﻿namespace Nessos.Streams.Tests
     open System.Linq
+    open System.Collections.Generic
     open FsCheck
     open FsCheck.Fluent
     open NUnit.Framework
@@ -11,15 +12,22 @@
         [<Test>]
         member __.``ofArray`` () =
             Spec.ForAny<int[]>(fun xs ->
-                let x = xs |> Stream.ofArray |> Stream.toArray
-                let y = xs |> Seq.toArray
+                let x = xs |> Stream.ofArray |> Stream.map ((+)1) |> Stream.toArray
+                let y = xs |> Seq.map ((+)1) |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``ofResizeArray/toResizeArray`` () =
+            Spec.ForAny<ResizeArray<int>>(fun xs ->
+                let x = xs |> Stream.ofResizeArray |> Stream.map ((+)1) |> Stream.toResizeArray
+                let y = xs |> Seq.map ((+)1) |> Seq.toArray
+                (x.ToArray()) = y).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``ofSeq`` () =
             Spec.ForAny<int[]>(fun xs ->
-                let x = xs |> Stream.ofSeq |> Stream.toArray
-                let y = xs |> Seq.toArray
+                let x = xs |> Stream.ofSeq |> Stream.map ((+)1) |> Stream.toArray
+                let y = xs |> Seq.map ((+)1) |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]

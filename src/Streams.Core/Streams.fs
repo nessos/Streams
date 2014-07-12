@@ -4,60 +4,85 @@ open System.Linq
 
 module Stream =
     
-    type Stream<'T> = ('T -> bool) -> unit
+    type Size = int option
+    type Stream<'T> = Stream of (('T -> bool) -> unit) * Size
         
     // generator functions
     let inline ofArray (source : 'T []) : Stream<'T> =
-        (fun iterf -> 
+        let iter iterf =
             let mutable i = 0
             let mutable next = true
             while i < source.Length && next do
                 next <- iterf source.[i]
-                i <- i + 1)
+                i <- i + 1
+        Stream (iter, Some source.Length)
+
+    let inline ofResizeArray (source : ResizeArray<'T>) : Stream<'T> =
+        let iter iterf =
+            let mutable i = 0
+            let mutable next = true
+            while i < source.Count && next do
+                next <- iterf source.[i]
+                i <- i + 1
+        Stream (iter, Some source.Count)
 
     let inline ofSeq (source : seq<'T>) : Stream<'T> =
-        (fun iterf -> 
+        let iter iterf = 
             use enumerator = source.GetEnumerator()
             let mutable next = true
             while enumerator.MoveNext() && next do
-                next <- iterf enumerator.Current)
+                next <- iterf enumerator.Current
+        Stream (iter, None)
 
     // intermediate functions
     let inline map (f : 'T -> 'R) (stream : Stream<'T>) : Stream<'R> =
-        (fun iterf ->
-            stream (fun value -> iterf (f value)))
+        let (Stream (streamf, size)) = stream
+        let iter iterf =
+            streamf (fun value -> iterf (f value))
+        Stream (iter, size)
 
     let inline flatMap (f : 'T -> Stream<'R>) (stream : Stream<'T>) : Stream<'R> =
-        (fun iterf -> 
-            stream (fun value -> f value iterf; true))
+        let (Stream (streamf, size)) = stream
+        let iter iterf =
+            streamf (fun value -> 
+                        let (Stream (streamf', _)) = f value;
+                        streamf' iterf; true)
+        Stream (iter, None)
 
     let inline collect (f : 'T -> Stream<'R>) (stream : Stream<'T>) : Stream<'R> =
         flatMap f stream
 
     let inline filter (predicate : 'T -> bool) (stream : Stream<'T>) : Stream<'T> =
-        (fun iterf -> 
-            stream (fun value -> if predicate value then iterf value else true))
+        let (Stream (streamf, size)) = stream
+        let iter iterf = 
+            streamf (fun value -> if predicate value then iterf value else true)
+        Stream (iter, None)
 
     let inline take (n : int) (stream : Stream<'T>) : Stream<'T> =
         if n < 0 then
             raise <| new System.ArgumentException("The input must be non-negative.")
-        (fun iterf -> 
+        let (Stream (streamf, size)) = stream
+        let iter iterf = 
             let counter = ref 0
-            stream (fun value -> 
+            streamf (fun value -> 
                 incr counter
-                if !counter <= n then iterf value else false))
+                if !counter <= n then iterf value else false)
+        Stream (iter, Some n)
 
     let inline skip (n : int) (stream : Stream<'T>) : Stream<'T> =
-        (fun iterf -> 
+        let (Stream (streamf, size)) = stream
+        let iter iterf = 
             let counter = ref 0
-            stream (fun value -> 
+            streamf (fun value -> 
                 incr counter
-                if !counter > n then iterf value else true))
-        
+                if !counter > n then iterf value else true)
+        Stream (iter, None)
+
     // terminal functions
-    let inline fold (folder : 'State -> 'T -> 'State) (state : 'State) (stream : Stream<'T>) : 'State = 
+    let inline fold (folder : 'State -> 'T -> 'State) (state : 'State) (stream : Stream<'T>) : 'State =
+        let (Stream (streamf, size)) = stream 
         let accRef = ref state
-        stream (fun value -> accRef := folder !accRef value ; true) 
+        streamf (fun value -> accRef := folder !accRef value ; true) 
         !accRef
 
     let inline sum (stream : Stream< ^T >) : ^T 
@@ -69,11 +94,21 @@ module Stream =
         fold (fun acc _  -> 1 + acc) 0 stream
 
     let inline iter (f : 'T -> unit) (stream : Stream<'T>) : unit = 
-        stream (fun value -> f value; true) 
+        let (Stream (streamf, size)) = stream
+        streamf (fun value -> f value; true) 
+
+    let inline toResizeArray (stream : Stream<'T>) : ResizeArray<'T> =
+        let (Stream (_, size)) = stream
+        let list = 
+            match size with
+            | Some n -> new List<'T>(n)
+            | None -> new List<'T>()
+        let list = 
+            fold (fun (acc : List<'T>) value -> acc.Add(value); acc) (list) stream 
+        list
 
     let inline toArray (stream : Stream<'T>) : 'T[] =
-        let list = 
-            fold (fun (acc : List<'T>) value -> acc.Add(value); acc) (new List<'T>()) stream 
+        let list = toResizeArray stream
         list.ToArray()
 
     let inline sortBy (projection : 'T -> 'Key) (stream : Stream<'T>) : 'T [] =
