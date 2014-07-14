@@ -2,11 +2,10 @@
 open System.Collections.Generic
 open System.Linq
 
+type Size = int option
+type Stream<'T> = Stream of (('T -> bool) -> unit) * Size
 module Stream =
-    
-    type Size = int option
-    type Stream<'T> = Stream of (('T -> bool) -> unit) * Size
-        
+           
     // generator functions
     let inline ofArray (source : 'T []) : Stream<'T> =
         let iter iterf =

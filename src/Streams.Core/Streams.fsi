@@ -1,10 +1,10 @@
 ﻿namespace Nessos.Streams.Core
 
+type Size = int option
+type Stream<'T> = Stream of (('T -> bool) -> unit) * Size
+
 /// <summary>Operations on Streams.</summary>
 module Stream =
-    type Size = int option
-    type Stream<'T> = Stream of (('T -> bool) -> unit) * Size
-
     /// <summary>Wraps array as a stream.</summary>
     /// <param name="source">The input array.</param>
     /// <returns>The result stream.</returns>
