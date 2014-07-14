@@ -23,11 +23,17 @@ data
 |> Stream.sum
 
 
-open System.Linq
+
+
+
+#r "../../packages/FSharp.Collections.ParallelSeq.1.0/lib/net40/FSharp.Collections.ParallelSeq.dll"
+
+open FSharp.Collections.ParallelSeq
 
 data
-    .AsParallel()
-    .Where(fun x -> x % 2L = 0L)
-    .Select(fun x -> x + 1L)
-    .Sum()
+|> PSeq.filter (fun x -> x % 2L = 0L)
+|> PSeq.map (fun x -> x + 1L)
+|> PSeq.sum
+
+    
 
