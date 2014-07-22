@@ -53,9 +53,11 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <None Include="Script.fsx" />
-    <Compile Include="StreamsTests.fs" />
     <None Include="packages.config" />
+    <Compile Include="ParStreamsTests.fs" />
+	<Compile Include="StreamsTests.fs" />
     <Compile Include="Program.fs" />
+    
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FsCheck">

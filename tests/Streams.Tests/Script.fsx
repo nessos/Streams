@@ -35,5 +35,11 @@ data
 |> PSeq.map (fun x -> x + 1L)
 |> PSeq.sum
 
+data
+|> ParStream.ofArray
+|> ParStream.filter (fun x -> x % 2L = 0L)
+|> ParStream.map (fun x -> x + 1L)
+|> ParStream.sum
+
     
 
