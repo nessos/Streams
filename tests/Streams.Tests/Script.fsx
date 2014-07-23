@@ -4,7 +4,7 @@
 
 open Nessos.Streams.Core
 
-let data = [|1..100000000|] |> Array.map int64
+let data = [|1..10000000|] |> Array.map int64
 
 data
 |> Seq.filter (fun x -> x % 2L = 0L)
@@ -31,15 +31,27 @@ data
 open FSharp.Collections.ParallelSeq
 
 data
-|> PSeq.filter (fun x -> x % 2L = 0L)
 |> PSeq.map (fun x -> x + 1L)
-|> PSeq.sum
+|> PSeq.map (fun x -> x + 1L)
+|> PSeq.map (fun x -> x + 1L)
+|> PSeq.map (fun x -> x + 1L)
+|> PSeq.map (fun x -> x + 1L)
+|> PSeq.map (fun x -> x + 1L)
+|> PSeq.map (fun x -> x + 1L)
+|> PSeq.map (fun x -> x + 1L)
+|> PSeq.length
 
 data
 |> ParStream.ofArray
-|> ParStream.filter (fun x -> x % 2L = 0L)
 |> ParStream.map (fun x -> x + 1L)
-|> ParStream.sum
+|> ParStream.map (fun x -> x + 1L)
+|> ParStream.map (fun x -> x + 1L)
+|> ParStream.map (fun x -> x + 1L)
+|> ParStream.map (fun x -> x + 1L)
+|> ParStream.map (fun x -> x + 1L)
+|> ParStream.map (fun x -> x + 1L)
+|> ParStream.map (fun x -> x + 1L)
+|> ParStream.length
 
     
 

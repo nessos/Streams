@@ -45,4 +45,12 @@
                 let y = xs |> PSeq.map (fun n -> 2 * n) |> PSeq.sum
                 x = y).QuickCheckThrowOnFailure()
 
+
+        [<Test>]
+        member __.``length`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> ParStream.ofArray |> ParStream.filter (fun n -> n % 2 = 0) |> ParStream.length
+                let y = xs |> PSeq.filter (fun n -> n % 2 = 0) |> PSeq.length
+                x = y).QuickCheckThrowOnFailure()
+
        

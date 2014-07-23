@@ -111,6 +111,9 @@ module ParStream =
             and  ^T : (static member Zero : ^T) = 
         fold (+) (+) (fun () -> LanguagePrimitives.GenericZero) stream
 
+    let inline length (stream : ParStream<'T>) : int =
+        fold (fun acc _  -> 1 + acc) (+) (fun () -> 0) stream
+
     let toArray (stream : ParStream<'T>) : 'T[] =
         let arrayCollector = 
             fold (fun (acc : ArrayCollector<'T>) value -> acc.Add(value); acc)
