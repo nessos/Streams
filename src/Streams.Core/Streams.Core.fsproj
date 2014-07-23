@@ -51,10 +51,11 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="ArrayCollector.fs" />
     <Compile Include="Streams.fsi" />
     <Compile Include="Streams.fs" />
-    <None Include="Script.fsx" />
     <Compile Include="ParStreams.fs" />
+    <None Include="Script.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

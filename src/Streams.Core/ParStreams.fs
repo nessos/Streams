@@ -60,6 +60,22 @@ module ParStream =
                         member self.Result = collector.Result  }
                 stream.Apply collector }
 
+    let inline flatMap (f : 'T -> Stream<'R>) (stream : ParStream<'T>) : ParStream<'R> =
+        { new ParStream<'R> with
+            member self.Apply<'S> (collector : Collector<'R, 'S>) =
+                let collector = 
+                    { new Collector<'T, 'S> with
+                        member self.Iterator() = 
+                            let iter = collector.Iterator()
+                            (fun value -> 
+                                let (Stream streamf) = f value
+                                streamf iter; true)
+                        member self.Result = collector.Result  }
+                stream.Apply collector }
+
+    let inline collect (f : 'T -> Stream<'R>) (stream : ParStream<'T>) : ParStream<'R> =
+        flatMap f stream
+
     let inline filter (predicate : 'T -> bool) (stream : ParStream<'T>) : ParStream<'T> =
         { new ParStream<'T> with
             member self.Apply<'S> (collector : Collector<'T, 'S>) =
@@ -94,3 +110,10 @@ module ParStream =
             when ^T : (static member ( + ) : ^T * ^T -> ^T) 
             and  ^T : (static member Zero : ^T) = 
         fold (+) (+) (fun () -> LanguagePrimitives.GenericZero) stream
+
+    let toArray (stream : ParStream<'T>) : 'T[] =
+        let arrayCollector = 
+            fold (fun (acc : ArrayCollector<'T>) value -> acc.Add(value); acc)
+                (fun left right -> left.AddRange(right); left) 
+                (fun () -> new ArrayCollector<'T>()) stream 
+        arrayCollector.ToArray()

@@ -4,7 +4,7 @@
 
 open Nessos.Streams.Core
 
-let data = [|1..10000000|] |> Array.map int64
+let data = [|1..100000000|] |> Array.map int64
 
 data
 |> Seq.filter (fun x -> x % 2L = 0L)

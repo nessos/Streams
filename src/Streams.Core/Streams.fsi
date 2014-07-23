@@ -1,7 +1,7 @@
 ﻿namespace Nessos.Streams.Core
 
-type Size = int option
-type Stream<'T> = Stream of (('T -> bool) -> unit) * Size
+
+type Stream<'T> = Stream of (('T -> bool) -> unit)
 
 /// <summary>Operations on Streams.</summary>
 module Stream =
