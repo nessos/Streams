@@ -16,6 +16,8 @@ open Nessos.Streams.Core
 
 let data = [|1..10000000|] |> Array.map int64
 
+// Sequential
+
 // Real: 00:00:00.044, CPU: 00:00:00.046, GC gen0: 0, gen1: 0, gen2: 0
 data
 |> Stream.ofArray
@@ -34,6 +36,25 @@ data
 |> Array.filter (fun x -> x % 2L = 0L)
 |> Array.map (fun x -> x + 1L)
 |> Array.sum
+
+// Parallel
+#r "../../packages/FSharp.Collections.ParallelSeq.1.0/lib/net40/FSharp.Collections.ParallelSeq.dll"
+open FSharp.Collections.ParallelSeq
+
+// Real: 00:00:00.017, CPU: 00:00:00.078, GC gen0: 0, gen1: 0, gen2: 0
+data
+|> ParStream.ofArray
+|> ParStream.filter (fun x -> x % 2L = 0L)
+|> ParStream.map (fun x -> x + 1L)
+|> ParStream.sum
+
+// Real: 00:00:00.045, CPU: 00:00:00.187, GC gen0: 0, gen1: 0, gen2: 0
+data
+|> PSeq.filter (fun x -> x % 2L = 0L)
+|> PSeq.map (fun x -> x + 1L)
+|> PSeq.sum
+
+
 ```
 
 ### Install via NuGet
