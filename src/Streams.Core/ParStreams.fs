@@ -41,11 +41,29 @@ module ParStream =
                                                     next <- iter source.[i]
                                                     i <- i + 1 
                                                 ())
-                    let tasks = partitions |> Array.mapi (fun index (s, e) -> 
+                    let tasks = partitions |> Array.map (fun (s, e) -> 
                                                             let iter = collector.Iterator()
                                                             createTask s e iter)
 
                     Task.WaitAll(tasks) }
+
+    let ofSeq (source : seq<'T>) : ParStream<'T> =
+        { new ParStream<'T> with
+            member self.Apply<'R> (collector : Collector<'T, 'R>) =
+                
+                let partitioner = Partitioner.Create(source)
+                let partitions = partitioner.GetPartitions(totalWorkers).ToArray()
+                let createTask (partition : IEnumerator<'T>) iter = 
+                    Task.Factory.StartNew(fun () ->
+                                            let mutable next = true
+                                            while partition.MoveNext() && next do
+                                                next <- iter partition.Current
+                                            ())
+                let tasks = partitions |> Array.map (fun partition -> 
+                                                        let iter = collector.Iterator()
+                                                        createTask partition iter)
+
+                Task.WaitAll(tasks) }
 
 
     // intermediate functions

@@ -16,6 +16,13 @@
                 let x = xs |> ParStream.ofArray |> ParStream.map ((+)1) |> ParStream.toArray
                 let y = xs |> PSeq.map ((+)1) |> PSeq.toArray
                 x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``ofSeq`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> ParStream.ofSeq |> ParStream.map ((+)1) |> ParStream.toArray
+                let y = xs |> PSeq.map ((+)1) |> PSeq.toArray
+                set x = set y).QuickCheckThrowOnFailure()
             
         [<Test>]
         member __.``map`` () =
