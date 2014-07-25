@@ -47,6 +47,25 @@ module ParStream =
 
                     Task.WaitAll(tasks) }
 
+    let ofResizeArray (source : ResizeArray<'T>) : ParStream<'T> =
+        { new ParStream<'T> with
+            member self.Apply<'R> (collector : Collector<'T, 'R>) =
+                if not (source.Count = 0) then 
+                    let partitions = getPartitions(0, source.Count)
+                    let createTask s e iter = 
+                        Task.Factory.StartNew(fun () ->
+                                                let mutable i = s
+                                                let mutable next = true
+                                                while i < e && next do
+                                                    next <- iter source.[i]
+                                                    i <- i + 1 
+                                                ())
+                    let tasks = partitions |> Array.map (fun (s, e) -> 
+                                                            let iter = collector.Iterator()
+                                                            createTask s e iter)
+
+                    Task.WaitAll(tasks) }
+
     let ofSeq (source : seq<'T>) : ParStream<'T> =
         { new ParStream<'T> with
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
@@ -138,3 +157,6 @@ module ParStream =
                 (fun left right -> left.AddRange(right); left) 
                 (fun () -> new ArrayCollector<'T>()) stream 
         arrayCollector.ToArray()
+
+    let toResizeArray (stream : ParStream<'T>) : ResizeArray<'T> =
+        new ResizeArray<'T>(toArray stream)

@@ -18,6 +18,14 @@
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``ofResizeArray/toResizeArray`` () =
+            Spec.ForAny<ResizeArray<int>>(fun xs ->
+                let x = xs |> ParStream.ofResizeArray |> ParStream.map ((+)1) |> ParStream.toResizeArray
+                let y = xs |> PSeq.map ((+)1) |> PSeq.toArray
+                (x.ToArray()) = y).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
         member __.``ofSeq`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> ParStream.ofSeq |> ParStream.map ((+)1) |> ParStream.toArray
