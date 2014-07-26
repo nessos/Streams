@@ -7,7 +7,7 @@
     open System.Collections.Concurrent
 
     // ArrayCollector is a helper type for efficient array insertions and concatenations
-    type internal ArrayCollector<'T> () =
+    type ArrayCollector<'T> () =
 
         let ls = List<'T [] * int>()
 

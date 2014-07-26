@@ -32,26 +32,13 @@ open FSharp.Collections.ParallelSeq
 
 data
 |> PSeq.map (fun x -> x + 1L)
-|> PSeq.map (fun x -> x + 1L)
-|> PSeq.map (fun x -> x + 1L)
-|> PSeq.map (fun x -> x + 1L)
-|> PSeq.map (fun x -> x + 1L)
-|> PSeq.map (fun x -> x + 1L)
-|> PSeq.map (fun x -> x + 1L)
-|> PSeq.map (fun x -> x + 1L)
-|> PSeq.length
+|> PSeq.sortBy id
+|> PSeq.toArray
 
 data
 |> ParStream.ofArray
 |> ParStream.map (fun x -> x + 1L)
-|> ParStream.map (fun x -> x + 1L)
-|> ParStream.map (fun x -> x + 1L)
-|> ParStream.map (fun x -> x + 1L)
-|> ParStream.map (fun x -> x + 1L)
-|> ParStream.map (fun x -> x + 1L)
-|> ParStream.map (fun x -> x + 1L)
-|> ParStream.map (fun x -> x + 1L)
-|> ParStream.length
+|> ParStream.sortBy id
 
     
 

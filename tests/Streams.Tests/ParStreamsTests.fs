@@ -68,4 +68,13 @@
                 let y = xs |> PSeq.filter (fun n -> n % 2 = 0) |> PSeq.length
                 x = y).QuickCheckThrowOnFailure()
 
+
+
+        [<Test>]
+        member __.``sortBy`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> ParStream.ofArray |> ParStream.map ((+) 1) |> ParStream.sortBy id
+                let y = xs |> PSeq.map ((+) 1) |> PSeq.sortBy id |> PSeq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
        

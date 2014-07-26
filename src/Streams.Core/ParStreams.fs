@@ -151,12 +151,33 @@ module ParStream =
     let inline length (stream : ParStream<'T>) : int =
         fold (fun acc _  -> 1 + acc) (+) (fun () -> 0) stream
 
-    let toArray (stream : ParStream<'T>) : 'T[] =
+    let inline toArray (stream : ParStream<'T>) : 'T[] =
         let arrayCollector = 
             fold (fun (acc : ArrayCollector<'T>) value -> acc.Add(value); acc)
                 (fun left right -> left.AddRange(right); left) 
                 (fun () -> new ArrayCollector<'T>()) stream 
         arrayCollector.ToArray()
 
-    let toResizeArray (stream : ParStream<'T>) : ResizeArray<'T> =
+    let inline toResizeArray (stream : ParStream<'T>) : ResizeArray<'T> =
         new ResizeArray<'T>(toArray stream)
+
+
+    let inline sortBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : 'T [] =
+        let keyValueArrays = 
+            fold (fun (keyValueArrays : ArrayCollector<'Key> * ArrayCollector<'T>) value -> 
+                    let (keyArray, valueArray) = keyValueArrays 
+                    keyArray.Add(projection value)
+                    valueArray.Add(value) 
+                    keyValueArrays)
+                (fun leftKeyValueArrays rightKeyValueArrays ->
+                    let (leftKeyArray, leftValueArray) = leftKeyValueArrays
+                    let (rightKeyArray, rightValueArray) = rightKeyValueArrays
+                    leftKeyArray.AddRange(rightKeyArray)
+                    leftValueArray.AddRange(rightValueArray)
+                    leftKeyValueArrays) 
+                (fun () -> (new ArrayCollector<'Key>(), new ArrayCollector<'T>())) stream 
+        let (keyArray, valueArray) = keyValueArrays
+        let keyArray' = keyArray.ToArray()
+        let valueArray' = valueArray.ToArray()
+        Sort.parallelSort keyArray' valueArray'
+        valueArray'
