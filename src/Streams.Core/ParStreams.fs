@@ -163,20 +163,21 @@ module ParStream =
 
 
     let inline sortBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : 'T [] =
-        let keyValueArrays = 
-            fold (fun (keyValueArrays : ArrayCollector<'Key> * ArrayCollector<'T>) value -> 
-                    let (keyArray, valueArray) = keyValueArrays 
+        // explicit use of Tuple<ArrayCollector<'Key>, ArrayCollector<'T>> to avoid temp heap allocations of (ArrayCollector<'Key> * ArrayCollector<'T>) 
+        let keyValueTuple = 
+            fold (fun (keyValueTuple : Tuple<ArrayCollector<'Key>, ArrayCollector<'T>>) value -> 
+                    let keyArray, valueArray = keyValueTuple.Item1, keyValueTuple.Item2
                     keyArray.Add(projection value)
                     valueArray.Add(value) 
-                    keyValueArrays)
-                (fun leftKeyValueArrays rightKeyValueArrays ->
-                    let (leftKeyArray, leftValueArray) = leftKeyValueArrays
-                    let (rightKeyArray, rightValueArray) = rightKeyValueArrays
+                    keyValueTuple)
+                (fun leftKeyValueTuple rightKeyValueTuple ->
+                    let leftKeyArray, leftValueArray = leftKeyValueTuple.Item1, leftKeyValueTuple.Item2 
+                    let rightKeyArray, rightValueArray = rightKeyValueTuple.Item1, rightKeyValueTuple.Item2 
                     leftKeyArray.AddRange(rightKeyArray)
                     leftValueArray.AddRange(rightValueArray)
-                    leftKeyValueArrays) 
-                (fun () -> (new ArrayCollector<'Key>(), new ArrayCollector<'T>())) stream 
-        let (keyArray, valueArray) = keyValueArrays
+                    leftKeyValueTuple) 
+                (fun () -> new Tuple<_, _>(new ArrayCollector<'Key>(), new ArrayCollector<'T>())) stream 
+        let keyArray, valueArray = keyValueTuple.Item1, keyValueTuple.Item2
         let keyArray' = keyArray.ToArray()
         let valueArray' = valueArray.ToArray()
         Sort.parallelSort keyArray' valueArray'
