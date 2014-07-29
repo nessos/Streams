@@ -10,6 +10,8 @@ source/generator |> lazy |> lazy |> lazy |> eager/reduce
 * Lazy functions take in streams and return streams like Stream.map/Stream.filter, these operations are fused together for efficient iteration.
 * Eager/reduce are functions like Stream.iter/Stream.sum that force the Stream to evaluate up to that point.
 
+The main difference between LINQ/Seq and Streams is that LINQ is about composing external iterators (Enumerable/Enumerator) and  Streams is based on the continuation-passing-style composition of internal iterators.
+
 For simple pipelines we have observed performance improvements of a factor of four and for more complex pipelines the performance gains are even greater.
 ```fsharp
 open Nessos.Streams.Core
