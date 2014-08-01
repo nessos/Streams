@@ -113,12 +113,21 @@ module Stream =
         let list = toResizeArray stream
         list.ToArray()
 
-    let inline sortBy (projection : 'T -> 'Key) (stream : Stream<'T>) : 'T [] =
+    let inline sortBy (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'T> =
         let array = toArray stream
         Array.sortInPlaceBy projection array
-        array
+        array |> ofArray
 
-    let inline groupBy (projection : 'T -> 'Key) (stream : Stream<'T>) : seq<'Key * seq<'T>>  =
+    let inline groupBy (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'Key * seq<'T>>  =
         let array = toArray stream
-        Seq.groupBy projection array
+        let dict = new Dictionary<'Key, List<'T>>()
+        let mutable grouping = Unchecked.defaultof<List<'T>>
+
+        for i = 0 to array.Length - 1 do
+            let key = projection array.[i]
+            if not <| dict.TryGetValue(key, &grouping) then
+                grouping <- new List<'T>()
+                dict.Add(key, grouping)
+            grouping.Add(array.[i])
+        dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))
         

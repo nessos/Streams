@@ -69,7 +69,7 @@
         [<Test>]
         member __.``sortBy`` () =
             Spec.ForAny<int[]>(fun xs ->
-                let x = xs |> Stream.ofArray |> Stream.map ((+) 1) |> Stream.sortBy id
+                let x = xs |> Stream.ofArray |> Stream.map ((+) 1) |> Stream.sortBy id |> Stream.toArray
                 let y = xs |> Seq.map ((+) 1) |> Seq.sortBy id |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
@@ -78,8 +78,7 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs 
                         |> Stream.ofArray 
-                        |> Stream.groupBy id 
-                        |> Stream.ofSeq 
+                        |> Stream.groupBy id  
                         |> Stream.map (fun (key, values) -> (key, values |> Seq.length))
                         |> Stream.toArray
                 let y = xs  

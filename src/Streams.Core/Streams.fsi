@@ -96,14 +96,14 @@ module Stream =
     /// <returns>The result ResizeArray.</returns>    
     val inline toResizeArray: stream: Stream<'T> -> ResizeArray<'T> 
 
-    /// <summary>Applies a key-generating function to each element of the input stream and yields an array ordered by keys. The keys are compared using generic comparison as implemented by Operators.compare.</summary>
+    /// <summary>Applies a key-generating function to each element of the input stream and yields a stream ordered by keys. The keys are compared using generic comparison as implemented by Operators.compare.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
     /// <param name="stream">The input stream.</param>
-    /// <returns>The result array.</returns>    
-    val inline sortBy: projection: ('T -> 'Key) -> stream: Stream<'T> -> 'T [] when 'Key : comparison
+    /// <returns>The result stream.</returns>    
+    val inline sortBy: projection: ('T -> 'Key) -> stream: Stream<'T> -> Stream<'T> when 'Key : comparison
 
-    /// <summary>Applies a key-generating function to each element of the input stream and yields a sequence of unique keys and a sequence of all elements that have each key.</summary>
+    /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and a sequence of all elements that have each key.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
     /// <param name="stream">The input stream.</param>
-    /// <returns>A sequence of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
-    val inline groupBy: projection: ('T -> 'Key) -> stream: Stream<'T> -> seq<'Key * seq<'T>> when 'Key : equality
+    /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
+    val inline groupBy: projection: ('T -> 'Key) -> stream: Stream<'T> -> Stream<'Key * seq<'T>> when 'Key : equality
