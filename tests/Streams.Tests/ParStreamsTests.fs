@@ -77,4 +77,19 @@
                 let y = xs |> PSeq.map ((+) 1) |> PSeq.sortBy id |> PSeq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
+
+        [<Test>]
+        member __.``groupBy`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs 
+                        |> ParStream.ofArray 
+                        |> ParStream.groupBy id  
+                        |> ParStream.map (fun (key, values) -> (key, values |> Seq.length))
+                        |> ParStream.toArray
+                let y = xs  
+                        |> PSeq.groupBy id 
+                        |> PSeq.map (fun (key, values) -> (key, values |> Seq.length))
+                        |> PSeq.toArray
+                (set x) = (set y)).QuickCheckThrowOnFailure()
+
        

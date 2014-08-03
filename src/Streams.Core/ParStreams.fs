@@ -182,3 +182,30 @@ module ParStream =
         let valueArray' = valueArray.ToArray()
         Sort.parallelSort keyArray' valueArray'
         valueArray'
+
+
+    let inline groupBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * seq<'T>> =
+        let dict = new ConcurrentDictionary<'Key, ConcurrentBag<'T>>()
+        
+        let collector = 
+            { new Collector<'T, int> with
+                member self.Iterator() = 
+                    (fun value -> 
+                        let mutable grouping = Unchecked.defaultof<ConcurrentBag<'T>>
+                        let key = projection value
+                        if dict.TryGetValue(key, &grouping) then
+                            grouping.Add(value)
+                            
+                        else
+                            grouping <- new ConcurrentBag<'T>()
+                            grouping.Add(value)
+                            dict.AddOrUpdate(key, grouping, 
+                                (fun _ (grouping : ConcurrentBag<'T>) -> 
+                                    grouping.Add(value)
+                                    grouping)) |> ignore
+                        true)
+                member self.Result = 
+                    raise <| System.InvalidOperationException() }
+        stream.Apply collector
+
+        dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))
