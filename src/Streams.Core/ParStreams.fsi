@@ -8,7 +8,7 @@ type Collector<'T, 'R> =
 type ParStream<'T> = 
     abstract Apply<'R> : Collector<'T, 'R> -> unit
 
-/// <summary>Operations on Streams.</summary>
+/// <summary>Operations on Parallel Streams.</summary>
 module ParStream =
     /// <summary>Wraps array as a parallel stream.</summary>
     /// <param name="source">The input array.</param>
