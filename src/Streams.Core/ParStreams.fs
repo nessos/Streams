@@ -3,6 +3,7 @@ open System
 open System.Collections.Generic
 open System.Linq
 open System.Collections.Concurrent
+open System.Threading
 open System.Threading.Tasks
 
 
@@ -183,29 +184,59 @@ module ParStream =
         Sort.parallelSort keyArray' valueArray'
         valueArray'
 
-
+    type Grouping<'T> = { IndexRef : int ref; ArrayRef : 'T [] ref }
     let inline groupBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * seq<'T>> =
-        let dict = new ConcurrentDictionary<'Key, ConcurrentBag<'T>>()
+        let dict = new ConcurrentDictionary<'Key, Grouping<'T>>()
         
         let collector = 
             { new Collector<'T, int> with
                 member self.Iterator() = 
+                    // A (mostly) lock-free ConcurrentList.Add
+                    let rec groupingAdd (value : 'T) (grouping : Grouping<'T>) = 
+                        let indexRef = grouping.IndexRef
+                        let arrayRef = grouping.ArrayRef
+                        let array = !arrayRef
+                        if array = null then
+                            groupingAdd value grouping
+                        else
+                            let index = Interlocked.Increment(indexRef)
+                            if index < array.Length then
+                                array.[index] <- value
+                                if not <| Object.ReferenceEquals(array, !arrayRef) then
+                                    groupingAdd value grouping
+                            else
+                                lock grouping (fun () ->
+                                    if Object.ReferenceEquals(array, !arrayRef) then
+                                        arrayRef := null
+                                        let index = array.Length
+                                        let newArray = Array.zeroCreate<'T> (array.Length * 2)
+                                        Array.Copy(array, newArray, index)
+                                        arrayRef := newArray
+                                        indexRef := index - 1
+                                )
+                                groupingAdd value grouping
+                        
                     (fun value -> 
-                        let mutable grouping = Unchecked.defaultof<ConcurrentBag<'T>>
+                        let mutable grouping = Unchecked.defaultof<Grouping<'T>>
                         let key = projection value
                         if dict.TryGetValue(key, &grouping) then
-                            grouping.Add(value)
-                            
+                            groupingAdd value grouping
                         else
-                            grouping <- new ConcurrentBag<'T>()
-                            grouping.Add(value)
-                            dict.AddOrUpdate(key, grouping, 
-                                (fun _ (grouping : ConcurrentBag<'T>) -> 
-                                    grouping.Add(value)
-                                    grouping)) |> ignore
+                            let array = Array.zeroCreate 16
+                            array.[0] <- value
+                            grouping <- { IndexRef = ref 0; ArrayRef = ref array }
+                            if not <| dict.TryAdd(key, grouping) then
+                                dict.TryGetValue(key, &grouping) |> ignore
+                                groupingAdd value grouping
                         true)
                 member self.Result = 
                     raise <| System.InvalidOperationException() }
         stream.Apply collector
 
-        dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))
+        dict |> ofSeq |> map (fun keyValue -> 
+                                    let length = keyValue.Value.IndexRef.Value + 1
+                                    let values = keyValue.Value.ArrayRef.Value |> Seq.take length 
+                                    (keyValue.Key, values))
+
+
+

@@ -1,4 +1,5 @@
 ﻿namespace Nessos.Streams.Tests
+open System
 open Nessos.Streams.Core
 
 module Program = 
@@ -6,10 +7,15 @@ module Program =
 
     [<EntryPoint>]
     let main argv = 
-        let data = [|1..10|] |> Array.map int64
+        let data = [|1..10000000|] |> Array.map (fun i -> int64 <| (i % 100000))
+        let start = DateTime.Now
         let result = 
             data
-            |> Stream.ofArray
-            |> Stream.toArray
+            |> ParStream.ofArray
+            |> ParStream.map (fun x -> x + 1L)
+            |> ParStream.groupBy id
+            |> ParStream.length
+
+        printfn "%A" <| DateTime.Now - start
         0
 

@@ -90,6 +90,6 @@
                         |> PSeq.groupBy id 
                         |> PSeq.map (fun (key, values) -> (key, values |> Seq.length))
                         |> PSeq.toArray
-                (set x) = (set y)).QuickCheckThrowOnFailure()
+                (x |> Array.sortBy fst) = (y |> Array.sortBy fst)).QuickCheckThrowOnFailure()
 
        

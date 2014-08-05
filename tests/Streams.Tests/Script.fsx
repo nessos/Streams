@@ -4,7 +4,8 @@
 
 open Nessos.Streams.Core
 
-let data = [|1..10000000|] |> Array.map int64
+
+let data = [|1..10000000|] |> Array.map (fun i -> int64 <| (i % 1000000))
 
 data
 |> Seq.filter (fun x -> x % 2L = 0L)
@@ -27,7 +28,6 @@ data
 
 
 #r "../../packages/FSharp.Collections.ParallelSeq.1.0/lib/net40/FSharp.Collections.ParallelSeq.dll"
-
 open FSharp.Collections.ParallelSeq
 
 data
@@ -41,5 +41,8 @@ data
 |> ParStream.groupBy id
 |> ParStream.length
 
-    
+
+
+
+
 
