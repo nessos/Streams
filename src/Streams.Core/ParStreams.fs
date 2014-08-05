@@ -126,6 +126,15 @@ module ParStream =
                 stream.Apply collector }
 
     // terminal functions
+    let inline iter (f : 'T -> unit) (stream : ParStream<'T>) : unit = 
+        let collector = 
+            { new Collector<'T, 'State> with
+                member self.Iterator() = 
+                    (fun value -> f value; true)
+                member self.Result = 
+                    raise <| System.InvalidOperationException()  }
+        stream.Apply collector
+
     let inline fold (folder : 'State -> 'T -> 'State) (combiner : 'State -> 'State -> 'State) 
                     (state : unit -> 'State) (stream : ParStream<'T>) : 'State =
 
@@ -163,7 +172,7 @@ module ParStream =
         new ResizeArray<'T>(toArray stream)
 
 
-    let inline sortBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : 'T [] =
+    let inline sortBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'T>  =
         // explicit use of Tuple<ArrayCollector<'Key>, ArrayCollector<'T>> to avoid temp heap allocations of (ArrayCollector<'Key> * ArrayCollector<'T>) 
         let keyValueTuple = 
             fold (fun (keyValueTuple : Tuple<ArrayCollector<'Key>, ArrayCollector<'T>>) value -> 
@@ -182,10 +191,10 @@ module ParStream =
         let keyArray' = keyArray.ToArray()
         let valueArray' = valueArray.ToArray()
         Sort.parallelSort keyArray' valueArray'
-        valueArray'
+        valueArray' |> ofArray
 
     type Grouping<'T> = { IndexRef : int ref; ArrayRef : 'T [] ref }
-    let inline groupBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * seq<'T>> =
+    let groupBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * seq<'T>> =
         let dict = new ConcurrentDictionary<'Key, Grouping<'T>>()
         
         let collector = 
@@ -196,9 +205,9 @@ module ParStream =
                         let indexRef = grouping.IndexRef
                         let arrayRef = grouping.ArrayRef
                         let array = !arrayRef
-                        if array = null then
+                        if Object.ReferenceEquals(array, null) then
                             groupingAdd value grouping
-                        else
+                        else 
                             let index = Interlocked.Increment(indexRef)
                             if index < array.Length then
                                 array.[index] <- value

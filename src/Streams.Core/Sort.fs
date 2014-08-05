@@ -3,7 +3,7 @@ open System
 open System.Threading.Tasks
 open System.Threading
 
-type private MergeArrayType = FromArrayType | ToArrayType 
+type MergeArrayType = FromArrayType | ToArrayType 
 
 module Sort = 
 

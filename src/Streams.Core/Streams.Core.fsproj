@@ -55,6 +55,7 @@
     <Compile Include="Sort.fs" />
     <Compile Include="Streams.fsi" />
     <Compile Include="Streams.fs" />
+    <Compile Include="ParStreams.fsi" />
     <Compile Include="ParStreams.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>
