@@ -211,8 +211,11 @@ module ParStream =
                             let index = Interlocked.Increment(indexRef)
                             if index < array.Length then
                                 array.[index] <- value
-                                if not <| Object.ReferenceEquals(array, !arrayRef) then
-                                    groupingAdd value grouping
+                                let mutable array' = array
+                                while not <| Object.ReferenceEquals(array', !arrayRef) || Object.ReferenceEquals(array', null) do
+                                    array' <- !arrayRef
+                                    if not <| Object.ReferenceEquals(array', null) then
+                                        array'.[index] <- value
                             else
                                 lock grouping (fun () ->
                                     if Object.ReferenceEquals(array, !arrayRef) then
@@ -220,8 +223,8 @@ module ParStream =
                                         let index = array.Length
                                         let newArray = Array.zeroCreate<'T> (array.Length * 2)
                                         Array.Copy(array, newArray, index)
-                                        arrayRef := newArray
                                         indexRef := index - 1
+                                        arrayRef := newArray
                                 )
                                 groupingAdd value grouping
                         
