@@ -95,3 +95,29 @@ module ParStream =
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>A parallel stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
     val groupBy: projection: ('T -> 'Key) -> stream: ParStream<'T> -> ParStream<'Key * seq<'T>> when 'Key : equality
+
+
+    /// <summary>Returns the first element for which the given function returns true. Returns None if no such element exists.</summary>
+    /// <param name="predicate">A function to test each source element for a condition.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The first element for which the predicate returns true, or None if every element evaluates to false.</returns>
+    val inline tryFind: predicate: ('T -> bool) -> stream : ParStream<'T> -> 'T option
+
+    /// <summary>Returns the first element for which the given function returns true. Raises KeyNotFoundException if no such element exists.</summary>
+    /// <param name="predicate">A function to test each source element for a condition.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The first element for which the predicate returns true.</returns>
+    /// <exception cref="System.KeyNotFoundException">Thrown if the predicate evaluates to false for all the elements of the parallel stream.</exception>
+    val inline find: predicate: ('T -> bool) -> stream : ParStream<'T> -> 'T 
+
+    /// <summary>Tests if any element of the stream satisfies the given predicate.</summary>
+    /// <param name="predicate">A function to test each source element for a condition.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>true if any element satisfies the predicate. Otherwise, returns false.</returns>
+    val inline exists: predicate: ('T -> bool) -> stream : ParStream<'T> -> bool
+
+    /// <summary>Tests if all elements of the parallel stream satisfy the given predicate.</summary>
+    /// <param name="predicate">A function to test each source element for a condition.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>true if all of the elements satisfies the predicate. Otherwise, returns false.</returns>
+    val inline forall: predicate: ('T -> bool) -> stream : ParStream<'T> -> bool

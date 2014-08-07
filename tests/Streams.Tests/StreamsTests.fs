@@ -117,3 +117,32 @@
                 let x = xs |> Stream.ofArray |> Stream.skip n |> Stream.length
                 let y = xs.Skip(n).Count()
                 x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``tryFind`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.tryFind (fun n -> n % 2 = 0) 
+                let y = xs |> Seq.tryFind (fun n -> n % 2 = 0) 
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``find`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = try xs |> Stream.ofArray |> Stream.find (fun n -> n % 2 = 0) with | :? KeyNotFoundException -> -1
+                let y = try xs |> Seq.find (fun n -> n % 2 = 0) with | :? KeyNotFoundException -> -1
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``exists`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.exists (fun n -> n % 2 = 0) 
+                let y = xs |> Seq.exists (fun n -> n % 2 = 0) 
+                x = y).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
+        member __.``forall`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.forall (fun n -> n % 2 = 0) 
+                let y = xs |> Seq.forall (fun n -> n % 2 = 0) 
+                x = y).QuickCheckThrowOnFailure()

@@ -34,12 +34,13 @@ module ParStream =
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
                 if not (source.Length = 0) then 
                     let partitions = getPartitions(0, source.Length)
+                    let nextRef = ref true
                     let createTask s e iter = 
                         Task.Factory.StartNew(fun () ->
                                                 let mutable i = s
-                                                let mutable next = true
-                                                while i < e && next do
-                                                    next <- iter source.[i]
+                                                while i < e && !nextRef do
+                                                    if not <| iter source.[i] then
+                                                        nextRef := false
                                                     i <- i + 1 
                                                 ())
                     let tasks = partitions |> Array.map (fun (s, e) -> 
@@ -53,12 +54,13 @@ module ParStream =
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
                 if not (source.Count = 0) then 
                     let partitions = getPartitions(0, source.Count)
+                    let nextRef = ref true
                     let createTask s e iter = 
                         Task.Factory.StartNew(fun () ->
                                                 let mutable i = s
-                                                let mutable next = true
-                                                while i < e && next do
-                                                    next <- iter source.[i]
+                                                while i < e && !nextRef do
+                                                    if not <| iter source.[i] then
+                                                        nextRef := false
                                                     i <- i + 1 
                                                 ())
                     let tasks = partitions |> Array.map (fun (s, e) -> 
@@ -73,11 +75,12 @@ module ParStream =
                 
                 let partitioner = Partitioner.Create(source)
                 let partitions = partitioner.GetPartitions(totalWorkers).ToArray()
+                let nextRef = ref true
                 let createTask (partition : IEnumerator<'T>) iter = 
                     Task.Factory.StartNew(fun () ->
-                                            let mutable next = true
-                                            while partition.MoveNext() && next do
-                                                next <- iter partition.Current
+                                            while partition.MoveNext() && !nextRef do
+                                                if not <| iter partition.Current then
+                                                    nextRef := false
                                             ())
                 let tasks = partitions |> Array.map (fun partition -> 
                                                         let iter = collector.Iterator()
@@ -249,6 +252,31 @@ module ParStream =
                                     let length = keyValue.Value.IndexRef.Value + 1
                                     let values = keyValue.Value.ArrayRef.Value |> Seq.take length 
                                     (keyValue.Key, values))
+
+
+    let inline tryFind (predicate : 'T -> bool) (stream : ParStream<'T>) : 'T option = 
+        let resultRef = ref Unchecked.defaultof<'T option>
+        let collector = 
+            { new Collector<'T, 'T option> with
+                member self.Iterator() = 
+                    (fun value -> if predicate value then resultRef := Some value; false else true)
+                member self.Result = 
+                    !resultRef }
+        stream.Apply collector
+        collector.Result
+
+    let inline find (predicate : 'T -> bool) (stream : ParStream<'T>) : 'T = 
+        match tryFind predicate stream with
+        | Some value -> value
+        | None -> raise <| new KeyNotFoundException()
+
+    let inline exists (predicate : 'T -> bool) (stream : ParStream<'T>) : bool = 
+        match tryFind predicate stream with
+        | Some value -> true
+        | None -> false
+
+    let inline forall (predicate : 'T -> bool) (stream : ParStream<'T>) : bool = 
+        not <| exists (fun x -> not <| predicate x) stream
 
 
 

@@ -92,4 +92,33 @@
                         |> PSeq.toArray
                 (x |> Array.sortBy fst) = (y |> Array.sortBy fst)).QuickCheckThrowOnFailure()
 
+        [<Test>]
+        member __.``tryFind`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> ParStream.ofArray |> ParStream.tryFind (fun n -> n = 0) 
+                let y = xs |> PSeq.tryFind (fun n -> n = 0) 
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``find`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = try xs |> ParStream.ofArray |> ParStream.find (fun n -> n = 0) with | :? KeyNotFoundException -> -1
+                let y = try xs |> PSeq.find (fun n -> n = 0) with | :? System.InvalidOperationException -> -1
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``exists`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> ParStream.ofArray |> ParStream.exists (fun n -> n % 2 = 0) 
+                let y = xs |> PSeq.exists (fun n -> n % 2 = 0) 
+                x = y).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
+        member __.``forall`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> ParStream.ofArray |> ParStream.forall (fun n -> n % 2 = 0) 
+                let y = xs |> PSeq.forall (fun n -> n % 2 = 0) 
+                x = y).QuickCheckThrowOnFailure()
+
        

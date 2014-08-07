@@ -130,4 +130,22 @@ module Stream =
                 dict.Add(key, grouping)
             grouping.Add(array.[i])
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))
-        
+
+    let inline tryFind (predicate : 'T -> bool) (stream : Stream<'T>) : 'T option = 
+        let (Stream streamf) = stream
+        let resultRef = ref Unchecked.defaultof<'T option>
+        streamf (fun value -> if predicate value then resultRef := Some value; false; else true) 
+        !resultRef
+
+    let inline find (predicate : 'T -> bool) (stream : Stream<'T>) : 'T = 
+        match tryFind predicate stream with
+        | Some value -> value
+        | None -> raise <| new KeyNotFoundException()
+
+    let inline exists (predicate : 'T -> bool) (stream : Stream<'T>) : bool = 
+        match tryFind predicate stream with
+        | Some value -> true
+        | None -> false
+
+    let inline forall (predicate : 'T -> bool) (stream : Stream<'T>) : bool = 
+        not <| exists (fun value -> not <| predicate value) stream
