@@ -58,6 +58,7 @@
     <Compile Include="ParStreams.fsi" />
     <Compile Include="ParStreams.fs" />
     <None Include="Script.fsx" />
+    <Compile Include="CSharpProxy.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
