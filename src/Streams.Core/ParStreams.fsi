@@ -84,7 +84,7 @@ module ParStream =
     /// <returns>The result ResizeArray.</returns>    
     val inline toResizeArray: stream: ParStream<'T> -> ResizeArray<'T> 
 
-    /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream ordered by keys. The keys are compared using generic comparison as implemented by Operators.compare.</summary>
+    /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream ordered by keys.</summary>
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result parallel stream.</returns>    

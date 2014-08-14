@@ -1,4 +1,5 @@
 ﻿namespace Nessos.Streams.Core
+open System
 open System.Collections.Generic
 open System.Linq
 
@@ -113,9 +114,10 @@ module Stream =
         let list = toResizeArray stream
         list.ToArray()
 
-    let inline sortBy (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'T> =
+    let inline sortBy<'T, 'Key when 'Key :> IComparable<'Key>> (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'T> =
         let array = toArray stream
-        Array.sortInPlaceBy projection array
+        let keys = toArray (map projection stream)
+        Array.Sort(keys, array)
         array |> ofArray
 
     let inline groupBy (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'Key * seq<'T>>  =

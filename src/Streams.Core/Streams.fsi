@@ -96,11 +96,11 @@ module Stream =
     /// <returns>The result ResizeArray.</returns>    
     val inline toResizeArray: stream: Stream<'T> -> ResizeArray<'T> 
 
-    /// <summary>Applies a key-generating function to each element of the input stream and yields a stream ordered by keys. The keys are compared using generic comparison as implemented by Operators.compare.</summary>
+    /// <summary>Applies a key-generating function to each element of the input stream and yields a stream ordered by keys. </summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>    
-    val inline sortBy: projection: ('T -> 'Key) -> stream: Stream<'T> -> Stream<'T> when 'Key : comparison
+    val inline sortBy: projection: ('T -> 'Key) -> stream: Stream<'T> -> Stream<'T> when 'Key :> System.IComparable<'Key>
 
     /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and a sequence of all elements that have each key.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
