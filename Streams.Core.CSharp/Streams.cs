@@ -181,5 +181,23 @@ namespace Nessos.Streams.Core.CSharp
         {
             return CSharpProxy.All(stream, predicate);
         }
+
+        /// <summary>Returns the elements of the stream up to a specified count.</summary>
+        /// <param name="n">The number of items to take.</param>
+        /// <param name="stream">The input stream.</param>
+        /// <returns>The result stream.</returns>
+        public static Stream<TSource> Take<TSource>(this Stream<TSource> stream, int n)
+        {
+            return Stream.take(n, stream);
+        }
+
+        /// <summary>Returns a stream that skips N elements of the input stream and then yields the remaining elements of the stream.</summary>
+        /// <param name="n">The number of items to skip.</param>
+        /// <param name="stream">The input stream.</param>
+        /// <returns>The result stream.</returns>
+        public static Stream<TSource> Skip<TSource>(this Stream<TSource> stream, int n)
+        {
+            return Stream.skip(n, stream);
+        }
     }
 }
