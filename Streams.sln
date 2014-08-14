@@ -28,7 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{3C97
 		nuget\Streams.nuspec = nuget\Streams.nuspec
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streams.Core.CSharp", "Streams.Core.CSharp\Streams.Core.CSharp.csproj", "{E6852495-8012-4694-BC0F-A5376CD84B1F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streams.Core.CSharp", "src\Streams.Core.CSharp\Streams.Core.CSharp.csproj", "{E6852495-8012-4694-BC0F-A5376CD84B1F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
