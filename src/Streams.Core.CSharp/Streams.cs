@@ -84,8 +84,8 @@ namespace Nessos.Streams.Core.CSharp
         /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and a sequence of all elements that have each key.</summary>
         /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
         /// <param name="stream">The input stream.</param>
-        /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
-        public static Stream<Tuple<TKey, IEnumerable<TSource>>> GroupBy<TSource, TKey>(this Stream<TSource> stream, Func<TSource, TKey> projection) 
+        /// <returns>A stream of IGrouping.</returns>    
+        public static Stream<System.Linq.IGrouping<TKey, TSource>> GroupBy<TSource, TKey>(this Stream<TSource> stream, Func<TSource, TKey> projection) 
         {
             return CSharpProxy.GroupBy(stream, projection);
         }

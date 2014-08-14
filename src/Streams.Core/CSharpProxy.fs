@@ -1,5 +1,7 @@
 ﻿namespace Nessos.Streams.Core
 open System
+open System.Collections
+open System.Collections.Generic
 open System.Runtime.CompilerServices
 
 // Proxy for FSharp type specialization and lambda inlining
@@ -33,10 +35,24 @@ type public CSharpProxy =
 
 
     static member GroupBy<'T, 'Key when 'Key : equality>(stream : Stream<'T>, func : Func<'T, 'Key>) =
-        Stream.groupBy (fun x -> func.Invoke(x)) stream
+        stream
+        |> Stream.groupBy (fun x -> func.Invoke(x)) 
+        |> Stream.map (fun (key, values) -> 
+            { new System.Linq.IGrouping<'Key, 'T> with
+                    member self.Key = key
+                    member self.GetEnumerator() : IEnumerator<'T> = values.GetEnumerator()
+                interface System.Collections.IEnumerable with
+                    member self.GetEnumerator() : IEnumerator = values.GetEnumerator() :> _ }) 
 
     static member GroupBy<'T, 'Key when 'Key : equality>(stream : ParStream<'T>, func : Func<'T, 'Key>) =
-        ParStream.groupBy (fun x -> func.Invoke(x)) stream
+        stream
+        |> ParStream.groupBy (fun x -> func.Invoke(x))
+        |> ParStream.map (fun (key, values) -> 
+            { new System.Linq.IGrouping<'Key, 'T> with
+                    member self.Key = key
+                    member self.GetEnumerator() : IEnumerator<'T> = values.GetEnumerator()
+                interface System.Collections.IEnumerable with
+                    member self.GetEnumerator() : IEnumerator = values.GetEnumerator() :> _ }) 
 
     static member OrderBy<'T, 'Key when 'Key :> IComparable<'Key>>(stream : Stream<'T>, func : Func<'T, 'Key>) =
         Stream.sortBy (fun x -> func.Invoke(x)) stream

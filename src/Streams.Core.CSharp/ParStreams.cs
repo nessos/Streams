@@ -85,8 +85,8 @@ namespace Nessos.Streams.Core.CSharp
         /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream of unique keys and a sequence of all elements that have each key.</summary>
         /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
         /// <param name="stream">The input parallel stream.</param>
-        /// <returns>A parallel stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
-        public static ParStream<Tuple<TKey, IEnumerable<TSource>>> GroupBy<TSource, TKey>(this ParStream<TSource> stream, Func<TSource, TKey> projection)
+        /// <returns>A parallel stream of IGrouping.</returns>    
+        public static ParStream<System.Linq.IGrouping<TKey, TSource>> GroupBy<TSource, TKey>(this ParStream<TSource> stream, Func<TSource, TKey> projection)
         {
             return CSharpProxy.GroupBy(stream, projection);
         }
