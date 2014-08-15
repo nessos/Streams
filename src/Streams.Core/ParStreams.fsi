@@ -94,7 +94,7 @@ module ParStream =
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>A parallel stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
-    val groupBy: projection: ('T -> 'Key) -> stream: ParStream<'T> -> ParStream<'Key * seq<'T>> when 'Key : equality
+    val inline groupBy: projection: ('T -> 'Key) -> stream: ParStream<'T> -> ParStream<'Key * seq<'T>> when 'Key : equality
 
 
     /// <summary>Returns the first element for which the given function returns true. Returns None if no such element exists.</summary>

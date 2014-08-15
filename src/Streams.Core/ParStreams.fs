@@ -196,17 +196,16 @@ module ParStream =
         Sort.parallelSort keyArray' valueArray'
         valueArray' |> ofArray
 
-    type Grouping<'T> = { IndexRef : int ref; ArrayRef : 'T [] ref }
-    let groupBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * seq<'T>> =
-        let dict = new ConcurrentDictionary<'Key, Grouping<'T>>()
+    let inline groupBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * seq<'T>> =
+        let dict = new ConcurrentDictionary<'Key, Tuple<int ref, 'T [] ref>>()
         
         let collector = 
             { new Collector<'T, int> with
                 member self.Iterator() = 
                     // A (mostly) lock-free ConcurrentList.Add
-                    let rec groupingAdd (value : 'T) (grouping : Grouping<'T>) = 
-                        let indexRef = grouping.IndexRef
-                        let arrayRef = grouping.ArrayRef
+                    let rec groupingAdd (value : 'T) (grouping : Tuple<int ref, 'T [] ref>) = 
+                        let indexRef = grouping.Item1
+                        let arrayRef = grouping.Item2
                         let array = !arrayRef
                         if Object.ReferenceEquals(array, null) then
                             groupingAdd value grouping
@@ -232,14 +231,14 @@ module ParStream =
                                 groupingAdd value grouping
                         
                     (fun value -> 
-                        let mutable grouping = Unchecked.defaultof<Grouping<'T>>
+                        let mutable grouping = Unchecked.defaultof<Tuple<int ref, 'T [] ref>>
                         let key = projection value
                         if dict.TryGetValue(key, &grouping) then
                             groupingAdd value grouping
                         else
                             let array = Array.zeroCreate 16
                             array.[0] <- value
-                            grouping <- { IndexRef = ref 0; ArrayRef = ref array }
+                            grouping <- new Tuple<_, _>(ref 0, ref array)
                             if not <| dict.TryAdd(key, grouping) then
                                 dict.TryGetValue(key, &grouping) |> ignore
                                 groupingAdd value grouping
@@ -249,8 +248,8 @@ module ParStream =
         stream.Apply collector
 
         dict |> ofSeq |> map (fun keyValue -> 
-                                    let length = keyValue.Value.IndexRef.Value + 1
-                                    let values = keyValue.Value.ArrayRef.Value |> Seq.take length 
+                                    let length = keyValue.Value.Item1.Value + 1 
+                                    let values = keyValue.Value.Item2.Value |> Seq.take length 
                                     (keyValue.Key, values))
 
 
