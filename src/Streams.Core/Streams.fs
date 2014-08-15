@@ -115,9 +115,12 @@ module Stream =
         list.ToArray()
 
     let inline sortBy<'T, 'Key when 'Key :> IComparable<'Key>> (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'T> =
-        let array = toArray stream
-        let keys = toArray (map projection stream)
-        Array.Sort(keys, array)
+        let (Stream streamf) = stream
+        let values = new List<'T>()
+        let keys = new List<'Key>()
+        streamf (fun value -> keys.Add(projection value); values.Add(value); true)
+        let array = values.ToArray()
+        Array.Sort(keys.ToArray(), array)
         array |> ofArray
 
     let inline groupBy (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'Key * seq<'T>>  =
