@@ -64,3 +64,7 @@ data
 ```
 Install-Package Streams
 ```
+
+### References
+
+* [Clash of the Lambdas](http://arxiv.org/abs/1406.6631)
