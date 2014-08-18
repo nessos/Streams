@@ -128,6 +128,17 @@ module ParStream =
                         member self.Result = collector.Result }
                 stream.Apply collector }
 
+    let inline choose (chooser : 'T -> 'R option) (stream : ParStream<'T>) : ParStream<'R> =
+        { new ParStream<'R> with
+            member self.Apply<'S> (collector : Collector<'R, 'S>) =
+                let collector = 
+                    { new Collector<'T, 'S> with
+                        member self.Iterator() = 
+                            let iter = collector.Iterator()
+                            (fun value -> match chooser value with Some value' -> iter value' | None -> true)
+                        member self.Result = collector.Result }
+                stream.Apply collector }
+
     // terminal functions
     let inline iter (f : 'T -> unit) (stream : ParStream<'T>) : unit = 
         let collector = 
@@ -266,6 +277,22 @@ module ParStream =
 
     let inline find (predicate : 'T -> bool) (stream : ParStream<'T>) : 'T = 
         match tryFind predicate stream with
+        | Some value -> value
+        | None -> raise <| new KeyNotFoundException()
+
+    let inline tryPick (chooser : 'T -> 'R option) (stream : ParStream<'T>) : 'R option = 
+        let resultRef = ref Unchecked.defaultof<'R option>
+        let collector = 
+            { new Collector<'T, 'R option> with
+                member self.Iterator() = 
+                    (fun value -> match chooser value with Some value' -> resultRef := Some value'; false | None -> true)
+                member self.Result = 
+                    !resultRef }
+        stream.Apply collector
+        collector.Result
+
+    let inline pick (chooser : 'T -> 'R option) (stream : ParStream<'T>) : 'R = 
+        match tryPick chooser stream with
         | Some value -> value
         | None -> raise <| new KeyNotFoundException()
 

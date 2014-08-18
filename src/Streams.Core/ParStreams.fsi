@@ -37,6 +37,12 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     val inline filter: predicate: ('T -> bool) -> stream : ParStream<'T> -> ParStream<'T>
 
+    /// <summary>Applies the given function to each element of the parallel stream and returns the parallel stream comprised of the results for each element where the function returns Some with some value.</summary>
+    /// <param name="chooser">A function to transform items of type 'T into options of type 'R.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result parallel stream.</returns>
+    val inline choose: chooser: ('T -> 'R option) -> stream : ParStream<'T> -> ParStream<'R>
+
     /// <summary>Transforms each element of the input parallel stream to a new stream and flattens its elements.</summary>
     /// <param name="f">A function to transform items from the input parallel stream.</param>
     /// <param name="stream">The input parallel stream.</param>
@@ -109,6 +115,21 @@ module ParStream =
     /// <returns>The first element for which the predicate returns true.</returns>
     /// <exception cref="System.KeyNotFoundException">Thrown if the predicate evaluates to false for all the elements of the parallel stream.</exception>
     val inline find: predicate: ('T -> bool) -> stream : ParStream<'T> -> 'T 
+
+    /// <summary>Applies the given function to successive elements, returning the first result where the function returns a Some value.</summary>
+    /// <param name="chooser">A function that transforms items into options.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The first element for which the chooser returns Some, or None if every element evaluates to None.</returns>
+    val inline tryPick: chooser: ('T -> 'R option) -> stream : ParStream<'T> -> 'R option
+
+    /// <summary>Applies the given function to successive elements, returning the first result where the function returns a Some value.
+    /// Raises KeyNotFoundException when every item of the parallel stream evaluates to None when the given function is applied.</summary>
+    /// <param name="chooser">A function that transforms items into options.</param>
+    /// <param name="stream">The input paralle stream.</param>
+    /// <returns>The first element for which the chooser returns Some, or raises KeyNotFoundException if every element evaluates to None.</returns>
+    /// <exception cref="System.KeyNotFoundException">Thrown if every item of the parallel stream evaluates to None when the given function is applied.</exception>
+    val inline pick: choose: ('T -> 'R option) -> stream : ParStream<'T> -> 'R
+
 
     /// <summary>Tests if any element of the stream satisfies the given predicate.</summary>
     /// <param name="predicate">A function to test each source element for a condition.</param>

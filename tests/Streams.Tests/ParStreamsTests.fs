@@ -47,6 +47,13 @@
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``choose`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> ParStream.ofArray |> ParStream.choose (fun n -> if n % 2 = 0 then Some n else None) |> ParStream.toArray
+                let y = xs |> PSeq.choose (fun n -> if n % 2 = 0 then Some n else None) |> PSeq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
         member __.``collect`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> ParStream.ofArray |> ParStream.collect (fun n -> [|1..n|] |> Stream.ofArray) |> ParStream.toArray
@@ -104,6 +111,21 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = try xs |> ParStream.ofArray |> ParStream.find (fun n -> n = 0) with | :? KeyNotFoundException -> -1
                 let y = try xs |> PSeq.find (fun n -> n = 0) with | :? System.InvalidOperationException -> -1
+                x = y).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
+        member __.``tryPick`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> ParStream.ofArray |> ParStream.tryPick (fun n -> if n = 0 then Some n else None) 
+                let y = xs |> Seq.tryPick (fun n -> if n = 0 then Some n else None) 
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``pick`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = try xs |> ParStream.ofArray |> ParStream.pick (fun n -> if n = 0 then Some n else None)  with | :? KeyNotFoundException -> -1
+                let y = try xs |> PSeq.pick (fun n -> if n = 0 then Some n else None)  with | :? KeyNotFoundException -> -1
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]

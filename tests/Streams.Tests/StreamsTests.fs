@@ -45,6 +45,13 @@
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``choose`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.choose (fun n -> if n % 2 = 0 then Some n else None) |> Stream.toArray
+                let y = xs |> Seq.choose (fun n -> if n % 2 = 0 then Some n else None) |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
         member __.``collect`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> Stream.ofArray |> Stream.collect (fun n -> [|1..n|] |> Stream.ofArray) |> Stream.toArray
@@ -130,6 +137,20 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = try xs |> Stream.ofArray |> Stream.find (fun n -> n % 2 = 0) with | :? KeyNotFoundException -> -1
                 let y = try xs |> Seq.find (fun n -> n % 2 = 0) with | :? KeyNotFoundException -> -1
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``tryPick`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.tryPick (fun n -> if n % 2 = 0 then Some n else None) 
+                let y = xs |> Seq.tryPick (fun n -> if n % 2 = 0 then Some n else None) 
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``pick`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = try xs |> Stream.ofArray |> Stream.pick (fun n -> if n % 2 = 0 then Some n else None)  with | :? KeyNotFoundException -> -1
+                let y = try xs |> Seq.pick (fun n -> if n % 2 = 0 then Some n else None)  with | :? KeyNotFoundException -> -1
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]

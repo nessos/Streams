@@ -58,6 +58,12 @@ module Stream =
             streamf (fun value -> if predicate value then iterf value else true)
         Stream iter
 
+    let inline choose (chooser : 'T -> 'R option) (stream : Stream<'T>) : Stream<'R> =
+        let (Stream streamf) = stream
+        let iter iterf = 
+            streamf (fun value -> match chooser value with | Some value' -> iterf value' | None -> true)
+        Stream iter
+
     let inline take (n : int) (stream : Stream<'T>) : Stream<'T> =
         if n < 0 then
             raise <| new System.ArgumentException("The input must be non-negative.")
@@ -142,9 +148,21 @@ module Stream =
         streamf (fun value -> if predicate value then resultRef := Some value; false; else true) 
         !resultRef
 
+
     let inline find (predicate : 'T -> bool) (stream : Stream<'T>) : 'T = 
         match tryFind predicate stream with
         | Some value -> value
+        | None -> raise <| new KeyNotFoundException()
+
+    let inline tryPick (chooser : 'T -> 'R option) (stream : Stream<'T>) : 'R option = 
+        let (Stream streamf) = stream
+        let resultRef = ref Unchecked.defaultof<'R option>
+        streamf (fun value -> match chooser value with | Some value' -> resultRef := Some value'; false; | None -> true) 
+        !resultRef
+
+    let inline pick (chooser : 'T -> 'R option) (stream : Stream<'T>) : 'R = 
+        match tryPick chooser stream with
+        | Some value' -> value'
         | None -> raise <| new KeyNotFoundException()
 
     let inline exists (predicate : 'T -> bool) (stream : Stream<'T>) : bool = 

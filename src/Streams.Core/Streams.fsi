@@ -32,6 +32,12 @@ module Stream =
     /// <returns>The result stream.</returns>
     val inline filter: predicate: ('T -> bool) -> stream : Stream<'T> -> Stream<'T>
 
+    /// <summary>Applies the given function to each element of the stream and returns the stream comprised of the results for each element where the function returns Some with some value.</summary>
+    /// <param name="chooser">A function to transform items of type 'T into options of type 'R.</param>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The result stream.</returns>
+    val inline choose: chooser: ('T -> 'R option) -> stream : Stream<'T> -> Stream<'R>
+
     /// <summary>Transforms each element of the input stream to a new stream and flattens its elements.</summary>
     /// <param name="f">A function to transform items from the input stream.</param>
     /// <param name="stream">The input stream.</param>
@@ -120,6 +126,20 @@ module Stream =
     /// <returns>The first element for which the predicate returns true.</returns>
     /// <exception cref="System.KeyNotFoundException">Thrown if the predicate evaluates to false for all the elements of the stream.</exception>
     val inline find: predicate: ('T -> bool) -> stream : Stream<'T> -> 'T 
+
+    /// <summary>Applies the given function to successive elements, returning the first result where the function returns a Some value.</summary>
+    /// <param name="chooser">A function that transforms items into options.</param>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The first element for which the chooser returns Some, or None if every element evaluates to None.</returns>
+    val inline tryPick: chooser: ('T -> 'R option) -> stream : Stream<'T> -> 'R option
+
+    /// <summary>Applies the given function to successive elements, returning the first result where the function returns a Some value.
+    /// Raises KeyNotFoundException when every item of the stream evaluates to None when the given function is applied.</summary>
+    /// <param name="chooser">A function that transforms items into options.</param>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The first element for which the chooser returns Some, or raises KeyNotFoundException if every element evaluates to None.</returns>
+    /// <exception cref="System.KeyNotFoundException">Thrown if every item of the stream evaluates to None when the given function is applied.</exception>
+    val inline pick: choose: ('T -> 'R option) -> stream : Stream<'T> -> 'R
 
     /// <summary>Tests if any element of the stream satisfies the given predicate.</summary>
     /// <param name="predicate">A function to test each source element for a condition.</param>

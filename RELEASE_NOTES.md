@@ -1,5 +1,5 @@
 #### 0.2.0
-* New functions (tryFind, find, exists, forall) for Stream and ParStream.
+* New functions (choose, tryFind, find, tryPick, pick, exists, forall) for Stream and ParStream.
 * CSharp API
 
 #### 0.1.5
