@@ -14,7 +14,10 @@
       <releaseNotes>@releaseNotes@</releaseNotes>
       <copyright>Copyright 2014</copyright>
       <tags>@tags@</tags>
-      @dependencies@
+		@dependencies@
+		<references>
+			<reference file="Streams.Core.dll" />
+		</references>
     </metadata>
     <files>
         <file src="..\src\Streams.Core\bin\Release\Streams.Core.dll" target="lib\Streams.Core.dll" />
