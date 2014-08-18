@@ -30,6 +30,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{3C97
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streams.Core.CSharp", "src\Streams.Core.CSharp\Streams.Core.CSharp.csproj", "{E6852495-8012-4694-BC0F-A5376CD84B1F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streams.Tests.CSharp", "tests\Streams.Tests.CSharp\Streams.Tests.CSharp.csproj", "{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,11 +50,16 @@ Global
 		{E6852495-8012-4694-BC0F-A5376CD84B1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6852495-8012-4694-BC0F-A5376CD84B1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6852495-8012-4694-BC0F-A5376CD84B1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8038FF4D-0D3C-413A-AF87-35C7F905D117} = {15DAA044-35EF-41F9-AB85-9D341CCC7B47}
+		{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1} = {15DAA044-35EF-41F9-AB85-9D341CCC7B47}
 	EndGlobalSection
 EndGlobal
