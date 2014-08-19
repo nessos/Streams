@@ -7,8 +7,8 @@
     <ProjectGuid>{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Streams.Tests.CSharp</RootNamespace>
-    <AssemblyName>Nessos.Streams.Tests.CSharp</AssemblyName>
+    <RootNamespace>Nessos.Streams.Tests.CSharp</RootNamespace>
+    <AssemblyName>Streams.Tests.CSharp</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
@@ -61,6 +61,10 @@
     <ProjectReference Include="..\..\src\Streams.Core.CSharp\Streams.Core.CSharp.csproj">
       <Project>{e6852495-8012-4694-bc0f-a5376cd84b1f}</Project>
       <Name>Streams.Core.CSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Streams.Core\Streams.Core.fsproj">
+      <Project>{f3482666-f39c-4f49-8d0b-3583328d2c42}</Project>
+      <Name>Streams.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

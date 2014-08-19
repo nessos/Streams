@@ -28,7 +28,7 @@ namespace Nessos.Streams.Core.CSharp
         /// <summary>Wraps IEnumerable as a parallel stream.</summary>
         /// <param name="source">The input seq.</param>
         /// <returns>The result parallel stream.</returns>
-        public static ParStream<T> AsStream<T>(this IEnumerable<T> source)
+        public static ParStream<T> AsParStream<T>(this IEnumerable<T> source)
         {
             return ParStream.ofSeq(source);
         }

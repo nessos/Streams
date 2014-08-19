@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Streams.Tests.CSharp
+namespace Nessos.Streams.Tests.CSharp
 {
     class Program
     {
