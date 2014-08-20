@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ParStreamsTests.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="StreamsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

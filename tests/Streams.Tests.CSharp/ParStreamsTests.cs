@@ -10,7 +10,7 @@ using Nessos.Streams.Core.CSharp;
 namespace Nessos.Streams.Tests.CSharp
 {
     [TestFixture]
-    public class StreamsTests
+    public class ParStreamsTests
     {
 
         [Test]
@@ -29,8 +29,8 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<List<int>>(xs =>
             {
-                var x = xs.AsStream().Select(i => i + 1).ToList();
-                var y = xs.Select(i => i + 1).ToList();
+                var x = xs.AsParStream().Select(i => i + 1).ToList();
+                var y = xs.AsParallel().Select(i => i + 1).ToList();
                 return x.SequenceEqual(y);
             }).QuickCheckThrowOnFailure();
         }
@@ -41,9 +41,9 @@ namespace Nessos.Streams.Tests.CSharp
             Spec.ForAny<List<int>>(xs =>
             {
                 IEnumerable<int> _xs = xs;
-                var x = _xs.AsStream().Select(i => i + 1).ToArray();
-                var y = _xs.Select(i => i + 1).ToArray();
-                return x.SequenceEqual(y);
+                var x = _xs.AsParStream().Select(i => i + 1).ToArray();
+                var y = _xs.AsParallel().Select(i => i + 1).ToArray();
+                return new SortedSet<int>(x).SequenceEqual(new SortedSet<int>(y));
             }).QuickCheckThrowOnFailure();
         }
 
@@ -52,8 +52,8 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsStream().Select(i => i + 1).ToArray();
-                var y = xs.Select(i => i + 1).ToArray();
+                var x = xs.AsParStream().Select(i => i + 1).ToArray();
+                var y = xs.AsParallel().Select(i => i + 1).ToArray();
                 return x.SequenceEqual(y);
             }).QuickCheckThrowOnFailure();
         }
@@ -63,8 +63,8 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsStream().Where(i => i % 2 == 0).ToArray();
-                var y = xs.Where(i => i % 2 == 0).ToArray();
+                var x = xs.AsParStream().Where(i => i % 2 == 0).ToArray();
+                var y = xs.AsParallel().Where(i => i % 2 == 0).ToArray();
                 return x.SequenceEqual(y);
             }).QuickCheckThrowOnFailure();
         }
@@ -74,19 +74,20 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsStream().SelectMany(i => xs.AsStream()).ToArray();
-                var y = xs.SelectMany(i => xs).ToArray();
+                var x = xs.AsParStream().SelectMany(i => xs.AsStream()).ToArray();
+                var y = xs.AsParallel().SelectMany(i => xs).ToArray();
                 return x.SequenceEqual(y);
             }).QuickCheckThrowOnFailure();
         }
+
 
         [Test]
         public void Aggregate()
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsStream().Select(i => i + 1).Aggregate(0, (acc, i) => acc + i);
-                var y = xs.Select(i => i + 1).Aggregate(0, (acc, i) => acc + i);
+                var x = xs.AsParStream().Select(i => i + 1).Aggregate(() => 0, (acc, i) => acc + i, (left, right) => left + right);
+                var y = xs.AsParallel().Select(i => i + 1).Aggregate(() => 0, (acc, i) => acc + i, (left, right) => left + right, i => i);
                 return x == y;
             }).QuickCheckThrowOnFailure();
         }
@@ -97,8 +98,8 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsStream().Select(i => i + 1).Sum();
-                var y = xs.Select(i => i + 1).Sum();
+                var x = xs.AsParStream().Select(i => i + 1).Sum();
+                var y = xs.AsParallel().Select(i => i + 1).Sum();
                 return x == y;
             }).QuickCheckThrowOnFailure();
         }
@@ -108,8 +109,8 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsStream().Select(i => i + 1).Count();
-                var y = xs.Select(i => i + 1).Count();
+                var x = xs.AsParStream().Select(i => i + 1).Count();
+                var y = xs.AsParallel().Select(i => i + 1).Count();
                 return x == y;
             }).QuickCheckThrowOnFailure();
         }
@@ -119,8 +120,8 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsStream().Select(i => i + 1).OrderBy(i => i).ToArray();
-                var y = xs.Select(i => i + 1).OrderBy(i => i).ToArray();
+                var x = xs.AsParStream().Select(i => i + 1).OrderBy(i => i).ToArray();
+                var y = xs.AsParallel().Select(i => i + 1).OrderBy(i => i).ToArray();
                 return x.SequenceEqual(y);
             }).QuickCheckThrowOnFailure();
         }
@@ -130,39 +131,18 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsStream()
+                var x = xs.AsParStream()
                           .Select(i => i + 1)
                           .GroupBy(i => i)
                           .Select(grouping => grouping.Count())
                           .ToArray();
                 var y = xs
+                        .AsParallel()
                         .Select(i => i + 1)
                         .GroupBy(i => i)
                         .Select(grouping => grouping.Count())
-                        .ToArray(); 
-                return x.SequenceEqual(y);
-            }).QuickCheckThrowOnFailure();
-        }
-
-        [Test]
-        public void Take()
-        {
-            Spec.ForAny<int[]>(xs =>
-            {
-                var x = xs.AsStream().Take(2).ToArray();
-                var y = xs.Take(2).ToArray();
-                return x.SequenceEqual(y);
-            }).QuickCheckThrowOnFailure();
-        }
-
-        [Test]
-        public void Skip()
-        {
-            Spec.ForAny<int[]>(xs =>
-            {
-                var x = xs.AsStream().Skip(2).ToArray();
-                var y = xs.Skip(2).ToArray();
-                return x.SequenceEqual(y);
+                        .ToArray();
+                return new SortedSet<int>(x).SequenceEqual(new SortedSet<int>(y));
             }).QuickCheckThrowOnFailure();
         }
 
@@ -174,7 +154,7 @@ namespace Nessos.Streams.Tests.CSharp
                 var x = 0;
                 try
                 {
-                    x = xs.AsStream().First(i => i % 2 == 0);
+                    x = xs.AsParStream().First(i => i == 0);
                 }
                 catch (KeyNotFoundException)
                 {
@@ -183,7 +163,7 @@ namespace Nessos.Streams.Tests.CSharp
                 var y = 0;
                 try
                 {
-                    y = xs.First(i => i % 2 == 0);
+                    y = xs.AsParallel().First(i => i == 0);
                 }
                 catch (InvalidOperationException)
                 {
@@ -197,8 +177,8 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsStream().Any(i => i % 2 == 0);
-                var y = xs.Any(i => i % 2 == 0);
+                var x = xs.AsParStream().Any(i => i % 2 == 0);
+                var y = xs.AsParallel().Any(i => i % 2 == 0);
                 return x == y;
             }).QuickCheckThrowOnFailure();
         }
@@ -207,8 +187,8 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsStream().All(i => i % 2 == 0);
-                var y = xs.All(i => i % 2 == 0);
+                var x = xs.AsParStream().All(i => i % 2 == 0);
+                var y = xs.AsParallel().All(i => i % 2 == 0);
                 return x == y;
             }).QuickCheckThrowOnFailure();
         }

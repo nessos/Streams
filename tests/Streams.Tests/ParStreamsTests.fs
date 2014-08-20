@@ -61,6 +61,13 @@
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``fold`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> ParStream.ofArray |> ParStream.map (fun n -> 2 * n) |> ParStream.fold (+) (+) (fun () -> 0) 
+                let y = xs |> PSeq.map (fun n -> 2 * n) |> PSeq.fold (+) 0 
+                x = y).QuickCheckThrowOnFailure()  
+
+        [<Test>]
         member __.``sum`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> ParStream.ofArray |> ParStream.map (fun n -> 2 * n) |> ParStream.sum
