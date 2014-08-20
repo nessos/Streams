@@ -57,7 +57,13 @@
                 let x = xs |> Stream.ofArray |> Stream.collect (fun n -> [|1..n|] |> Stream.ofArray) |> Stream.toArray
                 let y = xs |> Seq.collect (fun n -> [|1..n|]) |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
-            
+
+        [<Test>]
+        member __.``fold`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.map (fun n -> 2 * n) |> Stream.fold (+) 0 
+                let y = xs |> Seq.map (fun n -> 2 * n) |> Seq.fold (+) 0 
+                x = y).QuickCheckThrowOnFailure()            
 
         [<Test>]
         member __.``sum`` () =
