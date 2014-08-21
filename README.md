@@ -63,6 +63,7 @@ data
 
 ```
 Install-Package Streams
+Install-Package Streams.CSharp
 ```
 
 ### References
