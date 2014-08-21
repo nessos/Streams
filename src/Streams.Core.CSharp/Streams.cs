@@ -7,6 +7,9 @@ using Nessos.Streams.Core;
 
 namespace Nessos.Streams.Core.CSharp
 {
+    /// <summary>
+    /// Stream operations
+    /// </summary>
     public static class Streams
     {
 
@@ -158,7 +161,7 @@ namespace Nessos.Streams.Core.CSharp
         /// <param name="predicate">A function to test each source element for a condition.</param>
         /// <param name="stream">The input stream.</param>
         /// <returns>The first element for which the predicate returns true.</returns>
-        /// <exception cref="System.KeyNotFoundException">Thrown if the predicate evaluates to false for all the elements of the stream.</exception>
+        /// <exception cref="System.Collections.Generic.KeyNotFoundException">Thrown if the predicate evaluates to false for all the elements of the stream.</exception>
         public static TSource First<TSource>(this Stream<TSource> stream, Func<TSource, bool> predicate)
         {
             return CSharpProxy.First(stream, predicate);
