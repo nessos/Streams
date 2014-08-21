@@ -34,6 +34,7 @@ let gitRaw = environVarOrDefault "gitRaw" "https://raw.github.com/nessos"
 let testAssemblies = 
     [
         "tests/Streams.Tests/bin/Release/Streams.Tests.exe"
+        "tests/Streams.Tests.CSharp/bin/Release/Streams.Tests.CSharp.exe"
     ]
 
 //
@@ -62,6 +63,7 @@ Target "AssemblyInfo" (fun _ ->
         ]
 
     CreateFSharpAssemblyInfo "src/Streams.Core/AssemblyInfo.fs" attributes
+    CreateCSharpAssemblyInfo "src/Streams.Core.CSharp/Properties/AssemblyInfo.cs" attributes
     
 )
 
@@ -141,6 +143,7 @@ Target "NuGet" (fun _ ->
             ("nuget/" + project + ".nuspec")
 
     mkNuGetPackage "Streams"
+    mkNuGetPackage "Streams.CSharp"
 )
 
 
