@@ -18,13 +18,13 @@ open Fake.AssemblyInfoFile
 
 let project = "Streams"
 let authors = ["Nessos Information Technologies, Nick Palladinos"]
-let summary = "A lightweight F# library for efficient functional-style pipelines on streams of data."
+let summary = "A lightweight F#/C# library for efficient functional-style pipelines on streams of data."
 
 let description = """
-    A lightweight F# library for efficient functional-style pipelines on streams of data.
+    A lightweight F#/C# library for efficient functional-style pipelines on streams of data.
 """
 
-let tags = "F# Streams"
+let tags = "F#/C# Streams"
 
 let gitHome = "https://github.com/nessos"
 let gitName = "Streams"
