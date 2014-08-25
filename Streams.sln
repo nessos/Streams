@@ -33,6 +33,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streams.Core.CSharp", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streams.Tests.CSharp", "tests\Streams.Tests.CSharp\Streams.Tests.CSharp.csproj", "{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Streams.Cloud", "src\Streams.Cloud\Streams.Cloud.fsproj", "{18F60AC5-898D-45C5-8713-BB0539D4200E}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Streams.Cloud.Tests", "tests\Streams.Cloud.Tests\Streams.Cloud.Tests.fsproj", "{F9C8725D-EEB1-464E-9A3B-70D728F9E327}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +59,14 @@ Global
 		{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18F60AC5-898D-45C5-8713-BB0539D4200E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18F60AC5-898D-45C5-8713-BB0539D4200E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18F60AC5-898D-45C5-8713-BB0539D4200E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18F60AC5-898D-45C5-8713-BB0539D4200E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9C8725D-EEB1-464E-9A3B-70D728F9E327}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9C8725D-EEB1-464E-9A3B-70D728F9E327}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9C8725D-EEB1-464E-9A3B-70D728F9E327}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9C8725D-EEB1-464E-9A3B-70D728F9E327}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,5 +74,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{8038FF4D-0D3C-413A-AF87-35C7F905D117} = {15DAA044-35EF-41F9-AB85-9D341CCC7B47}
 		{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1} = {15DAA044-35EF-41F9-AB85-9D341CCC7B47}
+		{F9C8725D-EEB1-464E-9A3B-70D728F9E327} = {15DAA044-35EF-41F9-AB85-9D341CCC7B47}
 	EndGlobalSection
 EndGlobal
