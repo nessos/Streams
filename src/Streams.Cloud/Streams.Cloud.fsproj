@@ -36,11 +36,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MBrace.Core">
-      <HintPath>..\..\packages\MBrace.Core.0.5.0-alpha\lib\net45\MBrace.Core.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.4-alpha\lib\net45\MBrace.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MBrace.Lib">
-      <HintPath>..\..\packages\MBrace.Core.0.5.0-alpha\lib\net45\MBrace.Lib.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.4-alpha\lib\net45\MBrace.Lib.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
