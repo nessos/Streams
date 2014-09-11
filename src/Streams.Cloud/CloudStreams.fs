@@ -1,54 +1,81 @@
 ﻿namespace Nessos.Streams.Cloud
 open System
 open System.Collections.Generic
+open System.Linq
+open System.Collections.Concurrent
+open System.Threading
+open System.Threading.Tasks
 open Nessos.MBrace
+open Nessos.Streams.Core
 
-type Collector<'T, 'R> = 
-    abstract Iterator : unit -> ('T -> bool)
-    abstract Result : 'R
 
 type CloudStream<'T> = 
-    abstract Apply<'R> : Collector<'T, 'R> -> ('R -> 'R -> 'R) -> Cloud<'R>
+    abstract Apply<'R> : (unit ->Collector<'T, 'R>) -> ('R -> 'R -> 'R) -> Cloud<'R>
 
 module CloudStream =
 
+    let internal getPartitions (totalWorkers : int) (s : int) (e : int) = 
+            let toSeq (enum : IEnumerator<_>)= 
+                seq {
+                    while enum.MoveNext() do
+                        yield enum.Current
+                }
+            let partitioner = Partitioner.Create(s, e)
+            let partitions = partitioner.GetPartitions(totalWorkers) |> Seq.collect toSeq |> Seq.toArray 
+            partitions
+
     // generator functions
     let ofArray (source : 'T []) : CloudStream<'T> =
-        raise <| new NotImplementedException()
+        { new CloudStream<'T> with
+            member self.Apply<'S> (collectorf : unit -> Collector<'T, 'S>) combiner =
+                cloud {
+                    let! workerCount = Cloud.GetWorkerCount()
+                    let createTask array (collector : Collector<'T, 'S>) = 
+                        cloud {
+                            let parStream = ParStream.ofArray array 
+                            do parStream.Apply collector
+                            return  collector.Result
+                        }
+                    let partitions = getPartitions workerCount 0 source.Length
+                    let! results = partitions |> Array.map (fun (s, e) -> createTask [| for i in s..(e-1) do yield source.[i] |] (collectorf ())) |> Cloud.Parallel
+                    return Array.reduce combiner results
+                } }
 
 
     // intermediate functions
     let inline map (f : 'T -> 'R) (stream : CloudStream<'T>) : CloudStream<'R> =
         { new CloudStream<'R> with
-            member self.Apply<'S> (collector : Collector<'R, 'S>) combiner =
-                let collector = 
+            member self.Apply<'S> (collectorf : unit -> Collector<'R, 'S>) combiner =
+                let collector = collectorf ()
+                let collectorf' () = 
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
                             let iter = collector.Iterator()
                             (fun value -> iter (f value))
                         member self.Result = collector.Result  }
-                stream.Apply collector combiner }
+                stream.Apply collectorf' combiner }
 
 
 
     let inline filter (predicate : 'T -> bool) (stream : CloudStream<'T>) : CloudStream<'T> =
         { new CloudStream<'T> with
-            member self.Apply<'S> (collector : Collector<'T, 'S>) combiner =
-                let collector = 
+            member self.Apply<'S> (collectorf : unit -> Collector<'T, 'S>) combiner =
+                let collector = collectorf ()
+                let collectorf' () = 
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
                             let iter = collector.Iterator()
                             (fun value -> if predicate value then iter value else true)
                         member self.Result = collector.Result }
-                stream.Apply collector combiner }
+                stream.Apply collectorf' combiner }
 
 
     // terminal functions
     let inline fold (folder : 'State -> 'T -> 'State) (combiner : 'State -> 'State -> 'State) 
                         (state : unit -> 'State) (stream : CloudStream<'T>) : Cloud<'State> =
 
-            let results = new List<'State ref>()
-            let collector = 
+            let collectorf () =  
+                let results = new List<'State ref>()
                 { new Collector<'T, 'State> with
                     member self.Iterator() = 
                         let accRef = ref <| state ()
@@ -59,7 +86,7 @@ module CloudStream =
                         for result in results do
                              acc <- combiner acc !result 
                         acc }
-            stream.Apply collector combiner
+            stream.Apply collectorf combiner
 
     let inline sum (stream : CloudStream< ^T >) : Cloud< ^T> 
             when ^T : (static member ( + ) : ^T * ^T -> ^T) 
