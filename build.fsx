@@ -35,6 +35,7 @@ let testAssemblies =
     [
         "tests/Streams.Tests/bin/Release/Streams.Tests.exe"
         "tests/Streams.Tests.CSharp/bin/Release/Streams.Tests.CSharp.exe"
+        "tests/Streams.Cloud.Tests/bin/Release/Streams.Cloud.Tests.exe"
     ]
 
 //

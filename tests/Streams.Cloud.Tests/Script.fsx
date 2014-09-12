@@ -11,7 +11,7 @@ open Nessos.MBrace
 open Nessos.MBrace.Store
 open Nessos.MBrace.Client
 
-let data = [|1..10000000|]
+let data = [|1..10|]
 
 
 data
@@ -19,3 +19,4 @@ data
 |> CloudStream.filter (fun x -> x % 2 = 0)
 |> CloudStream.length
 |> MBrace.RunLocal
+
