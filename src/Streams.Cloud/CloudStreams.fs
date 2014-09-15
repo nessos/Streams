@@ -10,19 +10,19 @@ open Nessos.Streams.Core
 
 
 type CloudStream<'T> = 
-    abstract Apply<'R> : (unit ->Collector<'T, 'R>) -> ('R -> 'R -> 'R) -> Cloud<'R>
+    abstract Apply<'R> : (unit -> Collector<'T, 'R>) -> ('R -> 'R -> 'R) -> Cloud<'R>
 
 module CloudStream =
 
     let internal getPartitions (totalWorkers : int) (s : int) (e : int) = 
-            let toSeq (enum : IEnumerator<_>)= 
-                seq {
-                    while enum.MoveNext() do
-                        yield enum.Current
-                }
-            let partitioner = Partitioner.Create(s, e)
-            let partitions = partitioner.GetPartitions(totalWorkers) |> Seq.collect toSeq |> Seq.toArray 
-            partitions
+        let toSeq (enum : IEnumerator<_>)= 
+            seq {
+                while enum.MoveNext() do
+                    yield enum.Current
+            }
+        let partitioner = Partitioner.Create(s, e)
+        let partitions = partitioner.GetPartitions(totalWorkers) |> Seq.collect toSeq |> Seq.toArray 
+        partitions
 
     // generator functions
     let ofArray (source : 'T []) : CloudStream<'T> =
@@ -36,9 +36,12 @@ module CloudStream =
                             do parStream.Apply collector
                             return  collector.Result
                         }
-                    let partitions = getPartitions workerCount 0 source.Length
-                    let! results = partitions |> Array.map (fun (s, e) -> createTask [| for i in s..(e-1) do yield source.[i] |] (collectorf ())) |> Cloud.Parallel
-                    return Array.reduce combiner results
+                    if not (source.Length = 0) then 
+                        let partitions = getPartitions workerCount 0 source.Length
+                        let! results = partitions |> Array.map (fun (s, e) -> createTask [| for i in s..(e-1) do yield source.[i] |] (collectorf ())) |> Cloud.Parallel
+                        return Array.reduce combiner results
+                    else
+                        return (collectorf ()).Result;
                 } }
 
 
@@ -56,6 +59,22 @@ module CloudStream =
                 stream.Apply collectorf' combiner }
 
 
+    let inline flatMap (f : 'T -> Stream<'R>) (stream : CloudStream<'T>) : CloudStream<'R> =
+        { new CloudStream<'R> with
+            member self.Apply<'S> (collectorf : unit -> Collector<'R, 'S>) combiner =
+                let collector = collectorf ()
+                let collectorf' () = 
+                    { new Collector<'T, 'S> with
+                        member self.Iterator() = 
+                            let iter = collector.Iterator()
+                            (fun value -> 
+                                let (Stream streamf) = f value
+                                streamf iter; true)
+                        member self.Result = collector.Result  }
+                stream.Apply collectorf' combiner }
+
+    let inline collect (f : 'T -> Stream<'R>) (stream : CloudStream<'T>) : CloudStream<'R> =
+        flatMap f stream
 
     let inline filter (predicate : 'T -> bool) (stream : CloudStream<'T>) : CloudStream<'T> =
         { new CloudStream<'T> with
@@ -73,7 +92,6 @@ module CloudStream =
     // terminal functions
     let inline fold (folder : 'State -> 'T -> 'State) (combiner : 'State -> 'State -> 'State) 
                         (state : unit -> 'State) (stream : CloudStream<'T>) : Cloud<'State> =
-
             let collectorf () =  
                 let results = new List<'State ref>()
                 { new Collector<'T, 'State> with
@@ -95,3 +113,12 @@ module CloudStream =
 
     let inline length (stream : CloudStream<'T>) : Cloud<int> =
         fold (fun acc _  -> 1 + acc) (+) (fun () -> 0) stream
+
+    let inline toArray (stream : CloudStream<'T>) : Cloud<'T[]> =
+        cloud {
+            let! arrayCollector = 
+                fold (fun (acc : ArrayCollector<'T>) value -> acc.Add(value); acc)
+                    (fun left right -> left.AddRange(right); left) 
+                    (fun () -> new ArrayCollector<'T>()) stream 
+            return arrayCollector.ToArray()
+        }
