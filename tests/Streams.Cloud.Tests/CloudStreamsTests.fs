@@ -58,18 +58,17 @@
                 let y = xs |> Seq.map (fun n -> 2 * n) |> Seq.sum
                 x = y).QuickCheckThrowOnFailure()
 
-
-        [<Test>]
-        member __.``countBy`` () =
-            Spec.ForAny<int[]>(fun xs ->
-                let x = xs |> CloudStream.ofArray |> CloudStream.countBy id |> run
-                let y = xs |> Seq.countBy id |> Seq.toArray
-                x = y).QuickCheckThrowOnFailure()
-
-
         [<Test>]
         member __.``length`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.filter (fun n -> n % 2 = 0) |> CloudStream.length |> run
                 let y = xs |> Seq.filter (fun n -> n % 2 = 0) |> Seq.length
+                x = y).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
+        member __.``countBy`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> CloudStream.ofArray |> CloudStream.countBy id |> CloudStream.toArray |> run
+                let y = xs |> Seq.countBy id |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()

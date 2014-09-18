@@ -22,6 +22,7 @@ module Program =
             data
             |> CloudStream.ofArray 
             |> CloudStream.countBy id
+            |> CloudStream.toArray
             |> MBrace.RunLocal
         
         0

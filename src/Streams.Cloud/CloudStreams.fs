@@ -91,7 +91,7 @@ module CloudStream =
 
     // terminal functions
     let inline fold (folder : 'State -> 'T -> 'State) (combiner : 'State -> 'State -> 'State) 
-                        (state : unit -> 'State) (stream : CloudStream<'T>) : Cloud<'State> =
+                    (state : unit -> 'State) (stream : CloudStream<'T>) : Cloud<'State> =
             let collectorf () =  
                 let results = new List<'State ref>()
                 { new Collector<'T, 'State> with
@@ -109,7 +109,7 @@ module CloudStream =
     let inline foldBy (projection : 'T -> 'Key) 
                       (folder : 'State -> 'T -> 'State) 
                       (combiner : 'State -> 'State -> 'State) 
-                      (state : unit -> 'State) (stream : CloudStream<'T>) : Cloud<('Key * 'State) []> =
+                      (state : unit -> 'State) (stream : CloudStream<'T>) : CloudStream<'Key * 'State> =
             let collectorf () =  
                 let results = new List<Dictionary<'Key, 'State ref>>()
                 { new Collector<'T,  Dictionary<'Key, 'State ref>> with
@@ -138,22 +138,29 @@ module CloudStream =
                                     stateRef := combiner !stateRef !keyValue.Value
                                     dict.Add(keyValue.Key, stateRef)
                         dict  }
-            cloud {
-                let combiner' (left : Dictionary<'Key, 'State ref>) (right : Dictionary<'Key, 'State ref>) = 
-                    for keyValue in right do
-                        let mutable stateRef = Unchecked.defaultof<'State ref>
-                        if left.TryGetValue(keyValue.Key, &stateRef) then
-                            stateRef := combiner !stateRef !keyValue.Value
-                        else
-                            stateRef <- ref <| state ()
-                            stateRef := combiner !stateRef !keyValue.Value
-                            left.Add(keyValue.Key, stateRef)
-                    left
-                let! dict = stream.Apply collectorf combiner'
-                return dict |> Seq.map (fun keyValue -> (keyValue.Key, !keyValue.Value)) |> Seq.toArray
-            }
+            let foldByComp = 
+                cloud {
+                    let combiner' (left : Dictionary<'Key, 'State ref>) (right : Dictionary<'Key, 'State ref>) = 
+                        for keyValue in right do
+                            let mutable stateRef = Unchecked.defaultof<'State ref>
+                            if left.TryGetValue(keyValue.Key, &stateRef) then
+                                stateRef := combiner !stateRef !keyValue.Value
+                            else
+                                stateRef <- ref <| state ()
+                                stateRef := combiner !stateRef !keyValue.Value
+                                left.Add(keyValue.Key, stateRef)
+                        left
+                    let! dict = stream.Apply collectorf combiner'
+                    return dict |> Seq.map (fun keyValue -> (keyValue.Key, !keyValue.Value)) |> Seq.toArray
+                }
+            { new CloudStream<'Key * 'State> with
+                member self.Apply<'S> (collectorf : unit -> Collector<'Key * 'State, 'S>) combiner =
+                    cloud {
+                        let! result = foldByComp
+                        return! (ofArray result).Apply collectorf combiner
+                    }  }
 
-    let inline countBy (projection : 'T -> 'Key) (stream : CloudStream<'T>) : Cloud<('Key * int) []> =
+    let inline countBy (projection : 'T -> 'Key) (stream : CloudStream<'T>) : CloudStream<'Key * int> =
         foldBy projection (fun state _ -> state + 1) (+) (fun () -> 0) stream
 
     let inline sum (stream : CloudStream< ^T >) : Cloud< ^T > 
