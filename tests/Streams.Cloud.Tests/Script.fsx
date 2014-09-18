@@ -13,10 +13,13 @@ open Nessos.MBrace.Client
 
 let data = [|1..10|]
 
+//let runtime = MBrace.InitLocal(totalNodes = 4, store = FileSystemStore.LocalTemp)
+let run (cloud : Cloud<'T>) = 
+    //runtime.Run cloud 
+    MBrace.RunLocal cloud
 
 data
 |> CloudStream.ofArray 
-|> CloudStream.filter (fun x -> x % 2 = 0)
-|> CloudStream.length
-|> MBrace.RunLocal
+|> CloudStream.countBy id
+|> run
 

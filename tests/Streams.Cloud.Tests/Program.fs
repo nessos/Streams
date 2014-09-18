@@ -14,16 +14,15 @@ module Program =
     [<EntryPoint>]
     let main argv = 
         let test = new ``CloudStreams tests`` ()
-        test.``ofArray`` ()
+        //test.``ofArray`` ()
 
-//        let data = [|1..10000000|]
-//
-//        let result = 
-//            data
-//            |> CloudStream.ofArray 
-//            |> CloudStream.filter (fun x -> x % 2 = 0)
-//            |> CloudStream.length
-//            |> MBrace.RunLocal
+        let data = [|1..100|]
+
+        let result = 
+            data
+            |> CloudStream.ofArray 
+            |> CloudStream.countBy id
+            |> MBrace.RunLocal
         
         0
 

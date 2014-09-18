@@ -60,6 +60,14 @@
 
 
         [<Test>]
+        member __.``countBy`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> CloudStream.ofArray |> CloudStream.countBy id |> run
+                let y = xs |> Seq.countBy id |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
         member __.``length`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.filter (fun n -> n % 2 = 0) |> CloudStream.length |> run
