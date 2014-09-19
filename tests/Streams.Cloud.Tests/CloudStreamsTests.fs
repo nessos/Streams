@@ -72,3 +72,11 @@
                 let x = xs |> CloudStream.ofArray |> CloudStream.countBy id |> CloudStream.toArray |> run
                 let y = xs |> Seq.countBy id |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
+        member __.``sortBy`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> CloudStream.ofArray |> CloudStream.sortBy id 10 |> CloudStream.toArray |> run
+                let y = (xs |> Seq.sortBy id).Take(10).ToArray()
+                x = y).QuickCheckThrowOnFailure()

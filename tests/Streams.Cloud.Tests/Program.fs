@@ -14,7 +14,7 @@ module Program =
     [<EntryPoint>]
     let main argv = 
         let test = new ``CloudStreams tests`` ()
-        //test.``ofArray`` ()
+        test.``sortBy`` ()
 
         let data = [|1..100|]
 

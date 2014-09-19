@@ -179,3 +179,52 @@ module CloudStream =
                     (fun () -> new ArrayCollector<'T>()) stream 
             return arrayCollector.ToArray()
         }
+
+    let sortBy (projection : 'T -> 'Key) (takeCount : int) (stream : CloudStream<'T>) : CloudStream<'T> = 
+        let collectorf () =  
+            let results = new List<List<'T>>()
+            { new Collector<'T, List<'Key[] * 'T []>> with
+                member self.Iterator() = 
+                    let list = new List<'T>()
+                    results.Add(list)
+                    (fun value -> list.Add(value); true)
+                member self.Result = 
+                    let count = results |> Seq.sumBy (fun list -> list.Count)
+                    let keys = Array.zeroCreate<'Key> count
+                    let values = Array.zeroCreate<'T> count
+                    let mutable counter = -1
+                    for list in results do
+                        for i = 0 to list.Count - 1 do
+                            let value = list.[i]
+                            counter <- counter + 1
+                            keys.[counter] <- projection value
+                            values.[counter] <- value
+                    Sort.parallelSort keys values
+                    new List<_>(Seq.singleton
+                                    (keys.Take(takeCount).ToArray(), 
+                                     values.Take(takeCount).ToArray())) }
+        let sortByComp = 
+            cloud {
+                let! results = stream.Apply collectorf (fun left right -> left.AddRange(right); left)
+                let result = 
+                    let count = results |> Seq.sumBy (fun (keys, _) -> keys.Length)
+                    let keys = Array.zeroCreate<'Key> count
+                    let values = Array.zeroCreate<'T> count
+                    let mutable counter = -1
+                    for (keys', values') in results do
+                        for i = 0 to keys'.Length - 1 do
+                            counter <- counter + 1
+                            keys.[counter] <- keys'.[i]
+                            values.[counter] <- values'.[i]
+                    Sort.parallelSort keys values    
+                    values.Take(takeCount).ToArray()
+                return result
+            }
+        { new CloudStream<'T> with
+            member self.Apply<'S> (collectorf : unit -> Collector<'T, 'S>) combiner = 
+                cloud {
+                    let! result = sortByComp
+                    return! (ofArray result).Apply collectorf combiner
+                }  }
+
+
