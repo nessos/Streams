@@ -46,7 +46,7 @@ module CloudStream =
 
 
     // intermediate functions
-    let inline map (f : 'T -> 'R) (stream : CloudStream<'T>) : CloudStream<'R> =
+    let map (f : 'T -> 'R) (stream : CloudStream<'T>) : CloudStream<'R> =
         { new CloudStream<'R> with
             member self.Apply<'S> (collectorf : unit -> Collector<'R, 'S>) combiner =
                 let collector = collectorf ()
@@ -59,7 +59,7 @@ module CloudStream =
                 stream.Apply collectorf' combiner }
 
 
-    let inline flatMap (f : 'T -> Stream<'R>) (stream : CloudStream<'T>) : CloudStream<'R> =
+    let flatMap (f : 'T -> Stream<'R>) (stream : CloudStream<'T>) : CloudStream<'R> =
         { new CloudStream<'R> with
             member self.Apply<'S> (collectorf : unit -> Collector<'R, 'S>) combiner =
                 let collector = collectorf ()
@@ -73,10 +73,10 @@ module CloudStream =
                         member self.Result = collector.Result  }
                 stream.Apply collectorf' combiner }
 
-    let inline collect (f : 'T -> Stream<'R>) (stream : CloudStream<'T>) : CloudStream<'R> =
+    let collect (f : 'T -> Stream<'R>) (stream : CloudStream<'T>) : CloudStream<'R> =
         flatMap f stream
 
-    let inline filter (predicate : 'T -> bool) (stream : CloudStream<'T>) : CloudStream<'T> =
+    let filter (predicate : 'T -> bool) (stream : CloudStream<'T>) : CloudStream<'T> =
         { new CloudStream<'T> with
             member self.Apply<'S> (collectorf : unit -> Collector<'T, 'S>) combiner =
                 let collector = collectorf ()
@@ -90,7 +90,7 @@ module CloudStream =
 
 
     // terminal functions
-    let inline fold (folder : 'State -> 'T -> 'State) (combiner : 'State -> 'State -> 'State) 
+    let fold (folder : 'State -> 'T -> 'State) (combiner : 'State -> 'State -> 'State) 
                     (state : unit -> 'State) (stream : CloudStream<'T>) : Cloud<'State> =
             let collectorf () =  
                 let results = new List<'State ref>()
@@ -106,7 +106,7 @@ module CloudStream =
                         acc }
             stream.Apply collectorf combiner
 
-    let inline foldBy (projection : 'T -> 'Key) 
+    let foldBy (projection : 'T -> 'Key) 
                       (folder : 'State -> 'T -> 'State) 
                       (combiner : 'State -> 'State -> 'State) 
                       (state : unit -> 'State) (stream : CloudStream<'T>) : CloudStream<'Key * 'State> =
@@ -160,7 +160,7 @@ module CloudStream =
                         return! (ofArray result).Apply collectorf combiner
                     }  }
 
-    let inline countBy (projection : 'T -> 'Key) (stream : CloudStream<'T>) : CloudStream<'Key * int> =
+    let countBy (projection : 'T -> 'Key) (stream : CloudStream<'T>) : CloudStream<'Key * int> =
         foldBy projection (fun state _ -> state + 1) (+) (fun () -> 0) stream
 
     let inline sum (stream : CloudStream< ^T >) : Cloud< ^T > 
@@ -168,10 +168,10 @@ module CloudStream =
             and  ^T : (static member Zero : ^T) = 
         fold (+) (+) (fun () -> LanguagePrimitives.GenericZero) stream
 
-    let inline length (stream : CloudStream<'T>) : Cloud<int> =
+    let length (stream : CloudStream<'T>) : Cloud<int> =
         fold (fun acc _  -> 1 + acc) (+) (fun () -> 0) stream
 
-    let inline toArray (stream : CloudStream<'T>) : Cloud<'T[]> =
+    let toArray (stream : CloudStream<'T>) : Cloud<'T[]> =
         cloud {
             let! arrayCollector = 
                 fold (fun (acc : ArrayCollector<'T>) value -> acc.Add(value); acc)
