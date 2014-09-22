@@ -1,4 +1,5 @@
 ﻿namespace Nessos.Streams.Cloud.Tests
+    open System.Threading
     open System.Linq
     open System.Collections.Generic
     open FsCheck
@@ -11,7 +12,9 @@
 
     [<TestFixture>]
     type ``CloudStreams tests`` () =
-        
+        do 
+            ThreadPool.SetMinThreads(200, 200) |> ignore
+
         let run (cloud : Cloud<'T>) = MBrace.RunLocal cloud
 
         [<Test>]
