@@ -2,7 +2,7 @@
 #time
 
 
-#load "../../packages/MBrace.Runtime.0.5.4-alpha/bootstrap.fsx" 
+#load "../../packages/MBrace.Runtime.0.5.6-alpha/bootstrap.fsx" 
 #r "bin/Debug/Streams.Core.dll"
 #r "bin/Debug/Streams.Cloud.dll"
 
