@@ -22,7 +22,7 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.length |> run
                 let y = xs |> Seq.map ((+)1) |> Seq.length
-                int x = y).QuickCheckThrowOnFailure()
+                Assert.AreEqual(y, int x)).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``ofCloudArray`` () =
@@ -30,7 +30,7 @@
                 let cloudArray = run <| CloudArray.New("temp", xs) 
                 let x = cloudArray |> CloudStream.ofCloudArray |> CloudStream.length |> run
                 let y = xs |> Seq.map ((+)1) |> Seq.length
-                int x = y).QuickCheckThrowOnFailure()
+                Assert.AreEqual(y, int x)).QuickCheckThrowOnFailure()
 
 
         [<Test>]
@@ -38,14 +38,14 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.map (fun n -> 2 * n) |> CloudStream.toArray |> run
                 let y = xs |> Seq.map (fun n -> 2 * n) |> Seq.toArray
-                x = y).QuickCheckThrowOnFailure()
+                Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``filter`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.filter (fun n -> n % 2 = 0) |> CloudStream.toArray |> run
                 let y = xs |> Seq.filter (fun n -> n % 2 = 0) |> Seq.toArray
-                x = y).QuickCheckThrowOnFailure()
+                Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
 
         [<Test>]
@@ -53,28 +53,28 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.collect (fun n -> [|1..n|] |> Stream.ofArray) |> CloudStream.toArray |> run
                 let y = xs |> Seq.collect (fun n -> [|1..n|]) |> Seq.toArray
-                x = y).QuickCheckThrowOnFailure()
+                Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``fold`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.map (fun n -> 2 * n) |> CloudStream.fold (+) (+) (fun () -> 0) |> run
                 let y = xs |> Seq.map (fun n -> 2 * n) |> Seq.fold (+) 0 
-                x = y).QuickCheckThrowOnFailure()  
+                Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()  
 
         [<Test>]
         member __.``sum`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.map (fun n -> 2 * n) |> CloudStream.sum |> run
                 let y = xs |> Seq.map (fun n -> 2 * n) |> Seq.sum
-                x = y).QuickCheckThrowOnFailure()
+                Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``length`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.filter (fun n -> n % 2 = 0) |> CloudStream.length |> run
                 let y = xs |> Seq.filter (fun n -> n % 2 = 0) |> Seq.length
-                int x = y).QuickCheckThrowOnFailure()
+                Assert.AreEqual(y, int x)).QuickCheckThrowOnFailure()
 
 
         [<Test>]
@@ -82,7 +82,7 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.countBy id |> CloudStream.toArray |> run
                 let y = xs |> Seq.countBy id |> Seq.toArray
-                x = y).QuickCheckThrowOnFailure()
+                Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
 
         [<Test>]
@@ -90,4 +90,4 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.sortBy id 10 |> CloudStream.toArray |> run
                 let y = (xs |> Seq.sortBy id).Take(10).ToArray()
-                x = y).QuickCheckThrowOnFailure()
+                Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
