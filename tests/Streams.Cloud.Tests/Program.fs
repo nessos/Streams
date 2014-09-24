@@ -9,21 +9,23 @@ open Nessos.MBrace.Store
 open Nessos.MBrace.Client
 
 module Program = 
-
-
-    [<EntryPoint>]
-    let main argv = 
-        let test = new ``CloudStreams tests`` ()
-        test.``sortBy`` ()
-
-        let data = [|1..100|]
-
-        let result = 
+    let data = [|1..100|]
+    let comp = 
             data
             |> CloudStream.ofArray 
             |> CloudStream.countBy id
             |> CloudStream.toArray
-            |> MBrace.RunLocal
-        
+
+    
+
+    // set local MBrace executable location
+    MBraceSettings.MBracedExecutablePath <- "../../../../packages/MBrace.Runtime.0.5.6-alpha/tools/mbraced.exe"
+
+    //let runtime = MBrace.InitLocal(totalNodes = 4, store = FileSystemStore.LocalTemp)
+    [<EntryPoint>]
+    let main argv = 
+        let cloudArray = CloudArray.New("temp", [|1..10|]) |> MBrace.RunLocal 
+        let result = cloudArray |> CloudStream.ofCloudArray |> CloudStream.length |> MBrace.RunLocal 
+
         0
 

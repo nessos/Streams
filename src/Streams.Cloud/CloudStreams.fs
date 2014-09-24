@@ -14,7 +14,7 @@ type CloudStream<'T> =
 
 module CloudStream =
 
-    let internal getPartitions (totalWorkers : int) (s : int) (e : int) = 
+    let internal getPartitions (totalWorkers : int) (s : int64) (e : int64) = 
         let toSeq (enum : IEnumerator<_>)= 
             seq {
                 while enum.MoveNext() do
@@ -37,8 +37,30 @@ module CloudStream =
                             return  collector.Result
                         }
                     if not (source.Length = 0) then 
-                        let partitions = getPartitions workerCount 0 source.Length
-                        let! results = partitions |> Array.map (fun (s, e) -> createTask [| for i in s..(e-1) do yield source.[i] |] (collectorf ())) |> Cloud.Parallel
+                        let partitions = getPartitions workerCount 0L (int64 source.Length)
+                        let! results = partitions |> Array.map (fun (s, e) -> createTask [| for i in s..(e - 1L) do yield source.[int i] |] (collectorf ())) |> Cloud.Parallel
+                        return Array.reduce combiner results
+                    else
+                        return (collectorf ()).Result;
+                } }
+
+
+    let ofCloudArray (source : ICloudArray<'T>) : CloudStream<'T> =
+        { new CloudStream<'T> with
+            member self.Apply<'S> (collectorf : unit -> Collector<'T, 'S>) combiner =
+                cloud {
+                    let! workerCount = Cloud.GetWorkerCount()
+                    // TODO: int64 partition sizes
+                    let createTask (s : int64) (e : int64) (collector : Collector<'T, 'S>) = 
+                        cloud {
+                            let array = source.Range(s, int (e - s))
+                            let parStream = ParStream.ofArray array 
+                            do parStream.Apply collector
+                            return  collector.Result
+                        }
+                    if not (source.Length = 0L) then 
+                        let partitions = getPartitions workerCount 0L source.Length
+                        let! results = partitions |> Array.map (fun (s, e) -> createTask s e (collectorf ())) |> Cloud.Parallel
                         return Array.reduce combiner results
                     else
                         return (collectorf ()).Result;
@@ -168,8 +190,8 @@ module CloudStream =
             and  ^T : (static member Zero : ^T) = 
         fold (+) (+) (fun () -> LanguagePrimitives.GenericZero) stream
 
-    let inline length (stream : CloudStream<'T>) : Cloud<int> =
-        fold (fun acc _  -> 1 + acc) (+) (fun () -> 0) stream
+    let inline length (stream : CloudStream<'T>) : Cloud<int64> =
+        fold (fun acc _  -> 1L + acc) (+) (fun () -> 0L) stream
 
     let inline toArray (stream : CloudStream<'T>) : Cloud<'T[]> =
         cloud {
@@ -179,6 +201,10 @@ module CloudStream =
                     (fun () -> new ArrayCollector<'T>()) stream 
             return arrayCollector.ToArray()
         }
+
+    let inline toCloudArray (stream : CloudStream<'T>) : Cloud<ICloudArray<'T>> =
+        
+        raise <| new NotImplementedException()
 
     let inline sortBy (projection : 'T -> 'Key) (takeCount : int) (stream : CloudStream<'T>) : CloudStream<'T> = 
         let collectorf () =  

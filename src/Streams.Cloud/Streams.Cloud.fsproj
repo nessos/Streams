@@ -54,7 +54,7 @@
   <ItemGroup>
     <Compile Include="CloudStreams.fs" />
     <None Include="Script.fsx" />
-    <Content Include="packages.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MBrace.Core">

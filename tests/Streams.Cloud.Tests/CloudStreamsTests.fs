@@ -22,7 +22,15 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.length |> run
                 let y = xs |> Seq.map ((+)1) |> Seq.length
-                x = y).QuickCheckThrowOnFailure()
+                int x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``ofCloudArray`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let cloudArray = run <| CloudArray.New("temp", xs) 
+                let x = cloudArray |> CloudStream.ofCloudArray |> CloudStream.length |> run
+                let y = xs |> Seq.map ((+)1) |> Seq.length
+                int x = y).QuickCheckThrowOnFailure()
 
 
         [<Test>]
@@ -66,7 +74,7 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.filter (fun n -> n % 2 = 0) |> CloudStream.length |> run
                 let y = xs |> Seq.filter (fun n -> n % 2 = 0) |> Seq.length
-                x = y).QuickCheckThrowOnFailure()
+                int x = y).QuickCheckThrowOnFailure()
 
 
         [<Test>]
