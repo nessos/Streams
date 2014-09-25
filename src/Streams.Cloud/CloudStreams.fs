@@ -222,7 +222,7 @@ module CloudStream =
                     values }
         stream.Apply collectorf (fun array -> cloud { 
                                                 let! processId = Cloud.GetProcessId() 
-                                                return! CloudArray.New(processId.ToString(), array) }) 
+                                                return! CloudArray.New(sprintf "process%d" processId, array) }) 
                                 (fun left right -> left.Append(right))
 
     let inline sortBy (projection : 'T -> 'Key) (takeCount : int) (stream : CloudStream<'T>) : CloudStream<'T> = 

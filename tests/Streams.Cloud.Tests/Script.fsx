@@ -23,15 +23,12 @@ let run (cloud : Cloud<'T>) =
 let cloudArray = CloudArray.New("temp", data) |> run
 
 
+let ca' =
+    cloudArray
+    |> CloudStream.ofCloudArray 
+    |> CloudStream.map (fun x -> x * x)
+    |> CloudStream.toCloudArray
+    |> run
 
-cloudArray
-|> CloudStream.ofCloudArray 
-|> CloudStream.length
-|> run
+ca'.Container
     
-
-
-let xs = [|1;0;0;0;0;0;0;0;0;0;0;0|]
-let x = xs |> CloudStream.ofArray |> CloudStream.sortBy id 12 |> CloudStream.toArray |> run
-let y = (xs |> Seq.sortBy id) |> Seq.take 12 |> Seq.toArray
-
