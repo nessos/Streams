@@ -34,6 +34,14 @@
 
 
         [<Test>]
+        member __.``toCloudArray`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> CloudStream.ofArray |> CloudStream.map ((+)1) |> CloudStream.toCloudArray |> run
+                let y = xs |> Seq.map ((+)1) |> Seq.toArray
+                Assert.AreEqual(y, x.ToArray())).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
         member __.``map`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.map (fun n -> 2 * n) |> CloudStream.toArray |> run

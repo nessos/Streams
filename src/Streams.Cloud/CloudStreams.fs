@@ -10,7 +10,7 @@ open Nessos.Streams.Core
 
 
 type CloudStream<'T> = 
-    abstract Apply<'R> : (unit -> Collector<'T, 'R>) -> ('R -> 'R -> 'R) -> Cloud<'R>
+    abstract Apply<'S, 'R> : (unit -> Collector<'T, 'S>) -> ('S -> Cloud<'R>) -> ('R -> 'R -> 'R) -> Cloud<'R>
 
 module CloudStream =
 
@@ -27,27 +27,27 @@ module CloudStream =
     // generator functions
     let ofArray (source : 'T []) : CloudStream<'T> =
         { new CloudStream<'T> with
-            member self.Apply<'S> (collectorf : unit -> Collector<'T, 'S>) combiner =
+            member self.Apply<'S, 'R> (collectorf : unit -> Collector<'T, 'S>) (projection : 'S -> Cloud<'R>) (combiner : 'R -> 'R -> 'R) =
                 cloud {
                     let! workerCount = Cloud.GetWorkerCount()
                     let createTask array (collector : Collector<'T, 'S>) = 
                         cloud {
                             let parStream = ParStream.ofArray array 
                             do parStream.Apply collector
-                            return  collector.Result
+                            return!  projection collector.Result
                         }
                     if not (source.Length = 0) then 
                         let partitions = getPartitions workerCount 0L (int64 source.Length)
                         let! results = partitions |> Array.map (fun (s, e) -> createTask [| for i in s..(e - 1L) do yield source.[int i] |] (collectorf ())) |> Cloud.Parallel
                         return Array.reduce combiner results
                     else
-                        return (collectorf ()).Result;
+                        return! projection (collectorf ()).Result;
                 } }
 
 
     let ofCloudArray (source : ICloudArray<'T>) : CloudStream<'T> =
         { new CloudStream<'T> with
-            member self.Apply<'S> (collectorf : unit -> Collector<'T, 'S>) combiner =
+            member self.Apply<'S, 'R> (collectorf : unit -> Collector<'T, 'S>) (projection : 'S -> Cloud<'R>) (combiner : 'R -> 'R -> 'R) =
                 cloud {
                     let! workerCount = Cloud.GetWorkerCount()
                     // TODO: int64 partition sizes
@@ -56,21 +56,21 @@ module CloudStream =
                             let array = source.Range(s, int (e - s))
                             let parStream = ParStream.ofArray array 
                             do parStream.Apply collector
-                            return  collector.Result
+                            return! projection  collector.Result
                         }
                     if not (source.Length = 0L) then 
                         let partitions = getPartitions workerCount 0L source.Length
                         let! results = partitions |> Array.map (fun (s, e) -> createTask s e (collectorf ())) |> Cloud.Parallel
                         return Array.reduce combiner results
                     else
-                        return (collectorf ()).Result;
+                        return! projection (collectorf ()).Result;
                 } }
 
 
     // intermediate functions
     let inline map (f : 'T -> 'R) (stream : CloudStream<'T>) : CloudStream<'R> =
         { new CloudStream<'R> with
-            member self.Apply<'S> (collectorf : unit -> Collector<'R, 'S>) combiner =
+            member self.Apply<'S, 'Result> (collectorf : unit -> Collector<'R, 'S>) (projection : 'S -> Cloud<'Result>) combiner =
                 let collector = collectorf ()
                 let collectorf' () = 
                     { new Collector<'T, 'S> with
@@ -78,12 +78,12 @@ module CloudStream =
                             let iter = collector.Iterator()
                             (fun value -> iter (f value))
                         member self.Result = collector.Result  }
-                stream.Apply collectorf' combiner }
+                stream.Apply collectorf' projection combiner }
 
 
     let inline flatMap (f : 'T -> Stream<'R>) (stream : CloudStream<'T>) : CloudStream<'R> =
         { new CloudStream<'R> with
-            member self.Apply<'S> (collectorf : unit -> Collector<'R, 'S>) combiner =
+            member self.Apply<'S, 'Result> (collectorf : unit -> Collector<'R, 'S>) (projection : 'S -> Cloud<'Result>) combiner =
                 let collector = collectorf ()
                 let collectorf' () = 
                     { new Collector<'T, 'S> with
@@ -93,14 +93,14 @@ module CloudStream =
                                 let (Stream streamf) = f value
                                 streamf iter; true)
                         member self.Result = collector.Result  }
-                stream.Apply collectorf' combiner }
+                stream.Apply collectorf' projection combiner }
 
     let inline collect (f : 'T -> Stream<'R>) (stream : CloudStream<'T>) : CloudStream<'R> =
         flatMap f stream
 
     let inline filter (predicate : 'T -> bool) (stream : CloudStream<'T>) : CloudStream<'T> =
         { new CloudStream<'T> with
-            member self.Apply<'S> (collectorf : unit -> Collector<'T, 'S>) combiner =
+            member self.Apply<'S, 'R> (collectorf : unit -> Collector<'T, 'S>) (projection : 'S -> Cloud<'R>) combiner =
                 let collector = collectorf ()
                 let collectorf' () = 
                     { new Collector<'T, 'S> with
@@ -108,7 +108,7 @@ module CloudStream =
                             let iter = collector.Iterator()
                             (fun value -> if predicate value then iter value else true)
                         member self.Result = collector.Result }
-                stream.Apply collectorf' combiner }
+                stream.Apply collectorf' projection combiner }
 
 
     // terminal functions
@@ -126,7 +126,7 @@ module CloudStream =
                         for result in results do
                              acc <- combiner acc !result 
                         acc }
-            stream.Apply collectorf combiner
+            stream.Apply collectorf (fun x -> cloud { return x }) combiner
 
     let inline foldBy (projection : 'T -> 'Key) 
                       (folder : 'State -> 'T -> 'State) 
@@ -172,14 +172,14 @@ module CloudStream =
                                 stateRef := combiner !stateRef !keyValue.Value
                                 left.Add(keyValue.Key, stateRef)
                         left
-                    let! dict = stream.Apply collectorf combiner'
+                    let! dict = stream.Apply collectorf (fun x -> cloud { return x }) combiner'
                     return dict |> Seq.map (fun keyValue -> (keyValue.Key, !keyValue.Value)) |> Seq.toArray
                 }
             { new CloudStream<'Key * 'State> with
-                member self.Apply<'S> (collectorf : unit -> Collector<'Key * 'State, 'S>) combiner =
+                member self.Apply<'S, 'R> (collectorf : unit -> Collector<'Key * 'State, 'S>) (projection : 'S -> Cloud<'R>) combiner =
                     cloud {
                         let! result = foldByComp
-                        return! (ofArray result).Apply collectorf combiner
+                        return! (ofArray result).Apply collectorf projection combiner
                     }  }
 
     let inline countBy (projection : 'T -> 'Key) (stream : CloudStream<'T>) : CloudStream<'Key * int> =
@@ -203,8 +203,27 @@ module CloudStream =
         }
 
     let inline toCloudArray (stream : CloudStream<'T>) : Cloud<ICloudArray<'T>> =
-        
-        raise <| new NotImplementedException()
+        let collectorf () =  
+            let results = new List<List<'T>>()
+            { new Collector<'T, 'T []> with
+                member self.Iterator() = 
+                    let list = new List<'T>()
+                    results.Add(list)
+                    (fun value -> list.Add(value); true)
+                member self.Result = 
+                    let count = results |> Seq.sumBy (fun list -> list.Count)
+                    let values = Array.zeroCreate<'T> count
+                    let mutable counter = -1
+                    for list in results do
+                        for i = 0 to list.Count - 1 do
+                            let value = list.[i]
+                            counter <- counter + 1
+                            values.[counter] <- value
+                    values }
+        stream.Apply collectorf (fun array -> cloud { 
+                                                let! processId = Cloud.GetProcessId() 
+                                                return! CloudArray.New(processId.ToString(), array) }) 
+                                (fun left right -> left.Append(right))
 
     let inline sortBy (projection : 'T -> 'Key) (takeCount : int) (stream : CloudStream<'T>) : CloudStream<'T> = 
         let collectorf () =  
@@ -231,7 +250,7 @@ module CloudStream =
                                      values.Take(takeCount).ToArray())) }
         let sortByComp = 
             cloud {
-                let! results = stream.Apply collectorf (fun left right -> left.AddRange(right); left)
+                let! results = stream.Apply collectorf (fun x -> cloud { return x }) (fun left right -> left.AddRange(right); left)
                 let result = 
                     let count = results |> Seq.sumBy (fun (keys, _) -> keys.Length)
                     let keys = Array.zeroCreate<'Key> count
@@ -247,10 +266,10 @@ module CloudStream =
                 return result
             }
         { new CloudStream<'T> with
-            member self.Apply<'S> (collectorf : unit -> Collector<'T, 'S>) combiner = 
+            member self.Apply<'S, 'R> (collectorf : unit -> Collector<'T, 'S>) (projection : 'S -> Cloud<'R>) combiner = 
                 cloud {
                     let! result = sortByComp
-                    return! (ofArray result).Apply collectorf combiner
+                    return! (ofArray result).Apply collectorf projection combiner
                 }  }
 
 

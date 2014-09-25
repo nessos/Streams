@@ -32,6 +32,6 @@ cloudArray
 
 
 let xs = [|1;0;0;0;0;0;0;0;0;0;0;0|]
-let x = xs |> CloudStream.ofArray |> CloudStream.sortBy id 10 |> CloudStream.toArray |> run
-let y = (xs |> Seq.sortBy id) |> Seq.take 10 |> Seq.toArray
+let x = xs |> CloudStream.ofArray |> CloudStream.sortBy id 12 |> CloudStream.toArray |> run
+let y = (xs |> Seq.sortBy id) |> Seq.take 12 |> Seq.toArray
 
