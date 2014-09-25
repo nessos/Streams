@@ -2,7 +2,7 @@
 #time
 
 
-#load "../../packages/MBrace.Runtime.0.5.6-alpha/bootstrap.fsx" 
+#load "../../packages/MBrace.Runtime.0.5.7-alpha/bootstrap.fsx" 
 #r "bin/Debug/Streams.Core.dll"
 #r "bin/Debug/Streams.Cloud.dll"
 
@@ -31,5 +31,7 @@ cloudArray
     
 
 
-
+let xs = [|1;0;0;0;0;0;0;0;0;0;0;0|]
+let x = xs |> CloudStream.ofArray |> CloudStream.sortBy id 10 |> CloudStream.toArray |> run
+let y = (xs |> Seq.sortBy id) |> Seq.take 10 |> Seq.toArray
 
