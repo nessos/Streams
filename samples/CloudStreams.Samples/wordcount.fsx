@@ -32,7 +32,7 @@ let noiseWords =
 
 let lines = 
     files
-    |> Array.map (fun f -> StoreClient.Default.CreateCloudArrayAsync("shakespeare", File.ReadLines(f)))
+    |> Array.map (fun f -> StoreClient.Default.CreateCloudArrayAsync("tmp", File.ReadLines(f)))
     |> Async.Parallel
     |> Async.RunSynchronously
     |> Array.reduce (fun l r -> l.Append(r))
