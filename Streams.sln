@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{15DAA044-35EF-41F9-AB85-9D341CCC7B47}"
 EndProject
@@ -37,6 +37,10 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Streams.Cloud", "src\Stream
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Streams.Cloud.Tests", "tests\Streams.Cloud.Tests\Streams.Cloud.Tests.fsproj", "{F9C8725D-EEB1-464E-9A3B-70D728F9E327}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{2B437217-9A05-49FB-98A5-B0F16955D966}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CloudStreams.Samples", "samples\CloudStreams.Samples\CloudStreams.Samples.fsproj", "{217E171A-C313-41AC-89D8-45B8B137469B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +71,10 @@ Global
 		{F9C8725D-EEB1-464E-9A3B-70D728F9E327}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9C8725D-EEB1-464E-9A3B-70D728F9E327}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9C8725D-EEB1-464E-9A3B-70D728F9E327}.Release|Any CPU.Build.0 = Release|Any CPU
+		{217E171A-C313-41AC-89D8-45B8B137469B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{217E171A-C313-41AC-89D8-45B8B137469B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{217E171A-C313-41AC-89D8-45B8B137469B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{217E171A-C313-41AC-89D8-45B8B137469B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -75,5 +83,6 @@ Global
 		{8038FF4D-0D3C-413A-AF87-35C7F905D117} = {15DAA044-35EF-41F9-AB85-9D341CCC7B47}
 		{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1} = {15DAA044-35EF-41F9-AB85-9D341CCC7B47}
 		{F9C8725D-EEB1-464E-9A3B-70D728F9E327} = {15DAA044-35EF-41F9-AB85-9D341CCC7B47}
+		{217E171A-C313-41AC-89D8-45B8B137469B} = {2B437217-9A05-49FB-98A5-B0F16955D966}
 	EndGlobalSection
 EndGlobal

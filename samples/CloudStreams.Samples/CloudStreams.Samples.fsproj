@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>217e171a-c313-41ac-89d8-45b8b137469b</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>CloudStreams.WordCount</RootNamespace>
+    <AssemblyName>CloudStreams.Samples</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
+    <Name>CloudStreams.Samples</Name>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>
+    </DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Release\CloudStreams.WordCount.XML</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '11.0'">
+      <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')">
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets')">
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Import Project="$(FSharpTargetsPath)" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <ItemGroup>
+    <None Include="wordcount.fsx" />
+    <None Include="App.config" />
+    <Content Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Streams.Core\Streams.Core.fsproj">
+      <Name>Streams.Core</Name>
+      <Project>{f3482666-f39c-4f49-8d0b-3583328d2c42}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <Reference Include="FsPickler">
+      <HintPath>..\..\packages\FsPickler.0.9.11\lib\net45\FsPickler.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FsPickler.Json">
+      <HintPath>..\..\packages\FsPickler.Json.0.9.11\lib\net45\FsPickler.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MBrace.Client">
+      <HintPath>..\..\packages\MBrace.Client.0.5.7-alpha\lib\net45\MBrace.Client.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MBrace.Core">
+      <HintPath>..\..\packages\MBrace.Core.0.5.7-alpha\lib\net45\MBrace.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MBrace.Lib">
+      <HintPath>..\..\packages\MBrace.Core.0.5.7-alpha\lib\net45\MBrace.Lib.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MBrace.Runtime.Base">
+      <HintPath>..\..\packages\MBrace.Client.0.5.7-alpha\lib\net45\MBrace.Runtime.Base.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MBrace.Store">
+      <HintPath>..\..\packages\MBrace.Store.0.5.7-alpha\lib\net45\MBrace.Store.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MBrace.Utils">
+      <HintPath>..\..\packages\MBrace.Client.0.5.7-alpha\lib\net45\MBrace.Utils.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\..\src\Streams.Cloud\Streams.Cloud.fsproj">
+      <Name>Streams.Cloud</Name>
+      <Project>{18f60ac5-898d-45c5-8713-bb0539d4200e}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <Reference Include="Thespian">
+      <HintPath>..\..\packages\Thespian.0.0.11-alpha\lib\net45\Thespian.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Thespian.Cluster">
+      <HintPath>..\..\packages\Thespian.0.0.11-alpha\lib\net45\Thespian.Cluster.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="UnionArgParser">
+      <HintPath>..\..\packages\UnionArgParser.0.8.0\lib\net40\UnionArgParser.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Unquote">
+      <HintPath>..\..\packages\Unquote.2.2.2\lib\net40\Unquote.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Vagrant">
+      <HintPath>..\..\packages\Vagrant.0.2.5\lib\net45\Vagrant.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
