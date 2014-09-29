@@ -41,7 +41,7 @@ let lines =
 let getTop count =
     lines
     |> CloudStream.ofCloudArray
-    |> CloudStream.flatMap (fun line -> 
+    |> CloudStream.collect (fun line -> 
         line.Split([|' '; '.'; ','|], StringSplitOptions.RemoveEmptyEntries) 
         |> Stream.ofArray
         |> Stream.map (fun word -> word.ToLower())
