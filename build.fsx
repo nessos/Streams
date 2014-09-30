@@ -45,27 +45,33 @@ let testAssemblies =
 
 //// Read release notes & version info from RELEASE_NOTES.md
 Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
-let release = parseReleaseNotes (IO.File.ReadAllLines "RELEASE_NOTES.md")
-let nugetVersion = release.NugetVersion
+
+module Streams =
+    let release = parseReleaseNotes (IO.File.ReadAllLines "RELEASE_NOTES.md")
+    let nugetVersion = release.NugetVersion
+
+module CloudStreams =
+    let release = parseReleaseNotes (IO.File.ReadAllLines "RELEASE_NOTES_CLOUDSTREAM.md")
+    let nugetVersion = release.NugetVersion
 
 Target "BuildVersion" (fun _ ->
-    Shell.Exec("appveyor", sprintf "UpdateBuild -Version \"%s\"" nugetVersion) |> ignore
+    Shell.Exec("appveyor", sprintf "UpdateBuild -Version \"%s\"" Streams.nugetVersion) |> ignore
 )
 
 // Generate assembly info files with the right version & up-to-date information
 Target "AssemblyInfo" (fun _ ->
-    let attributes =
+    let attributes version =
         [ 
             Attribute.Title project
             Attribute.Product project
             Attribute.Company "Nessos Information Technologies"
-            Attribute.Version release.AssemblyVersion
-            Attribute.FileVersion release.AssemblyVersion
+            Attribute.Version version
+            Attribute.FileVersion version
         ]
 
-    CreateFSharpAssemblyInfo "src/Streams.Core/AssemblyInfo.fs" attributes
-    CreateCSharpAssemblyInfo "src/Streams.Core.CSharp/Properties/AssemblyInfo.cs" attributes
-    
+    CreateFSharpAssemblyInfo "src/Streams.Core/AssemblyInfo.fs" <| attributes Streams.release.AssemblyVersion
+    CreateCSharpAssemblyInfo "src/Streams.Core.CSharp/Properties/AssemblyInfo.cs" <| attributes Streams.release.AssemblyVersion
+    CreateFSharpAssemblyInfo "src/Streams.Core/AssemblyInfo.fs" <| attributes CloudStreams.release.AssemblyVersion
 )
 
 
@@ -123,19 +129,19 @@ FinalTarget "CloseTestRunner" (fun _ ->
 //// Build a NuGet package
 
 Target "NuGet" (fun _ ->
+    let nugetPath = ".nuget/NuGet.exe"
 
     let mkNuGetPackage project =
         // Format the description to fit on a single line (remove \r\n and double-spaces)
         let description = description.Replace("\r", "").Replace("\n", "").Replace("  ", " ")
-        let nugetPath = ".nuget/NuGet.exe"
         NuGet (fun p -> 
             { p with   
                 Authors = authors
                 Project = project
                 Summary = summary
                 Description = description
-                Version = nugetVersion
-                ReleaseNotes = String.concat " " release.Notes
+                Version = Streams.nugetVersion
+                ReleaseNotes = String.concat " " Streams.release.Notes
                 Tags = tags
                 OutputPath = "nuget"
                 ToolPath = nugetPath
@@ -145,6 +151,26 @@ Target "NuGet" (fun _ ->
 
     mkNuGetPackage "Streams"
     mkNuGetPackage "Streams.CSharp"
+
+    NuGet (fun p -> 
+        { p with   
+            Authors = authors
+            Project = "Streams.Cloud"
+            Summary = summary
+            Description = description
+            Version = CloudStreams.nugetVersion
+            ReleaseNotes = String.concat " " CloudStreams.release.Notes
+            Tags = tags
+            OutputPath = "nuget"
+            Dependencies = 
+                [
+                    "Streams",      RequireExactly "0.2.0"
+                    "MBrace.Core",  RequireExactly "0.5.7-alpha"
+                ]
+            ToolPath = nugetPath
+            AccessKey = getBuildParamOrDefault "nugetkey" ""
+            Publish = hasBuildParam "nugetkey" })
+        ("nuget/Streams.Cloud.nuspec")
 )
 
 
