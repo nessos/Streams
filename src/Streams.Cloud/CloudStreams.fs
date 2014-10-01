@@ -21,7 +21,9 @@ module CloudStream =
                     yield enum.Current
             }
         let partitioner = Partitioner.Create(s, e)
-        let partitions = partitioner.GetPartitions(totalWorkers) |> Seq.collect toSeq |> Seq.toArray 
+        let partitions = partitioner.GetPartitions(totalWorkers) 
+                         |> Seq.collect toSeq 
+                         |> Seq.toArray 
         partitions
 
     // generator functions
@@ -44,16 +46,45 @@ module CloudStream =
                         return! projection (collectorf ()).Result;
                 } }
 
+    let cache (source : ICloudArray<'T>) : Cloud<ICachedCloudArray<'T>> = 
+        cloud {
+            let! workerCount = Cloud.GetWorkerCount()
+            let createTask (s : int64) (e : int64) (cachedCloudArray : ICachedCloudArray<'T>) = 
+                // TODO: Allow larger partition ranges
+                if e - s > int64 Int32.MaxValue then 
+                    failwith "Partition range exceeds max value"
+                cloud {
+                    
+                    let cloudArrayName = cachedCloudArray.ToString()
+                    do CloudArrayRangeRegistry.Add(cloudArrayName, (s, int (e - s)))
+                    let _ = cachedCloudArray.Range(s, int (e - s)) // returns cached array range
+                    return ()
+                }
+            let cachedCloudArray = source.Cache()
+            let partitions = getPartitions workerCount 0L source.Length
+            let! _ = partitions |> Array.map (fun (s, e) -> createTask s e cachedCloudArray) |> Cloud.Parallel
+            return cachedCloudArray 
+        }
 
     let ofCloudArray (source : ICloudArray<'T>) : CloudStream<'T> =
         { new CloudStream<'T> with
             member self.Apply<'S, 'R> (collectorf : unit -> Collector<'T, 'S>) (projection : 'S -> Cloud<'R>) (combiner : 'R -> 'R -> 'R) =
                 cloud {
                     let! workerCount = Cloud.GetWorkerCount()
-                    // TODO: int64 partition sizes
                     let createTask (s : int64) (e : int64) (collector : Collector<'T, 'S>) = 
                         cloud {
-                            let array = source.Range(s, int (e - s))
+                            let array = 
+                                match source with
+                                | :? ICachedCloudArray<'T> as source ->
+                                    let cloudArrayName = source.ToString()
+                                    if CloudArrayRangeRegistry.Contains(cloudArrayName) then
+                                        let ranges = CloudArrayRangeRegistry.Get(cloudArrayName)
+                                        let (s', count) = Seq.head ranges
+                                        source.Range(s', count) // returns cached array range
+                                    else
+                                        CloudArrayRangeRegistry.Add(cloudArrayName, (s, int (e - s)))
+                                        source.Range(s, int (e - s)) // returns cached array range
+                                | _ -> source.Range(s, int (e - s))
                             let parStream = ParStream.ofArray array 
                             do parStream.Apply collector
                             return! projection  collector.Result

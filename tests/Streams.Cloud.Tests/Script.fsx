@@ -12,23 +12,27 @@ open Nessos.MBrace.Store
 open Nessos.MBrace.Client
 
 let rnd = new System.Random()
-let data = [|1..100|] |> Array.map (fun i -> i)
+let data = [|1..1000|] |> Array.map (fun i -> i)
 
-//let runtime = MBrace.InitLocal(totalNodes = 4, store = FileSystemStore.LocalTemp)
+let runtime = MBrace.InitLocal(totalNodes = 4, store = FileSystemStore.LocalTemp)
 let run (cloud : Cloud<'T>) = 
-    //runtime.Run cloud 
-    MBrace.RunLocal cloud
+    runtime.Run cloud 
+    //MBrace.RunLocal cloud
 
 
-let cloudArray = StoreClient.Default.CreateCloudArray("temp", data) 
+//let cloudArray : = StoreClient.Default.CreateCloudArray("temp", data) 
+let cloudArray = CloudArray.New("temp", [|1; 0|]) |> run
+
+
+let cloudArray' = cloudArray.Cache()
 
 
 let ca' =
-    cloudArray
+    cloudArray'
     |> CloudStream.ofCloudArray 
-    |> CloudStream.map (fun x -> x * x)
+    |> CloudStream.map (fun x -> x)
     |> CloudStream.toCloudArray
     |> run
 
-ca'.Container
+[|1; 0|] = (ca' |> Seq.toArray)
 

@@ -40,6 +40,16 @@
                 let y = xs |> Seq.map ((+)1) |> Seq.toArray
                 Assert.AreEqual(y, x.ToArray())).QuickCheckThrowOnFailure()
 
+        [<Test>]
+        member __.``cachedCloudArray`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let cloudArray = run <| CloudArray.New("temp", xs) 
+                let cachedCloudArray = cloudArray.Cache()
+                let x = cachedCloudArray |> CloudStream.ofCloudArray |> CloudStream.map id |> CloudStream.toCloudArray |> run
+                let x' = cachedCloudArray |> CloudStream.ofCloudArray |> CloudStream.map id |> CloudStream.toCloudArray |> run
+                let y = xs |> Seq.map id |> Seq.toArray
+                Assert.AreEqual(y, x.ToArray())
+                Assert.AreEqual(x'.ToArray(), x.ToArray())).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``map`` () =
