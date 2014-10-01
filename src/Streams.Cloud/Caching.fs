@@ -41,7 +41,7 @@ type internal CachedCloudArray<'T>(source : ICloudArray<'T>) =
         member this.Cache() : ICachedCloudArray<'T> = failwith "Invalid"
 
 [<Sealed;AbstractClass>]
-type internal CloudArrayCache private () =
+type CloudArrayCache private () =
     static let guid = System.Guid.NewGuid()
 
     static let createKey ca start count = sprintf "%s %d %d" (ca.ToString()) start count
