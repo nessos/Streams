@@ -19,6 +19,9 @@ open System.Runtime.Caching
 [<Serializable; StructuredFormatDisplay("{StructuredFormatDisplay}")>]
 type internal CachedCloudArray<'T>(source : ICloudArray<'T>) = 
     let untyped = source :> ICloudArray
+    
+    member private this.StructuredFormatDisplay = source.ToString()
+    
     interface ICloudArray<'T> with
         member this.Container = source.Container
         member this.Name = source.Name

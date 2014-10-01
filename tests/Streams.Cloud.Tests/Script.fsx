@@ -21,18 +21,21 @@ let run (cloud : Cloud<'T>) =
 
 
 //let cloudArray : = StoreClient.Default.CreateCloudArray("temp", data) 
-let cloudArray = CloudArray.New("temp", [|1; 0|]) |> run
+let cloudArray = CloudArray.New("temp", data) |> run
 
 
-let cloudArray' = cloudArray.Cache()
-
+let cached = CloudStream.cache cloudArray
+             |> run
 
 let ca' =
-    cloudArray'
+    cached
     |> CloudStream.ofCloudArray 
     |> CloudStream.map (fun x -> x)
     |> CloudStream.toCloudArray
     |> run
+
+ca' |> Seq.toArray |> Seq.length
+
 
 [|1; 0|] = (ca' |> Seq.toArray)
 
