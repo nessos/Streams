@@ -46,24 +46,25 @@ module CloudStream =
                         return! projection (collectorf ()).Result;
                 } }
 
-    let cache (source : ICloudArray<'T>) : Cloud<ICachedCloudArray<'T>> = 
+    let cache (source : ICloudArray<'T>) : Cloud<ICloudArray<'T>> = 
         cloud {
             let! workerCount = Cloud.GetWorkerCount()
-            let createTask (s : int64) (e : int64) (cachedCloudArray : ICachedCloudArray<'T>) = 
+            let createTask (s : int64) (e : int64) (cached : ICloudArray<'T>) = 
                 // TODO: Allow larger partition ranges
                 if e - s > int64 Int32.MaxValue then 
                     failwith "Partition range exceeds max value"
                 cloud {
-                    
-                    let cloudArrayName = cachedCloudArray.ToString()
-                    do CloudArrayRangeRegistry.Add(cloudArrayName, (s, int (e - s)))
-                    let _ = cachedCloudArray.Range(s, int (e - s)) // returns cached array range
-                    return ()
+                    let count = int (e - s)
+                    let slice = cached.Range(s, count)
+                    CloudArrayCache.Add(cached, s, count, slice)
                 }
-            let cachedCloudArray = source.Cache()
+            let cached = new CachedCloudArray<'T>(source)
             let partitions = getPartitions workerCount 0L source.Length
-            let! _ = partitions |> Array.map (fun (s, e) -> createTask s e cachedCloudArray) |> Cloud.Parallel
-            return cachedCloudArray 
+            do! partitions 
+                |> Array.map (fun (s, e) -> createTask s e cached) 
+                |> Cloud.Parallel
+                |> Cloud.Ignore
+            return cached :> _
         }
 
     let ofCloudArray (source : ICloudArray<'T>) : CloudStream<'T> =
@@ -71,30 +72,48 @@ module CloudStream =
             member self.Apply<'S, 'R> (collectorf : unit -> Collector<'T, 'S>) (projection : 'S -> Cloud<'R>) (combiner : 'R -> 'R -> 'R) =
                 cloud {
                     let! workerCount = Cloud.GetWorkerCount()
+
                     let createTask (s : int64) (e : int64) (collector : Collector<'T, 'S>) = 
                         cloud {
-                            let array = 
-                                match source with
-                                | :? ICachedCloudArray<'T> as source ->
-                                    let cloudArrayName = source.ToString()
-                                    if CloudArrayRangeRegistry.Contains(cloudArrayName) then
-                                        let ranges = CloudArrayRangeRegistry.Get(cloudArrayName)
-                                        let (s', count) = Seq.head ranges
-                                        source.Range(s', count) // returns cached array range
-                                    else
-                                        CloudArrayRangeRegistry.Add(cloudArrayName, (s, int (e - s)))
-                                        source.Range(s, int (e - s)) // returns cached array range
-                                | _ -> source.Range(s, int (e - s))
+                            let array = source.Range(s, int (e - s)) // TODO: allow larger ranges
                             let parStream = ParStream.ofArray array 
                             do parStream.Apply collector
-                            return! projection  collector.Result
+                            return! projection collector.Result
                         }
-                    if not (source.Length = 0L) then 
-                        let partitions = getPartitions workerCount 0L source.Length
-                        let! results = partitions |> Array.map (fun (s, e) -> createTask s e (collectorf ())) |> Cloud.Parallel
-                        return Array.reduce combiner results
-                    else
+
+                    let createTaskCached (cached : CachedCloudArray<'T>) (collector : Collector<'T, 'S>) = 
+                        cloud { 
+                            let ranges = CloudArrayCache.Get(cached) |> Seq.toArray
+                            let completed = new ResizeArray<int64 * int64 * 'R>()
+                            for start, count in ranges do
+                                let array = CloudArrayCache.Get(cached, start, count)
+                                let parStream = ParStream.ofArray array
+                                parStream.Apply collector
+                                let! partial = projection collector.Result
+                                completed.Add(start, start + int64 count - 1L, partial)
+                            return completed :> seq<_>
+                        }
+                    
+                    if source.Length = 0L then
                         return! projection (collectorf ()).Result;
+                    else
+                        let partitions = getPartitions workerCount 0L source.Length
+                        match source with
+                        | :? CachedCloudArray<'T> as cached -> 
+                            // round 1
+                            let! partial = Array.init partitions.Length (fun _ -> createTaskCached cached (collectorf ())) |> Cloud.Parallel
+                            let results1 = Seq.concat partial
+                            let completedPartitions = results1 |> Seq.map (fun (s,e,_) -> s, e) |> Set.ofSeq
+                            let allPartitions = partitions |> Set.ofSeq
+                            // round 2
+                            let restPartitions = allPartitions - completedPartitions
+                            let! results2 = restPartitions |> Set.toArray |> Array.map (fun (s, e) -> createTask s e (collectorf ())) |> Cloud.Parallel
+                            let final = Array.append (results1 |> Seq.map (fun (_,_,r) -> r) |> Seq.toArray) results2
+                            return Array.reduce combiner final
+                        | source -> 
+                            let! results = partitions |> Array.map (fun (s, e) -> createTask s e (collectorf ())) |> Cloud.Parallel
+                            return Array.reduce combiner results
+                            
                 } }
 
 
