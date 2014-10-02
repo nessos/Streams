@@ -49,16 +49,17 @@ module CloudStream =
     let cache (source : ICloudArray<'T>) : Cloud<ICloudArray<'T>> = 
         cloud {
             let! workerCount = Cloud.GetWorkerCount()
-            let createTask (s : int64) (e : int64) (cached : ICloudArray<'T>) = 
+            let createTask (s : int64) (e : int64) (cached : CachedCloudArray<'T>) = 
                 // TODO: Allow larger partition ranges
                 if e - s > int64 Int32.MaxValue then 
                     failwith "Partition range exceeds max value"
                 cloud {
                     let count = int (e - s)
-                    let slice = cached.Range(s, count)
+                    let slice = (cached :> ICloudArray<'T>).Range(s, count)
                     CloudArrayCache.Add(cached, s, count, slice)
                 }
-            let cached = new CachedCloudArray<'T>(source)
+            let! taskId = Cloud.GetTaskId()
+            let cached = new CachedCloudArray<'T>(source, taskId)
             let partitions = getPartitions workerCount 0L source.Length
             do! partitions 
                 |> Array.map (fun (s, e) -> createTask s e cached) 
@@ -81,12 +82,12 @@ module CloudStream =
                             return! projection collector.Result
                         }
 
-                    let createTaskCached (cached : CachedCloudArray<'T>) (collector : Collector<'T, 'S>) = 
+                    let createTaskCached (cached : CachedCloudArray<'T>) (taskId : string) (collector : Collector<'T, 'S>) = 
                         cloud { 
-                            let ranges = CloudArrayCache.Get(cached) |> Seq.toArray
+                            let ranges = CloudArrayCache.Get(cached, taskId) |> Seq.toArray
                             let completed = new ResizeArray<int64 * int64 * 'R>()
                             for start, count in ranges do
-                                let array = CloudArrayCache.Get(cached, start, count)
+                                let array = CloudArrayCache.GetRange(cached, start, count)
                                 let parStream = ParStream.ofArray array
                                 parStream.Apply collector
                                 let! partial = projection collector.Result
@@ -101,7 +102,8 @@ module CloudStream =
                         match source with
                         | :? CachedCloudArray<'T> as cached -> 
                             // round 1
-                            let! partial = Array.init partitions.Length (fun _ -> createTaskCached cached (collectorf ())) |> Cloud.Parallel
+                            let taskId = Guid.NewGuid().ToString() //Cloud.GetTaskId()
+                            let! partial = Array.init partitions.Length (fun _ -> createTaskCached cached taskId (collectorf ())) |> Cloud.Parallel
                             let results1 = Seq.concat partial
                             let completedPartitions = results1 |> Seq.map (fun (s,e,_) -> s, e) |> Set.ofSeq
                             let allPartitions = partitions |> Set.ofSeq

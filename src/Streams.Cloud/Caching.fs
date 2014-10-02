@@ -2,25 +2,15 @@
 
 open Nessos.MBrace
 open System
-open System.Collections.Concurrent
 open System.Collections.Generic
 open System.Runtime.Caching
 
-
-(****************************************************************
- * TODO :                                                       *
- * 1. Remove Cache methods                                      *
- * 2. Merge and simplify CloudArrayRegistry and CloudArrayCache *
- * 3. No need for fancy Cache.FetchRange stuff.                 *
- * 4. Remove CloudArrayId and CloudArrayRange                   *
- * 5. Remove 'T [] and implement big arrays                     *
- ****************************************************************)
-
 [<Serializable; StructuredFormatDisplay("{StructuredFormatDisplay}")>]
-type internal CachedCloudArray<'T>(source : ICloudArray<'T>) = 
+type CachedCloudArray<'T>(source : ICloudArray<'T>, taskId : string) = 
     let untyped = source :> ICloudArray
     
     member private this.StructuredFormatDisplay = source.ToString()
+    member internal this.TaskId = taskId
     
     interface ICloudArray<'T> with
         member this.Container = source.Container
@@ -41,18 +31,23 @@ type internal CachedCloudArray<'T>(source : ICloudArray<'T>) =
         member this.Cache() : ICachedCloudArray<'T> = failwith "Invalid"
 
 [<Sealed;AbstractClass>]
-type CloudArrayCache private () =
+type CloudArrayCache () =
     static let guid = System.Guid.NewGuid()
 
-    static let createKey ca start count = sprintf "%s %d %d" (ca.ToString()) start count
-    static let parseKey(key : string) = let key = key.Split() in key.[0], int64 key.[1], int key.[2]
+    // TODO : Replace
+    static let createKey (ca : CachedCloudArray<'T>) start count = 
+        sprintf "%s %s %d %d" (ca.ToString()) ca.TaskId start count
+    static let parseKey (key : string) = 
+        let key = key.Split()
+        key.[0], key.[1], int64 key.[2], int key.[3]
 
     static let config = new System.Collections.Specialized.NameValueCollection()
     static do  config.Add("PhysicalMemoryLimitPercentage", "70")
     static let mc = new MemoryCache("CloudArrayMemoryCache", config)
 
     static let sync      = new obj()
-    static let registry  = new HashSet<string * int64 * int>()
+    static let registry  = new HashSet<string * string * int64 * int>()
+    static let occupied  = new HashSet<string>()
     static let policy    = new CacheItemPolicy()
     static do  policy.RemovedCallback <-
                 new CacheEntryRemovedCallback(
@@ -62,18 +57,23 @@ type CloudArrayCache private () =
 
     static member Guid = guid
     static member State = registry :> seq<_>
+    static member Occupied = occupied :> seq<_>
         
-    static member Add(ca : ICloudArray<'T>, start : int64, count : int, values : 'T []) =
+    static member Add(ca : CachedCloudArray<'T>, start : int64, count : int, values : 'T []) =
         let key = createKey ca start count
         mc.Add(key, values, policy) |> ignore
-        lock sync (fun () -> registry.Add((ca.ToString()),start, count) |> ignore)
+        lock sync (fun () -> registry.Add((ca.ToString()), ca.TaskId, start, count) |> ignore)
   
-    static member Get(ca : ICloudArray<'T>) : seq<int64 * int> =
+    static member Get(ca : CachedCloudArray<'T>, parentTaskId  : string) : seq<int64 * int> =
         lock sync (fun () -> 
-            registry 
-            |> Seq.filter (fun (key,s, c) -> key = ca.ToString() )
-            |> Seq.map (fun (_,s,c) -> s,c))
+            if occupied.Contains parentTaskId then
+                Seq.empty
+            else
+                occupied.Add(parentTaskId) |> ignore
+                registry 
+                |> Seq.filter (fun (key, tid, _, _) -> key = ca.ToString() && ca.TaskId = tid )
+                |> Seq.map (fun (_,_,s,c) -> s,c))
 
-    static member Get(ca : ICloudArray<'T>, start : int64, count : int) : 'T [] =
+    static member GetRange(ca : CachedCloudArray<'T>, start : int64, count : int) : 'T [] =
         let key = createKey ca start count
         mc.Get(key) :?> 'T []
