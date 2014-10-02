@@ -5,6 +5,7 @@
 
 open System
 open System.IO
+open System.Text.RegularExpressions
 open Nessos.MBrace
 open Nessos.MBrace.Client
 open Nessos.Streams.Core
@@ -30,6 +31,11 @@ let noiseWords =
         "shall"
     ]
 
+let splitWords =
+    let regex = new Regex(@"[\W]+", RegexOptions.Compiled)
+    fun word -> regex.Split(word)
+
+
 let lines = 
     files
     |> Array.map (fun f -> StoreClient.Default.CreateCloudArrayAsync("tmp", File.ReadLines(f)))
@@ -42,7 +48,7 @@ let getTop count =
     lines
     |> CloudStream.ofCloudArray
     |> CloudStream.collect (fun line -> 
-        line.Split([|' '; '.'; ','|], StringSplitOptions.RemoveEmptyEntries) 
+        splitWords line
         |> Stream.ofArray
         |> Stream.map (fun word -> word.ToLower())
         |> Stream.map (fun word -> word.Trim()))
