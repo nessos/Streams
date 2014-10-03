@@ -11,6 +11,8 @@ type CachedCloudArray<'T>(source : ICloudArray<'T>, taskId : string) =
     
     member private this.StructuredFormatDisplay = source.ToString()
     member internal this.TaskId = taskId
+
+    override this.ToString() = source.ToString()
     
     interface ICloudArray<'T> with
         member this.Container = source.Container

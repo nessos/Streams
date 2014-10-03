@@ -82,17 +82,18 @@ module CloudStream =
                             return! projection collector.Result
                         }
 
-                    let createTaskCached (cached : CachedCloudArray<'T>) (taskId : string) (collector : Collector<'T, 'S>) = 
+                    let createTaskCached (cached : CachedCloudArray<'T>) (taskId : string) (collectorf : unit -> Collector<'T, 'S>) = 
                         cloud { 
                             let ranges = CloudArrayCache.Get(cached, taskId) |> Seq.toArray
                             let completed = new ResizeArray<int64 * int64 * 'R>()
                             for start, count in ranges do
                                 let array = CloudArrayCache.GetRange(cached, start, count)
                                 let parStream = ParStream.ofArray array
+                                let collector = collectorf()
                                 parStream.Apply collector
                                 let! partial = projection collector.Result
-                                completed.Add(start, start + int64 count - 1L, partial)
-                            return completed :> seq<_>
+                                completed.Add(start, start + int64 count, partial)
+                            return completed 
                         }
                     
                     if source.Length = 0L then
@@ -103,15 +104,35 @@ module CloudStream =
                         | :? CachedCloudArray<'T> as cached -> 
                             // round 1
                             let taskId = Guid.NewGuid().ToString() //Cloud.GetTaskId()
-                            let! partial = Array.init partitions.Length (fun _ -> createTaskCached cached taskId (collectorf ())) |> Cloud.Parallel
-                            let results1 = Seq.concat partial
-                            let completedPartitions = results1 |> Seq.map (fun (s,e,_) -> s, e) |> Set.ofSeq
+                            let! partial = 
+                                Array.init partitions.Length (fun _ -> createTaskCached cached taskId collectorf) 
+                                |> Cloud.Parallel
+                            let results1 = Seq.concat partial 
+                                           |> Seq.toArray 
+                            let completedPartitions = 
+                                results1
+                                |> Seq.map (fun (s, e, _) -> s, e)
+                                |> Set.ofSeq
                             let allPartitions = partitions |> Set.ofSeq
                             // round 2
                             let restPartitions = allPartitions - completedPartitions
-                            let! results2 = restPartitions |> Set.toArray |> Array.map (fun (s, e) -> createTask s e (collectorf ())) |> Cloud.Parallel
-                            let final = Array.append (results1 |> Seq.map (fun (_,_,r) -> r) |> Seq.toArray) results2
-                            return Array.reduce combiner final
+                            
+                            if Seq.isEmpty restPartitions then
+                                let final = results1 
+                                            |> Seq.sortBy (fun (s,_,_) -> s)
+                                            |> Seq.map (fun (_,_,r) -> r) 
+                                            |> Seq.toArray
+                                return Array.reduce combiner final
+                            else
+                                let! results2 = restPartitions 
+                                                |> Set.toArray 
+                                                |> Array.map (fun (s, e) -> cloud { let! r = createTask s e (collectorf ()) in return s,e,r }) 
+                                                |> Cloud.Parallel
+                                let final = Seq.append results1 results2
+                                            |> Seq.sortBy (fun (s,_,_) -> s)
+                                            |> Seq.map (fun (_,_,r) -> r)
+                                            |> Seq.toArray
+                                return Array.reduce combiner final
                         | source -> 
                             let! results = partitions |> Array.map (fun (s, e) -> createTask s e (collectorf ())) |> Cloud.Parallel
                             return Array.reduce combiner results
@@ -123,8 +144,8 @@ module CloudStream =
     let inline map (f : 'T -> 'R) (stream : CloudStream<'T>) : CloudStream<'R> =
         { new CloudStream<'R> with
             member self.Apply<'S, 'Result> (collectorf : unit -> Collector<'R, 'S>) (projection : 'S -> Cloud<'Result>) combiner =
-                let collector = collectorf ()
                 let collectorf' () = 
+                    let collector = collectorf ()
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
                             let iter = collector.Iterator()
@@ -136,8 +157,8 @@ module CloudStream =
     let inline flatMap (f : 'T -> Stream<'R>) (stream : CloudStream<'T>) : CloudStream<'R> =
         { new CloudStream<'R> with
             member self.Apply<'S, 'Result> (collectorf : unit -> Collector<'R, 'S>) (projection : 'S -> Cloud<'Result>) combiner =
-                let collector = collectorf ()
                 let collectorf' () = 
+                    let collector = collectorf ()
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
                             let iter = collector.Iterator()
@@ -153,8 +174,8 @@ module CloudStream =
     let inline filter (predicate : 'T -> bool) (stream : CloudStream<'T>) : CloudStream<'T> =
         { new CloudStream<'T> with
             member self.Apply<'S, 'R> (collectorf : unit -> Collector<'T, 'S>) (projection : 'S -> Cloud<'R>) combiner =
-                let collector = collectorf ()
                 let collectorf' () = 
+                    let collector = collectorf ()
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
                             let iter = collector.Iterator()
