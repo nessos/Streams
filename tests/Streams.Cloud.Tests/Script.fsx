@@ -9,9 +9,6 @@ open Nessos.MBrace.Client
 
 #time
 
-let ver = typeof<MBrace>.Assembly.GetName().Version
-
-
 let rnd = new System.Random()
 let data = Array.init 100 id
 
@@ -39,7 +36,7 @@ cloud { let! n = Cloud.GetWorkerCount() in return! [|1..n|] |> Array.map (fun _ 
 cloud { let! n = Cloud.GetWorkerCount() in return! [|1..n|] |> Array.map (fun _ -> cloud { return CloudArrayCache.Occupied }) |> Cloud.Parallel }
 |> run
 
-let cloudArray = StoreClient.Default.CreateCloudArray("temp", data) 
+let cloudArray = StoreClient.Default.CreateCloudArray<int>("temp", Seq.empty) 
 let cached = CloudStream.cache cloudArray |> run
 
 CloudArrayCache.Occupied
@@ -48,7 +45,7 @@ let ca' =
     cached
     |> CloudStream.ofCloudArray 
     |> CloudStream.map (fun x -> x * x)
-    |> CloudStream.toArray
+    |> CloudStream.toCloudArray
     |> run
 
 ca' |> Seq.toArray |> Seq.length

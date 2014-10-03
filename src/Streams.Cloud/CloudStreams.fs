@@ -60,11 +60,12 @@ module CloudStream =
                 }
             let taskId = Guid.NewGuid().ToString()
             let cached = new CachedCloudArray<'T>(source, taskId)
-            let partitions = getPartitions workerCount 0L source.Length
-            do! partitions 
-                |> Array.map (fun (s, e) -> createTask s e cached) 
-                |> Cloud.Parallel
-                |> Cloud.Ignore
+            if source.Length > 0L then
+                let partitions = getPartitions workerCount 0L source.Length
+                do! partitions 
+                    |> Array.map (fun (s, e) -> createTask s e cached) 
+                    |> Cloud.Parallel
+                    |> Cloud.Ignore
             return cached :> _
         }
 
