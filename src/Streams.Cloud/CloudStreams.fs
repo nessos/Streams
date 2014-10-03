@@ -58,7 +58,7 @@ module CloudStream =
                     let slice = (cached :> ICloudArray<'T>).Range(s, count)
                     CloudArrayCache.Add(cached, s, count, slice)
                 }
-            let! taskId = Cloud.GetTaskId()
+            let taskId = Guid.NewGuid().ToString()
             let cached = new CachedCloudArray<'T>(source, taskId)
             let partitions = getPartitions workerCount 0L source.Length
             do! partitions 

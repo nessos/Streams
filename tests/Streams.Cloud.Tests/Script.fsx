@@ -9,6 +9,9 @@ open Nessos.MBrace.Client
 
 #time
 
+let ver = typeof<MBrace>.Assembly.GetName().Version
+
+
 let rnd = new System.Random()
 let data = Array.init 100 id
 
