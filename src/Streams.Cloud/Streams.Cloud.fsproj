@@ -55,6 +55,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Caching.fs" />
     <Compile Include="Partitioning.fs" />
+    <Compile Include="Readers.fs" />
     <Compile Include="CloudStreams.fs" />
     <None Include="Script.fsx" />
     <None Include="packages.config" />
