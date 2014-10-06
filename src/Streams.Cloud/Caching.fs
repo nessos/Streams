@@ -6,7 +6,7 @@ open System.Collections.Generic
 open System.Runtime.Caching
 
 [<Serializable; StructuredFormatDisplay("{StructuredFormatDisplay}")>]
-type CachedCloudArray<'T>(source : ICloudArray<'T>, taskId : string) = 
+type internal CachedCloudArray<'T>(source : ICloudArray<'T>, taskId : string) = 
     let untyped = source :> ICloudArray
     
     member private this.StructuredFormatDisplay = source.ToString()
@@ -33,7 +33,7 @@ type CachedCloudArray<'T>(source : ICloudArray<'T>, taskId : string) =
         member this.Cache() : ICachedCloudArray<'T> = failwith "Invalid"
 
 [<Sealed;AbstractClass>]
-type CloudArrayCache () =
+type internal CloudArrayCache () =
     static let guid = System.Guid.NewGuid()
 
     // TODO : Replace

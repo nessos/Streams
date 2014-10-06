@@ -52,11 +52,12 @@
   <Import Project="$(FSharpTargetsPath)" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Caching.fs" />
+    <Compile Include="Partitioning.fs" />
     <Compile Include="CloudStreams.fs" />
     <None Include="Script.fsx" />
     <None Include="packages.config" />
-    <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MBrace.Core">

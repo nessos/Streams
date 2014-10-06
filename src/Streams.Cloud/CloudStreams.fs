@@ -2,9 +2,6 @@
 open System
 open System.Collections.Generic
 open System.Linq
-open System.Collections.Concurrent
-open System.Threading
-open System.Threading.Tasks
 open Nessos.MBrace
 open Nessos.Streams.Core
 
@@ -12,19 +9,8 @@ open Nessos.Streams.Core
 type CloudStream<'T> = 
     abstract Apply<'S, 'R> : (unit -> Collector<'T, 'S>) -> ('S -> Cloud<'R>) -> ('R -> 'R -> 'R) -> Cloud<'R>
 
+[<RequireQualifiedAccess>]
 module CloudStream =
-
-    let internal getPartitions (totalWorkers : int) (s : int64) (e : int64) = 
-        let toSeq (enum : IEnumerator<_>)= 
-            seq {
-                while enum.MoveNext() do
-                    yield enum.Current
-            }
-        let partitioner = Partitioner.Create(s, e)
-        let partitions = partitioner.GetPartitions(totalWorkers) 
-                         |> Seq.collect toSeq 
-                         |> Seq.toArray 
-        partitions
 
     // generator functions
     let ofArray (source : 'T []) : CloudStream<'T> =
@@ -36,38 +22,15 @@ module CloudStream =
                         cloud {
                             let parStream = ParStream.ofArray array 
                             do parStream.Apply collector
-                            return!  projection collector.Result
+                            return! projection collector.Result
                         }
                     if not (source.Length = 0) then 
-                        let partitions = getPartitions workerCount 0L (int64 source.Length)
+                        let partitions = Partitions.ofRange workerCount 0L (int64 source.Length)
                         let! results = partitions |> Array.map (fun (s, e) -> createTask [| for i in s..(e - 1L) do yield source.[int i] |] (collectorf ())) |> Cloud.Parallel
                         return Array.reduce combiner results
                     else
-                        return! projection (collectorf ()).Result;
+                        return! projection (collectorf ()).Result
                 } }
-
-    let cache (source : ICloudArray<'T>) : Cloud<ICloudArray<'T>> = 
-        cloud {
-            let! workerCount = Cloud.GetWorkerCount()
-            let createTask (s : int64) (e : int64) (cached : CachedCloudArray<'T>) = 
-                // TODO: Allow larger partition ranges
-                if e - s > int64 Int32.MaxValue then 
-                    failwith "Partition range exceeds max value"
-                cloud {
-                    let count = int (e - s)
-                    let slice = (cached :> ICloudArray<'T>).Range(s, count)
-                    CloudArrayCache.Add(cached, s, count, slice)
-                }
-            let taskId = Guid.NewGuid().ToString()
-            let cached = new CachedCloudArray<'T>(source, taskId)
-            if source.Length > 0L then
-                let partitions = getPartitions workerCount 0L source.Length
-                do! partitions 
-                    |> Array.map (fun (s, e) -> createTask s e cached) 
-                    |> Cloud.Parallel
-                    |> Cloud.Ignore
-            return cached :> _
-        }
 
     let ofCloudArray (source : ICloudArray<'T>) : CloudStream<'T> =
         { new CloudStream<'T> with
@@ -100,7 +63,7 @@ module CloudStream =
                     if source.Length = 0L then
                         return! projection (collectorf ()).Result;
                     else
-                        let partitions = getPartitions workerCount 0L source.Length
+                        let partitions = Partitions.ofRange workerCount 0L source.Length
                         match source with
                         | :? CachedCloudArray<'T> as cached -> 
                             // round 1
@@ -140,6 +103,28 @@ module CloudStream =
                             
                 } }
 
+    let cache (source : ICloudArray<'T>) : Cloud<ICloudArray<'T>> = 
+        cloud {
+            let! workerCount = Cloud.GetWorkerCount()
+            let createTask (s : int64) (e : int64) (cached : CachedCloudArray<'T>) = 
+                // TODO: Allow larger partition ranges
+                if e - s > int64 Int32.MaxValue then 
+                    failwith "Partition range exceeds max value"
+                cloud {
+                    let count = int (e - s)
+                    let slice = (cached :> ICloudArray<'T>).Range(s, count)
+                    CloudArrayCache.Add(cached, s, count, slice)
+                }
+            let taskId = Guid.NewGuid().ToString()
+            let cached = new CachedCloudArray<'T>(source, taskId)
+            if source.Length > 0L then
+                let partitions = Partitions.ofRange workerCount 0L source.Length
+                do! partitions 
+                    |> Array.map (fun (s, e) -> createTask s e cached) 
+                    |> Cloud.Parallel
+                    |> Cloud.Ignore
+            return cached :> _
+        }
 
     // intermediate functions
     let inline map (f : 'T -> 'R) (stream : CloudStream<'T>) : CloudStream<'R> =

@@ -73,4 +73,15 @@ getPartitions 8 0L 100L
 Partitioner.Create(0L,100L).GetPartitions(3)
 |> Seq.mapi (fun i x -> i, x |> toSeq )
 
+let xs = [1..2000]
+
+let p = Partitioner.Create(xs)
+
+let ps = p.GetPartitions(4)
+         |> Seq.map (toSeq >> Seq.toArray)
+         |> Seq.toArray 
+
+
+
+
 
