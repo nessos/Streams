@@ -29,9 +29,30 @@ let ca' =
 ca' |> Seq.toArray |> Seq.length
 
 
+let path = @"C:\dev\github-repositories\MBrace.Demos\data\Shakespeare"
 
+let cfs = runtime.GetStoreClient().UploadFiles(System.IO.Directory.GetFiles path)
 
+open Nessos.Streams.Core
 
+let r = 
+    cfs
+    |> CloudStream.ofCloudFiles CloudFile.ReadLines
+    |> CloudStream.collect (fun lines -> Stream.ofSeq lines)
+    |> CloudStream.map id
+    |> CloudStream.length
+    |> run
+
+let cas = System.IO.Directory.GetFiles path
+          |> Array.map (fun file -> let vs = System.IO.File.ReadLines(file) in runtime.GetStoreClient().CreateCloudArray("tmp", vs))
+          |> Array.reduce (fun l r -> l.Append(r))
+
+let r' = 
+    cas
+    |> CloudStream.ofCloudArray 
+    |> CloudStream.map id
+    |> CloudStream.length
+    |> run
 
 
 //cloud { let! n = Cloud.GetWorkerCount() in return! [|1..n|] |> Array.map (fun _ -> cloud { return CloudArrayCache.State }) |> Cloud.Parallel }
