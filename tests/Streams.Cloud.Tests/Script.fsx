@@ -74,12 +74,12 @@ Partitioner.Create(0L,100L).GetPartitions(3)
 |> Seq.mapi (fun i x -> i, x |> toSeq )
 
 let xs = [1..2000]
-
+let f x 
 let p = Partitioner.Create(xs)
 
 let ps = p.GetPartitions(4)
-         |> Seq.map (toSeq >> Seq.toArray)
-         |> Seq.toArray 
+         |> Seq.toArray
+         |> Array.map (toSeq >> Seq.toArray)
 
 
 

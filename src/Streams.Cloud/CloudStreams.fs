@@ -25,11 +25,36 @@ module CloudStream =
                             return! projection collector.Result
                         }
                     if not (source.Length = 0) then 
-                        let partitions = Partitions.ofRange workerCount 0L (int64 source.Length)
+                        let partitions = Partitions.ofLongRange workerCount 0L (int64 source.Length)
                         let! results = partitions |> Array.map (fun (s, e) -> createTask [| for i in s..(e - 1L) do yield source.[int i] |] (collectorf ())) |> Cloud.Parallel
                         return Array.reduce combiner results
                     else
                         return! projection (collectorf ()).Result
+                } }
+
+    let ofCloudFiles (reader : System.IO.Stream -> Async<'T>) (sources : seq<ICloudFile>) : CloudStream<'T> =
+        { new CloudStream<'T> with
+            member self.Apply<'S, 'R> (collectorf : unit -> Collector<'T, 'S>) (projection : 'S -> Cloud<'R>) (combiner : 'R -> 'R -> 'R) =
+                cloud { 
+                    if Seq.isEmpty sources then 
+                        return! projection (collectorf ()).Result
+                    else
+                        let! workerCount = Cloud.GetWorkerCount()
+
+                        let createTask (files : ICloudFile []) (collector : Collector<'T, 'S>) : Cloud<'R> = 
+                            cloud {
+                                let! sources = 
+                                    files |> Array.map (fun file -> CloudFile.Read(file, reader))
+                                          |> Cloud.Parallel
+                                          |> Cloud.ToLocal  
+                                let parStream = ParStream.ofSeq sources
+                                parStream.Apply collector
+                                return! projection collector.Result
+                            }
+
+                        let partitions = sources |> Seq.toArray |> Partitions.ofArray workerCount
+                        let! results = partitions |> Array.map (fun cfiles -> createTask cfiles (collectorf())) |> Cloud.Parallel
+                        return Array.reduce combiner results
                 } }
 
     let ofCloudArray (source : ICloudArray<'T>) : CloudStream<'T> =
@@ -63,7 +88,7 @@ module CloudStream =
                     if source.Length = 0L then
                         return! projection (collectorf ()).Result;
                     else
-                        let partitions = Partitions.ofRange workerCount 0L source.Length
+                        let partitions = Partitions.ofLongRange workerCount 0L source.Length
                         match source with
                         | :? CachedCloudArray<'T> as cached -> 
                             // round 1
@@ -118,7 +143,7 @@ module CloudStream =
             let taskId = Guid.NewGuid().ToString()
             let cached = new CachedCloudArray<'T>(source, taskId)
             if source.Length > 0L then
-                let partitions = Partitions.ofRange workerCount 0L source.Length
+                let partitions = Partitions.ofLongRange workerCount 0L source.Length
                 do! partitions 
                     |> Array.map (fun (s, e) -> createTask s e cached) 
                     |> Cloud.Parallel
