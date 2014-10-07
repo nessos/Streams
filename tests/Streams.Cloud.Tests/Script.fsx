@@ -55,6 +55,28 @@ let r' =
     |> run
 
 
+let xs : string [] [] = [|[|null|]|]
+open System.IO
+open Nessos.Streams.Core
+let cfs = 
+    xs |> Array.map(fun xs -> 
+        StoreClient.Default.CreateCloudFile(System.Guid.NewGuid().ToString(),
+            (fun (stream : Stream) -> 
+                async {
+                    use sw = new StreamWriter(stream)
+                    xs |> Array.iter (sw.WriteLine) })))
+cfs.[0].Size
+
+let x = cfs |> CloudStream.ofCloudFiles CloudFile.ReadLines
+            |> CloudStream.collect (fun s -> printfn "%A" s ; Stream.ofSeq s)
+            |> CloudStream.toArray
+            |> MBrace.RunLocal
+
+let y = xs |> Array.collect id
+
+
+
+
 //cloud { let! n = Cloud.GetWorkerCount() in return! [|1..n|] |> Array.map (fun _ -> cloud { return CloudArrayCache.State }) |> Cloud.Parallel }
 //|> run
 //|> Seq.iter (

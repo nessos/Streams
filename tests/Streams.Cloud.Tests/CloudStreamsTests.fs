@@ -42,7 +42,7 @@
                 Assert.AreEqual(y, x.ToArray())).QuickCheckThrowOnFailure()
 
         [<Test>]
-        member __.``cachedCloudArray`` () =
+        member __.``cache`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let cloudArray = __.Evaluate <| CloudArray.New("temp", xs) 
                 let cached = CloudStream.cache cloudArray |> __.Evaluate 
@@ -53,7 +53,7 @@
                 Assert.AreEqual(x'.ToArray(), x.ToArray())).QuickCheckThrowOnFailure()
 
         [<Test>]
-        member __.``cache two times`` () =
+        member __.``subsequent caching`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let cloudArray = __.Evaluate <| CloudArray.New("temp", xs) 
                 let _ = CloudStream.cache cloudArray |> __.Evaluate 
@@ -63,6 +63,30 @@
                 let y = xs |> Seq.map (fun x -> x * x) |> Seq.toArray
                 Assert.AreEqual(y, x.ToArray())
                 Assert.AreEqual(x'.ToArray(), x.ToArray())).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``ofCloudFiles`` () =
+            Spec.ForAny<string [] []>(fun (xs : string [][]) ->
+                let cfs = 
+                    xs |> Array.map(fun xs -> 
+                        StoreClient.Default.CreateCloudFile(System.Guid.NewGuid().ToString(),
+                            (fun (stream : Stream) -> 
+                                async {
+                                    use sw = new StreamWriter(stream)
+                                    xs |> Array.iter (sw.WriteLine) })))
+
+                let x = cfs |> CloudStream.ofCloudFiles CloudFile.ReadLines
+                            |> CloudStream.collect Stream.ofSeq
+                            |> CloudStream.toArray
+                            |> __.Evaluate
+
+                let y = cfs |> Array.map (fun cf -> cf.Read())
+                            |> Array.map (fun s -> async { let! s = s in return! CloudFile.ReadLines s })
+                            |> Async.Parallel
+                            |> Async.RunSynchronously
+                            |> Array.collect id
+
+                Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``map`` () =
