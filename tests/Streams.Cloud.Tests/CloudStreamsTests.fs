@@ -157,8 +157,25 @@
     type ``Cluster Tests`` () =
         inherit ``CloudStreams tests`` ()
         
-        let ver = typeof<MBrace>.Assembly.GetName().Version.ToString(3)
-        do MBraceSettings.MBracedExecutablePath <- Path.Combine(Directory.GetCurrentDirectory(), "../../../../packages/MBrace.Runtime." + ver + "-alpha/tools/mbraced.exe")
-        let rt = MBrace.InitLocal(totalNodes = 4)
+        let currentRuntime : MBraceRuntime option ref = ref None
+        
+        override __.Evaluate(expr : Cloud<'T>) : 'T = currentRuntime.Value.Value.Run expr
 
-        override __.Evaluate(expr : Cloud<'T>) : 'T = rt.Run expr
+        [<TestFixtureSetUp>]
+        member test.InitRuntime() =
+            lock currentRuntime (fun () ->
+                match currentRuntime.Value with
+                | Some runtime -> runtime.Kill()
+                | None -> ()
+            
+                let ver = typeof<MBrace>.Assembly.GetName().Version.ToString(3)
+                MBraceSettings.MBracedExecutablePath <- Path.Combine(Directory.GetCurrentDirectory(), "../packages/MBrace.Runtime." + ver + "-alpha/tools/mbraced.exe")
+                let runtime = MBraceRuntime.InitLocal(4, debug = true)
+                currentRuntime := Some runtime)
+
+        [<TestFixtureTearDown>]
+        member test.FiniRuntime() =
+            lock currentRuntime (fun () -> 
+                match currentRuntime.Value with
+                | None -> invalidOp "No runtime specified in test fixture."
+                | Some r -> r.Shutdown() ; currentRuntime := None)
