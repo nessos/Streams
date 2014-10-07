@@ -20,7 +20,7 @@
 		</references>
     </metadata>
     <files>
-        <file src="..\src\Streams.Core\bin\Release\Streams.Core.dll" target="lib\Streams.Core.dll" />
-        <file src="..\src\Streams.Core\bin\Release\Streams.Core.XML" target="lib\Streams.Core.XML" />
+        <file src="..\bin\Streams.Core.dll" target="lib\Streams.Core.dll" />
+        <file src="..\bin\Streams.Core.XML" target="lib\Streams.Core.XML" />
     </files>
 </package>

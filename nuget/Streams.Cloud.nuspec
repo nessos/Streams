@@ -20,7 +20,7 @@
     </references>
     </metadata>
     <files>
-        <file src="..\src\Streams.Cloud\bin\Release\Streams.Cloud.dll" target="lib\Streams.Cloud.dll" />
+        <file src="..\bin\Streams.Cloud.dll" target="lib\Streams.Cloud.dll" />
         <!--<file src="..\src\Streams.Cloud\bin\Release\Streams.Cloud.XML" target="lib\Streams.Core.XML" />-->
     </files>
 </package>

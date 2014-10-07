@@ -33,9 +33,9 @@ let gitRaw = environVarOrDefault "gitRaw" "https://raw.github.com/nessos"
 
 let testAssemblies = 
     [
-        "tests/Streams.Tests/bin/Release/Streams.Tests.exe"
-        "tests/Streams.Tests.CSharp/bin/Release/Streams.Tests.CSharp.exe"
-        "tests/Streams.Cloud.Tests/bin/Release/Streams.Cloud.Tests.exe"
+        "bin/Streams.Tests.exe"
+        "bin/Streams.Tests.CSharp.exe"
+        "bin/Streams.Cloud.Tests.exe"
     ]
 
 //
@@ -85,6 +85,8 @@ Target "RestorePackages" (fun _ ->
 
 Target "Clean" (fun _ ->
     CleanDirs (!! "**/bin/Release/")
+    CleanDirs (!! "**/bin/Debug/")
+    CleanDir "bin/"
 )
 
 //
