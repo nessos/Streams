@@ -16,26 +16,20 @@ type ParStream<'T> =
 
 module ParStream =
 
-    let internal totalWorkers = Environment.ProcessorCount
+    let private totalWorkers = Environment.ProcessorCount
 
-    let internal getPartitions (s : int, e : int) =
-        if s > e then invalidArg "e" "Must be greater than s"
-        let n = totalWorkers
-        let step = (e - s) / n
-        let ranges = new ResizeArray<int * int>(n)
-        let mutable current = s
-        while current + step <= e do
-            ranges.Add(current, current + step)
-            current <- current + step + 1
-        if current <= e then ranges.Add(current,e)
-        ranges.ToArray()
+    let private getPartitions length =
+        [| 
+            for i in 0 .. totalWorkers - 1 ->
+                let i, j = length * i / totalWorkers, length * (i + 1) / totalWorkers in (i, j) 
+        |]
 
     // generator functions
     let ofArray (source : 'T []) : ParStream<'T> =
         { new ParStream<'T> with
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
                 if not (source.Length = 0) then 
-                    let partitions = getPartitions(0, source.Length)
+                    let partitions = getPartitions source.Length
                     let nextRef = ref true
                     let createTask s e iter = 
                         Task.Factory.StartNew(fun () ->
@@ -55,7 +49,7 @@ module ParStream =
         { new ParStream<'T> with
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
                 if not (source.Count = 0) then 
-                    let partitions = getPartitions(0, source.Count)
+                    let partitions = getPartitions source.Count
                     let nextRef = ref true
                     let createTask s e iter = 
                         Task.Factory.StartNew(fun () ->
