@@ -25,7 +25,7 @@ module CloudStream =
                             return! projection collector.Result
                         }
                     if not (source.Length = 0) then 
-                        let partitions = Partitions.ofLongRange workerCount 0L (int64 source.Length)
+                        let partitions = Partitions.ofLongRange workerCount (int64 source.Length)
                         let! results = partitions |> Array.map (fun (s, e) -> createTask [| for i in s..(e - 1L) do yield source.[int i] |] (collectorf ())) |> Cloud.Parallel
                         return Array.reduce combiner results
                     else
@@ -88,7 +88,7 @@ module CloudStream =
                     if source.Length = 0L then
                         return! projection (collectorf ()).Result;
                     else
-                        let partitions = Partitions.ofLongRange workerCount 0L source.Length
+                        let partitions = Partitions.ofLongRange workerCount source.Length
                         match source with
                         | :? CachedCloudArray<'T> as cached -> 
                             // round 1
@@ -143,7 +143,7 @@ module CloudStream =
             let taskId = Guid.NewGuid().ToString()
             let cached = new CachedCloudArray<'T>(source, taskId)
             if source.Length > 0L then
-                let partitions = Partitions.ofLongRange workerCount 0L source.Length
+                let partitions = Partitions.ofLongRange workerCount source.Length
                 do! partitions 
                     |> Array.map (fun (s, e) -> createTask s e cached) 
                     |> Cloud.Parallel
