@@ -16,17 +16,19 @@ type ParStream<'T> =
 
 module ParStream =
 
-    let internal  totalWorkers = int (2.0 ** float (int (Math.Log(float Environment.ProcessorCount, 2.0))))
+    let internal totalWorkers = Environment.ProcessorCount
 
-    let internal getPartitions (s : int, e : int) = 
-            let toSeq (enum : IEnumerator<_>)= 
-                seq {
-                    while enum.MoveNext() do
-                        yield enum.Current
-                }
-            let partitioner = Partitioner.Create(s, e)
-            let partitions = partitioner.GetPartitions(totalWorkers) |> Seq.collect toSeq |> Seq.toArray 
-            partitions
+    let internal getPartitions (s : int, e : int) =
+        if s > e then invalidArg "e" "Must be greater than s"
+        let n = totalWorkers
+        let step = (e - s) / n
+        let ranges = new ResizeArray<int * int>(n)
+        let mutable current = s
+        while current + step <= e do
+            ranges.Add(current, current + step)
+            current <- current + step + 1
+        if current <= e then ranges.Add(current,e)
+        ranges.ToArray()
 
     // generator functions
     let ofArray (source : 'T []) : ParStream<'T> =

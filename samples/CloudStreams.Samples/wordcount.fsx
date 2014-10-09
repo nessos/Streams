@@ -1,7 +1,7 @@
 ﻿
 #load "../../packages/MBrace.Runtime.0.5.7-alpha/bootstrap.fsx" 
-#r "bin/Debug/Streams.Core.dll"
-#r "bin/Debug/Streams.Cloud.dll"
+#r "../../bin/Streams.Core.dll"
+#r "../../bin/Streams.Cloud.dll"
 
 open System
 open System.IO

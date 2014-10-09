@@ -1,20 +1,23 @@
 ﻿namespace Nessos.Streams.Cloud
 
 module internal Partitions =
+    open System
     open System.Collections.Generic
     open System.Collections.Concurrent
 
-    let ofLongRange (totalWorkers : int) (s : int64) (e : int64) : (int64 * int64) []  = 
-        let toSeq (enum : IEnumerator<_>)= 
-            seq {
-                while enum.MoveNext() do
-                    yield enum.Current
-            }
-        let partitioner = Partitioner.Create(s, e)
-        let partitions = partitioner.GetPartitions(totalWorkers) 
-                         |> Seq.collect toSeq 
-                         |> Seq.toArray 
-        partitions
+    let ofLongRange (n : int) (s : int64) (e : int64) : (int64 * int64) []  = 
+        if n < 0 then invalidArg "n" "Must be greater than zero"
+        if s > e then invalidArg "e" "Must be greater than s"
+
+        let step = min ((e - s) / int64 n) (int64 Int32.MaxValue)
+
+        let ranges = new ResizeArray<int64 * int64>(n)
+        let mutable current = s
+        while current + step <= e do
+            ranges.Add(current, current + step)
+            current <- current + step + 1L
+        if current <= e then ranges.Add(current,e)
+        ranges.ToArray()
 
     let ofRange (totalWorkers : int) (s : int) (e : int) : (int * int) [] = 
         ofLongRange totalWorkers (int64 s) (int64 e)

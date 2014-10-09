@@ -76,6 +76,56 @@ let y = xs |> Array.collect id
 
 
 
+open System.Collections.Generic
+open System.Collections.Concurrent
+
+let ofLongRange (totalWorkers : int) (s : int64) (e : int64) : (int64 * int64) []  = 
+    let toSeq (enum : IEnumerator<_>)= 
+        seq {
+            while enum.MoveNext() do
+                yield enum.Current
+        }
+    let partitioner = Partitioner.Create(s, e)
+    let partitions = partitioner.GetPartitions(totalWorkers) 
+                        |> Seq.collect toSeq 
+                        |> Seq.toArray 
+    partitions
+
+
+ofLongRange 1 80L 1000000L |> Seq.length
+
+
+
+
+
+let partition (s : int) (e : int) (n : int) =
+    if n < 0 then invalidArg "n" "Must be greater than zero"
+    if s > e then invalidArg "e" "Must be greater than s"
+
+    let step = (e - s) / n
+    let ranges = new ResizeArray<int * int>(n)
+    let mutable current = s
+    while current + step <= e do
+        ranges.Add(current, current + step)
+        current <- current + step + 1
+    if current <= e then ranges.Add(current,e)
+    ranges.ToArray()
+
+
+#r @"C:\dev\github-repositories\Streams\packages\FsCheck.1.0.0\lib\net45\FsCheck.dll"
+
+open FsCheck
+open FsCheck.Fluent
+
+Spec.ForAny<int*int*int>(fun (s,e,n) ->
+        if s > e || n <= 0 then
+            true
+        else
+            let ps = partition s e n
+            ps.Length <= n 
+    ).QuickCheckThrowOnFailure()
+
+partition 0 0 2
 
 //cloud { let! n = Cloud.GetWorkerCount() in return! [|1..n|] |> Array.map (fun _ -> cloud { return CloudArrayCache.State }) |> Cloud.Parallel }
 //|> run
