@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>ParStream<'T> - Streams</title>
+    <title>Collector<'T, 'R> - Streams</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content=""/>
     <meta name="author" content="Nick Palladinos, Kostas Rontogiannis"/>
@@ -35,7 +35,7 @@
 
 
 
-<h1>ParStream<'T></h1>
+<h1>Collector<'T, 'R></h1>
 <div class="xmldoc">
 </div>
   <h3>Instance members</h3>
@@ -48,15 +48,34 @@
         <td class="member-name">
 
           <code onmouseout="hideTip(event, '49', 49)" onmouseover="showTip(event, '49', 49)">
-            Apply(arg1)
+            Iterator()
           </code>
           <div class="tip" id="49">
-            <strong>Signature:</strong> Collector&lt;&#39;T,&#39;R&gt; -&gt; unit<br />
+            <strong>Signature:</strong> unit -&gt; &#39;T -&gt; bool<br />
               <strong>Modifiers:</strong> abstract<br />
-                          <strong>Type parameters:</strong> 'R          </div>
+                      </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/ParStreams.fs#L15-15" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/ParStreams.fs#L12-12" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '50', 50)" onmouseover="showTip(event, '50', 50)">
+            Result
+          </code>
+          <div class="tip" id="50">
+            <strong>Signature:</strong> &#39;R<br />
+              <strong>Modifiers:</strong> abstract<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/ParStreams.fs#L13-13" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>

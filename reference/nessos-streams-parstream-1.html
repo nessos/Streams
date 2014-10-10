@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>Stream<'T> - Streams</title>
+    <title>ParStream<'T> - Streams</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content=""/>
     <meta name="author" content="Nick Palladinos, Kostas Rontogiannis"/>
@@ -35,27 +35,28 @@
 
 
 
-<h1>Stream<'T></h1>
+<h1>ParStream<'T></h1>
 <div class="xmldoc">
 </div>
-  <h3>Union Cases</h3>
+  <h3>Instance members</h3>
   <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Union Case</td><td>Description</td></tr>
+      <tr><td>Instance member</td><td>Description</td></tr>
     </thead>
     <tbody>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '48', 48)" onmouseover="showTip(event, '48', 48)">
-            Stream((&#39;T -&gt; bool) -&gt; unit)
+          <code onmouseout="hideTip(event, '51', 51)" onmouseover="showTip(event, '51', 51)">
+            Apply(arg1)
           </code>
-          <div class="tip" id="48">
-            <strong>Signature:</strong> (&#39;T -&gt; bool) -&gt; unit<br />
-                      </div>
+          <div class="tip" id="51">
+            <strong>Signature:</strong> Collector&lt;&#39;T,&#39;R&gt; -&gt; unit<br />
+              <strong>Modifiers:</strong> abstract<br />
+                          <strong>Type parameters:</strong> 'R          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/Streams.fsi#L4-4" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/ParStreams.fs#L16-16" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
