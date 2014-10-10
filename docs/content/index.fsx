@@ -3,7 +3,8 @@
 // it to define helpers that you do not want to show in the documentation.
 #I "../../bin/"
 
-#r "Nessos.Steams.Core.dll"
+#r "Streams.Core.dll"
+#r "../../packages/FSharp.Collections.ParallelSeq.1.0/lib/net40/FSharp.Collections.ParallelSeq.dll"
 
 (**
 
@@ -25,9 +26,7 @@ A lightweight F#/C# library for efficient functional-style pipelines on streams 
 
 The main design behind Streams is inspired by Java 8 Streams and is based on the observation that many functional pipelines follow the pattern:
 
-    ```
     source/generator |> lazy |> lazy |> lazy |> eager/reduce
-    ```
 
 * Source/generator are functions that create Streams like Stream.ofArray/Stream.init.
 * Lazy functions take in streams and return streams like Stream.map/Stream.filter, these operations are fused together for efficient iteration.
@@ -64,7 +63,6 @@ data
 |> Array.sum
 
 // Parallel
-#r "../../packages/FSharp.Collections.ParallelSeq.1.0/lib/net40/FSharp.Collections.ParallelSeq.dll"
 open FSharp.Collections.ParallelSeq
 
 // Real: 00:00:00.017, CPU: 00:00:00.078, GC gen0: 0, gen1: 0, gen2: 0
