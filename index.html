@@ -35,11 +35,35 @@
           
 <h1><a name="Streams" class="anchor" href="#Streams">Streams</a></h1>
 
-<p>A lightweight F#/C# library for efficient functional-style pipelines on streams of data. The main design behind Streams
-is inspired by Java 8 Streams and is based on the observation that many functional pipelines follow the pattern:</p>
+<p>A lightweight F#/C# library for efficient functional-style pipelines on streams of data.</p>
 
-<p><code>`fsharp 
-source/generator |&gt; lazy |&gt; lazy |&gt; lazy |&gt; eager/reduce</code>`</p>
+<div class="row">
+  <div class="span1"></div>
+  <div class="span6">
+    <div class="well well-small" id="nuget">
+      Install via <a href="https://nuget.org/packages/Streams">NuGet</a>:
+      <pre>PM> Install-Package Streams</pre>
+      <pre>PM> Install-Package Streams.CSharp</pre>
+    </div>
+  </div>
+  <div class="span1"></div>
+</div>
+
+<p>The main design behind Streams is inspired by Java 8 Streams and is based on the observation that many functional pipelines follow the pattern:</p>
+
+<table class="pre"><tr><td class="lines"><pre class="fssnip">
+<span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+</pre>
+</td>
+<td class="snippet"><pre class="fssnip">
+<span class="k">`</span><span class="k">`</span><span class="k">`</span>
+<span class="i">source</span><span class="o">/</span><span class="i">generator</span> <span class="o">|&gt;</span> <span class="k">lazy</span> <span class="o">|&gt;</span> <span class="k">lazy</span> <span class="o">|&gt;</span> <span class="k">lazy</span> <span class="o">|&gt;</span> <span class="i">eager</span><span class="o">/</span><span class="i">reduce</span>
+<span class="k">`</span><span class="k">`</span><span class="k">`</span></pre>
+</td>
+</tr>
+</table>
 
 <ul>
 <li>Source/generator are functions that create Streams like Stream.ofArray/Stream.init.</li>
@@ -140,18 +164,6 @@ source/generator |&gt; lazy |&gt; lazy |&gt; lazy |&gt; eager/reduce</code>`</p>
 </td>
 </tr>
 </table>
-
-<div class="row">
-  <div class="span1"></div>
-  <div class="span6">
-    <div class="well well-small" id="nuget">
-      Install via <a href="https://nuget.org/packages/Streams">NuGet</a>:
-      <pre>PM> Install-Package Streams</pre>
-      <pre>PM> Install-Package Streams.CSharp</pre>
-    </div>
-  </div>
-  <div class="span1"></div>
-</div>
 
 <h2><a name="References" class="anchor" href="#References">References</a></h2>
 
