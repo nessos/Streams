@@ -71,11 +71,6 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Streams.Core\Streams.Core.fsproj">
-      <Name>Streams.Core</Name>
-      <Project>{f3482666-f39c-4f49-8d0b-3583328d2c42}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>

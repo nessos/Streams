@@ -85,8 +85,8 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Streams.Core\Streams.Core.fsproj">
-      <Name>Streams.Core</Name>
+    <ProjectReference Include="..\..\src\Streams\Streams.fsproj">
+      <Name>Streams</Name>
       <Project>{f3482666-f39c-4f49-8d0b-3583328d2c42}</Project>
       <Private>True</Private>
     </ProjectReference>

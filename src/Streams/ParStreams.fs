@@ -9,7 +9,7 @@ open Nessos.Streams.Internals
 
 /// Collects elements into a mutable result container.
 type Collector<'T, 'R> = 
-    /// Gets an iterator for the elements.
+    /// Gets an iterator over the elements.
     abstract Iterator : unit -> ('T -> bool)
     /// The result of the collector.
     abstract Result : 'R

@@ -76,12 +76,14 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\Streams.Core\Streams.Core.fsproj">
-      <Name>Streams.Core</Name>
+    <Reference Include="System.Runtime.Caching" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Streams\Streams.fsproj">
+      <Name>Streams</Name>
       <Project>{f3482666-f39c-4f49-8d0b-3583328d2c42}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="System.Runtime.Caching" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
