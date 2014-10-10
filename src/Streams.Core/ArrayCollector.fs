@@ -1,12 +1,11 @@
 ﻿namespace Nessos.Streams.Core
     
     open System
-    open System.Collections
     open System.Linq
     open System.Collections.Generic
-    open System.Collections.Concurrent
 
-    // ArrayCollector is a helper type for efficient array insertions and concatenations
+    /// [omit]
+    /// Helper type for efficient array insertions and concatenations.
     type ArrayCollector<'T> () =
 
         let ls = List<'T [] * int>()

@@ -3,11 +3,11 @@ open System
 open System.Threading.Tasks
 open System.Threading
 
-type MergeArrayType = FromArrayType | ToArrayType 
+type private MergeArrayType = FromArrayType | ToArrayType 
 
+/// [omit]
+/// Helpers for parallel sorting.
 module Sort = 
-
-
     let parallelSort<'Key, 'Value when 'Key :> IComparable<'Key>>
         (keys : 'Key[]) (array : 'Value[]) = 
             // Taken from Carl Nolan's parallel inplace merge
