@@ -69,9 +69,9 @@ Target "AssemblyInfo" (fun _ ->
             Attribute.FileVersion version
         ]
 
-    CreateFSharpAssemblyInfo "src/Streams.Core/AssemblyInfo.fs" <| attributes Streams.release.AssemblyVersion
-    CreateCSharpAssemblyInfo "src/Streams.Core.CSharp/Properties/AssemblyInfo.cs" <| attributes Streams.release.AssemblyVersion
-    CreateFSharpAssemblyInfo "src/Streams.Core/AssemblyInfo.fs" <| attributes CloudStreams.release.AssemblyVersion
+    CreateFSharpAssemblyInfo "src/Streams/AssemblyInfo.fs" <| attributes Streams.release.AssemblyVersion
+    CreateCSharpAssemblyInfo "src/Streams.CSharp/Properties/AssemblyInfo.cs" <| attributes Streams.release.AssemblyVersion
+    CreateFSharpAssemblyInfo "src/Streams/AssemblyInfo.fs" <| attributes CloudStreams.release.AssemblyVersion
 )
 
 
