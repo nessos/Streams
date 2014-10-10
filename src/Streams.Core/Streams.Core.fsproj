@@ -55,7 +55,6 @@
     <Compile Include="Sort.fs" />
     <Compile Include="Streams.fs" />
     <Compile Include="ParStreams.fs" />
-    <None Include="Script.fsx" />
     <Compile Include="CSharpProxy.fs" />
   </ItemGroup>
   <ItemGroup>

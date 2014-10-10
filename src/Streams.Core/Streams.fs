@@ -2,6 +2,7 @@
 open System
 open System.Collections.Generic
 
+/// Represents a Stream of values.
 type Stream<'T> = Stream of (('T -> bool) -> unit)
 
 /// Provides basic operations on Streams.

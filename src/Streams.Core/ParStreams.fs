@@ -7,12 +7,16 @@ open System.Threading
 open System.Threading.Tasks
 open Nessos.Streams.Internals
 
-
+/// Collects elements into a mutable result container.
 type Collector<'T, 'R> = 
+    /// Gets an iterator for the elements.
     abstract Iterator : unit -> ('T -> bool)
+    /// The result of the collector.
     abstract Result : 'R
 
-type ParStream<'T> = 
+/// Represents a parallel Stream of values.
+type ParStream<'T> =
+    /// Applies the given collector to the parallel Stream.
     abstract Apply<'R> : Collector<'T, 'R> -> unit
 
 /// Provides basic operations on Parallel Streams.
