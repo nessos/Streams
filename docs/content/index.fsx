@@ -9,12 +9,25 @@
 
 # Streams
 
-A lightweight F#/C# library for efficient functional-style pipelines on streams of data. The main design behind Streams
-is inspired by Java 8 Streams and is based on the observation that many functional pipelines follow the pattern:
+A lightweight F#/C# library for efficient functional-style pipelines on streams of data. 
 
-```fsharp 
-source/generator |> lazy |> lazy |> lazy |> eager/reduce
-```
+<div class="row">
+  <div class="span1"></div>
+  <div class="span6">
+    <div class="well well-small" id="nuget">
+      Install via <a href="https://nuget.org/packages/Streams">NuGet</a>:
+      <pre>PM> Install-Package Streams</pre>
+      <pre>PM> Install-Package Streams.CSharp</pre>
+    </div>
+  </div>
+  <div class="span1"></div>
+</div>
+
+The main design behind Streams is inspired by Java 8 Streams and is based on the observation that many functional pipelines follow the pattern:
+
+    ```
+    source/generator |> lazy |> lazy |> lazy |> eager/reduce
+    ```
 
 * Source/generator are functions that create Streams like Stream.ofArray/Stream.init.
 * Lazy functions take in streams and return streams like Stream.map/Stream.filter, these operations are fused together for efficient iteration.
@@ -24,6 +37,7 @@ The main difference between LINQ/Seq and Streams is that LINQ is about composing
 
 For simple pipelines we have observed performance improvements of a factor of four and for more complex pipelines the performance gains are even greater.
 *)
+
 open Nessos.Streams.Core
 
 let data = [|1..10000000|] |> Array.map int64
@@ -67,18 +81,6 @@ data
 |> PSeq.sum
 
 (**
-<div class="row">
-  <div class="span1"></div>
-  <div class="span6">
-    <div class="well well-small" id="nuget">
-      Install via <a href="https://nuget.org/packages/Streams">NuGet</a>:
-      <pre>PM> Install-Package Streams</pre>
-      <pre>PM> Install-Package Streams.CSharp</pre>
-    </div>
-  </div>
-  <div class="span1"></div>
-</div>
-
 ## References
 
 * [Clash of the Lambdas](http://arxiv.org/abs/1406.6631)

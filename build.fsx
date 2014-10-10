@@ -207,7 +207,7 @@ Target "Help" (fun _ -> PrintTargets() )
   ==> "AssemblyInfo"
   ==> "Prepare"
   ==> "Build"
-  //==> "RunTests"
+  ==> "RunTests"
   ==> "All"
 
 "All"
