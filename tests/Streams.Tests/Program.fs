@@ -1,6 +1,6 @@
 ﻿namespace Nessos.Streams.Tests
 open System
-open Nessos.Streams.Core
+open Nessos.Streams
 
 module Program = 
 

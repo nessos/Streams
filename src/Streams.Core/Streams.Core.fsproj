@@ -8,7 +8,7 @@
     <ProjectGuid>f3482666-f39c-4f49-8d0b-3583328d2c42</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Streams</RootNamespace>
-    <AssemblyName>Streams.Core</AssemblyName>
+    <AssemblyName>Streams</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>Streams</Name>
     <TargetFrameworkProfile />
@@ -53,9 +53,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ArrayCollector.fs" />
     <Compile Include="Sort.fs" />
-    <Compile Include="Streams.fsi" />
     <Compile Include="Streams.fs" />
-    <Compile Include="ParStreams.fsi" />
     <Compile Include="ParStreams.fs" />
     <None Include="Script.fsx" />
     <Compile Include="CSharpProxy.fs" />

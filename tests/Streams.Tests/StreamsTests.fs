@@ -4,7 +4,7 @@
     open FsCheck
     open FsCheck.Fluent
     open NUnit.Framework
-    open Nessos.Streams.Core
+    open Nessos.Streams
 
     [<TestFixture>]
     type ``Streams tests`` () =

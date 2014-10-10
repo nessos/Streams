@@ -5,7 +5,7 @@
     open System.Linq
     open FsCheck.Fluent
     open NUnit.Framework
-    open Nessos.Streams.Core
+    open Nessos.Streams
     open Nessos.Streams.Cloud
     open Nessos.MBrace
     open Nessos.MBrace.Client

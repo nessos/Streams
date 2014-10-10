@@ -1,7 +1,8 @@
-﻿namespace Nessos.Streams.Core
+﻿namespace Nessos.Streams.Internals
 open System
 open System.Collections
 open System.Collections.Generic
+open Nessos.Streams
 
 /// [omit]
 /// Proxy for FSharp type specialization and lambda inlining.

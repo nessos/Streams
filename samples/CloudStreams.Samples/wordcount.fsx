@@ -1,6 +1,6 @@
 ﻿
 #load "../../packages/MBrace.Runtime.0.5.7-alpha/bootstrap.fsx" 
-#r "../../bin/Streams.Core.dll"
+#r "../../bin/Streams.dll"
 #r "../../bin/Streams.Cloud.dll"
 
 open System
@@ -8,7 +8,7 @@ open System.IO
 open System.Text.RegularExpressions
 open Nessos.MBrace
 open Nessos.MBrace.Client
-open Nessos.Streams.Core
+open Nessos.Streams
 open Nessos.Streams.Cloud
 
 let path = "path to your files"

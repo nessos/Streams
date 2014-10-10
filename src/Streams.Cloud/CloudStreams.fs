@@ -3,7 +3,8 @@ open System
 open System.Collections.Generic
 open System.Linq
 open Nessos.MBrace
-open Nessos.Streams.Core
+open Nessos.Streams
+open Nessos.Streams.Internals
 
 
 type CloudStream<'T> = 

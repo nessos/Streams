@@ -16,11 +16,11 @@
       <tags>@tags@</tags>
 		@dependencies@
 		<references>
-			<reference file="Streams.Core.dll" />
+			<reference file="Streams.dll" />
 		</references>
     </metadata>
     <files>
-        <file src="..\bin\Streams.Core.dll" target="lib\Streams.Core.dll" />
-        <file src="..\bin\Streams.Core.XML" target="lib\Streams.Core.XML" />
+        <file src="..\bin\Streams.dll" target="lib\Streams.dll" />
+        <file src="..\bin\Streams.XML" target="lib\Streams.XML" />
     </files>
 </package>

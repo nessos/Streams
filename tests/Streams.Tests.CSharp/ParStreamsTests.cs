@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FsCheck.Fluent;
 using NUnit.Framework;
-using Nessos.Streams.Core.CSharp;
+using Nessos.Streams.CSharp;
 
 namespace Nessos.Streams.Tests.CSharp
 {

@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Nessos.Streams.Core;
+using Nessos.Streams;
+using Nessos.Streams.Internals;
 
-namespace Nessos.Streams.Core.CSharp
+namespace Nessos.Streams.CSharp
 {
     /// <summary>
     /// Parallel Stream operations

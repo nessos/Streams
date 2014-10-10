@@ -3,7 +3,7 @@
 // it to define helpers that you do not want to show in the documentation.
 #I "../../bin/"
 
-#r "Streams.Core.dll"
+#r "Streams.dll"
 #r "../../packages/FSharp.Collections.ParallelSeq.1.0/lib/net40/FSharp.Collections.ParallelSeq.dll"
 
 (**
@@ -37,7 +37,7 @@ The main difference between LINQ/Seq and Streams is that LINQ is about composing
 For simple pipelines we have observed performance improvements of a factor of four and for more complex pipelines the performance gains are even greater.
 *)
 
-open Nessos.Streams.Core
+open Nessos.Streams
 
 let data = [|1..10000000|] |> Array.map int64
 

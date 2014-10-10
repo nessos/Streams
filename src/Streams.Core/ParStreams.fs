@@ -1,10 +1,11 @@
-﻿namespace Nessos.Streams.Core
+﻿namespace Nessos.Streams
 open System
 open System.Collections.Generic
 open System.Linq
 open System.Collections.Concurrent
 open System.Threading
 open System.Threading.Tasks
+open Nessos.Streams.Internals
 
 
 type Collector<'T, 'R> = 
@@ -14,6 +15,8 @@ type Collector<'T, 'R> =
 type ParStream<'T> = 
     abstract Apply<'R> : Collector<'T, 'R> -> unit
 
+/// Provides basic operations on Parallel Streams.
+[<RequireQualifiedAccessAttribute>]
 module ParStream =
 
     let private totalWorkers = Environment.ProcessorCount
@@ -25,6 +28,10 @@ module ParStream =
         |]
 
     // generator functions
+
+    /// <summary>Wraps array as a parallel stream.</summary>
+    /// <param name="source">The input array.</param>
+    /// <returns>The result parallel stream.</returns>
     let ofArray (source : 'T []) : ParStream<'T> =
         { new ParStream<'T> with
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
@@ -45,6 +52,9 @@ module ParStream =
 
                     Task.WaitAll(tasks) }
 
+    /// <summary>Wraps ResizeArray as a parallel stream.</summary>
+    /// <param name="source">The input array.</param>
+    /// <returns>The result parallel stream.</returns>
     let ofResizeArray (source : ResizeArray<'T>) : ParStream<'T> =
         { new ParStream<'T> with
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
@@ -65,6 +75,9 @@ module ParStream =
 
                     Task.WaitAll(tasks) }
 
+    /// <summary>Wraps seq as a parallel stream.</summary>
+    /// <param name="source">The input seq.</param>
+    /// <returns>The result parallel stream.</returns>
     let ofSeq (source : seq<'T>) : ParStream<'T> =
         { new ParStream<'T> with
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
@@ -86,6 +99,11 @@ module ParStream =
 
 
     // intermediate functions
+
+    /// <summary>Transforms each element of the input parallel stream.</summary>
+    /// <param name="f">A function to transform items from the input parallel stream.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result parallel stream.</returns>
     let inline map (f : 'T -> 'R) (stream : ParStream<'T>) : ParStream<'R> =
         { new ParStream<'R> with
             member self.Apply<'S> (collector : Collector<'R, 'S>) =
@@ -97,6 +115,10 @@ module ParStream =
                         member self.Result = collector.Result  }
                 stream.Apply collector }
 
+    /// <summary>Transforms each element of the input parallel stream to a new stream and flattens its elements.</summary>
+    /// <param name="f">A function to transform items from the input parallel stream.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result parallel stream.</returns>
     let inline flatMap (f : 'T -> Stream<'R>) (stream : ParStream<'T>) : ParStream<'R> =
         { new ParStream<'R> with
             member self.Apply<'S> (collector : Collector<'R, 'S>) =
@@ -110,9 +132,17 @@ module ParStream =
                         member self.Result = collector.Result  }
                 stream.Apply collector }
 
+    /// <summary>Transforms each element of the input parallel stream to a new stream and flattens its elements.</summary>
+    /// <param name="f">A function to transform items from the input parallel stream.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result parallel stream.</returns>
     let inline collect (f : 'T -> Stream<'R>) (stream : ParStream<'T>) : ParStream<'R> =
         flatMap f stream
 
+    /// <summary>Filters the elements of the input parallel stream.</summary>
+    /// <param name="predicate">A function to test each source element for a condition.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result parallel stream.</returns>
     let inline filter (predicate : 'T -> bool) (stream : ParStream<'T>) : ParStream<'T> =
         { new ParStream<'T> with
             member self.Apply<'S> (collector : Collector<'T, 'S>) =
@@ -124,6 +154,10 @@ module ParStream =
                         member self.Result = collector.Result }
                 stream.Apply collector }
 
+    /// <summary>Applies the given function to each element of the parallel stream and returns the parallel stream comprised of the results for each element where the function returns Some with some value.</summary>
+    /// <param name="chooser">A function to transform items of type 'T into options of type 'R.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result parallel stream.</returns>
     let inline choose (chooser : 'T -> 'R option) (stream : ParStream<'T>) : ParStream<'R> =
         { new ParStream<'R> with
             member self.Apply<'S> (collector : Collector<'R, 'S>) =
@@ -136,6 +170,10 @@ module ParStream =
                 stream.Apply collector }
 
     // terminal functions
+
+    /// <summary>Applies the given function to each element of the parallel stream.</summary>
+    /// <param name="f">A function to apply to each element of the parallel stream.</param>
+    /// <param name="stream">The input parallel stream.</param>    
     let inline iter (f : 'T -> unit) (stream : ParStream<'T>) : unit = 
         let collector = 
             { new Collector<'T, 'State> with
@@ -145,6 +183,12 @@ module ParStream =
                     raise <| System.InvalidOperationException()  }
         stream.Apply collector
 
+    /// <summary>Applies a function to each element of the parallel stream, threading an accumulator argument through the computation. If the input function is f and the elements are i0...iN, then this function computes f (... (f s i0)...) iN.</summary>
+    /// <param name="folder">A function that updates the state with each element from the parallel stream.</param>
+    /// <param name="combiner">A function that combines partial states into a new state.</param>
+    /// <param name="state">A function that produces the initial state.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The final result.</returns>
     let inline fold (folder : 'State -> 'T -> 'State) (combiner : 'State -> 'State -> 'State) 
                     (state : unit -> 'State) (stream : ParStream<'T>) : 'State =
 
@@ -163,14 +207,23 @@ module ParStream =
         stream.Apply collector
         collector.Result
 
+    /// <summary>Returns the sum of the elements.</summary>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The sum of the elements.</returns>
     let inline sum (stream : ParStream< ^T >) : ^T 
             when ^T : (static member ( + ) : ^T * ^T -> ^T) 
             and  ^T : (static member Zero : ^T) = 
         fold (+) (+) (fun () -> LanguagePrimitives.GenericZero) stream
 
+    /// <summary>Returns the total number of elements of the parallel stream.</summary>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The total number of elements.</returns>
     let inline length (stream : ParStream<'T>) : int =
         fold (fun acc _  -> 1 + acc) (+) (fun () -> 0) stream
 
+    /// <summary>Creates an array from the given parallel stream.</summary>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result array.</returns>    
     let inline toArray (stream : ParStream<'T>) : 'T[] =
         let arrayCollector = 
             fold (fun (acc : ArrayCollector<'T>) value -> acc.Add(value); acc)
@@ -178,10 +231,16 @@ module ParStream =
                 (fun () -> new ArrayCollector<'T>()) stream 
         arrayCollector.ToArray()
 
+    /// <summary>Creates an ResizeArray from the given parallel stream.</summary>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result ResizeArray.</returns>    
     let inline toResizeArray (stream : ParStream<'T>) : ResizeArray<'T> =
         new ResizeArray<'T>(toArray stream)
 
-
+    /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream ordered by keys.</summary>
+    /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result parallel stream.</returns>    
     let inline sortBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'T>  =
         // explicit use of Tuple<ArrayCollector<'Key>, ArrayCollector<'T>> to avoid temp heap allocations of (ArrayCollector<'Key> * ArrayCollector<'T>) 
         let keyValueTuple = 
@@ -203,6 +262,10 @@ module ParStream =
         Sort.parallelSort keyArray' valueArray'
         valueArray' |> ofArray
 
+    /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream of unique keys and a sequence of all elements that have each key.</summary>
+    /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>A parallel stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
     let inline groupBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * seq<'T>> =
         let dict = new ConcurrentDictionary<'Key, Tuple<int ref, 'T [] ref>>()
         
@@ -259,7 +322,10 @@ module ParStream =
                                     let values = keyValue.Value.Item2.Value |> Seq.take length 
                                     (keyValue.Key, values))
 
-
+    /// <summary>Returns the first element for which the given function returns true. Returns None if no such element exists.</summary>
+    /// <param name="predicate">A function to test each source element for a condition.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The first element for which the predicate returns true, or None if every element evaluates to false.</returns>
     let inline tryFind (predicate : 'T -> bool) (stream : ParStream<'T>) : 'T option = 
         let resultRef = ref Unchecked.defaultof<'T option>
         let collector = 
@@ -271,11 +337,20 @@ module ParStream =
         stream.Apply collector
         collector.Result
 
+    /// <summary>Returns the first element for which the given function returns true. Raises KeyNotFoundException if no such element exists.</summary>
+    /// <param name="predicate">A function to test each source element for a condition.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The first element for which the predicate returns true.</returns>
+    /// <exception cref="System.KeyNotFoundException">Thrown if the predicate evaluates to false for all the elements of the parallel stream.</exception>
     let inline find (predicate : 'T -> bool) (stream : ParStream<'T>) : 'T = 
         match tryFind predicate stream with
         | Some value -> value
         | None -> raise <| new KeyNotFoundException()
 
+    /// <summary>Applies the given function to successive elements, returning the first result where the function returns a Some value.</summary>
+    /// <param name="chooser">A function that transforms items into options.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The first element for which the chooser returns Some, or None if every element evaluates to None.</returns>
     let inline tryPick (chooser : 'T -> 'R option) (stream : ParStream<'T>) : 'R option = 
         let resultRef = ref Unchecked.defaultof<'R option>
         let collector = 
@@ -287,16 +362,31 @@ module ParStream =
         stream.Apply collector
         collector.Result
 
+    /// <summary>Applies the given function to successive elements, returning the first result where the function returns a Some value.
+    /// Raises KeyNotFoundException when every item of the parallel stream evaluates to None when the given function is applied.</summary>
+    /// <param name="chooser">A function that transforms items into options.</param>
+    /// <param name="stream">The input paralle stream.</param>
+    /// <returns>The first element for which the chooser returns Some, or raises KeyNotFoundException if every element evaluates to None.</returns>
+    /// <exception cref="System.KeyNotFoundException">Thrown if every item of the parallel stream evaluates to None when the given function is applied.</exception>
     let inline pick (chooser : 'T -> 'R option) (stream : ParStream<'T>) : 'R = 
         match tryPick chooser stream with
         | Some value -> value
         | None -> raise <| new KeyNotFoundException()
 
+    /// <summary>Tests if any element of the stream satisfies the given predicate.</summary>
+    /// <param name="predicate">A function to test each source element for a condition.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>true if any element satisfies the predicate. Otherwise, returns false.</returns>
     let inline exists (predicate : 'T -> bool) (stream : ParStream<'T>) : bool = 
         match tryFind predicate stream with
         | Some value -> true
         | None -> false
 
+
+    /// <summary>Tests if all elements of the parallel stream satisfy the given predicate.</summary>
+    /// <param name="predicate">A function to test each source element for a condition.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>true if all of the elements satisfies the predicate. Otherwise, returns false.</returns>
     let inline forall (predicate : 'T -> bool) (stream : ParStream<'T>) : bool = 
         not <| exists (fun x -> not <| predicate x) stream
 

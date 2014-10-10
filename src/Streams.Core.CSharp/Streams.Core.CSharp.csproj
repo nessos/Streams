@@ -7,8 +7,8 @@
     <ProjectGuid>{E6852495-8012-4694-BC0F-A5376CD84B1F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Nessos.Streams.Core.CSharp</RootNamespace>
-    <AssemblyName>Streams.Core.CSharp</AssemblyName>
+    <RootNamespace>Nessos.Streams.CSharp</RootNamespace>
+    <AssemblyName>Streams.CSharp</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

@@ -2,7 +2,7 @@
 
 
 open System
-open Nessos.Streams.Core
+open Nessos.Streams
 open Nessos.Streams.Cloud
 open Nessos.MBrace
 open Nessos.MBrace.Store

@@ -5,7 +5,7 @@
     open FsCheck.Fluent
     open NUnit.Framework
     open FSharp.Collections.ParallelSeq
-    open Nessos.Streams.Core
+    open Nessos.Streams
 
     [<TestFixture>]
     type ``ParStreams tests`` () =

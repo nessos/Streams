@@ -1,4 +1,4 @@
-﻿namespace Nessos.Streams.Core
+﻿namespace Nessos.Streams.Internals
 open System
 open System.Threading.Tasks
 open System.Threading
