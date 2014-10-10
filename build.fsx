@@ -17,7 +17,7 @@ open Fake.AssemblyInfoFile
 // --------------------------------------------------------------------------------------
 
 let project = "Streams"
-let authors = ["Nessos Information Technologies, Nick Palladinos"]
+let authors = ["Nessos Information Technologies, Nick Palladinos, Kostas Rontogiannis"]
 let summary = "A lightweight F#/C# library for efficient functional-style pipelines on streams of data."
 
 let description = """
@@ -175,6 +175,22 @@ Target "NuGet" (fun _ ->
         ("nuget/Streams.Cloud.nuspec")
 )
 
+Target "GenerateDocs" (fun _ ->
+    executeFSIWithArgs "docs/tools" "generate.fsx" ["--define:RELEASE"] [] |> ignore
+)
+
+Target "ReleaseDocs" (fun _ ->
+    let tempDocsDir = "temp/gh-pages"
+    CleanDir tempDocsDir
+    Repository.cloneSingleBranch "" (gitHome + "/" + gitName + ".git") "gh-pages" tempDocsDir
+
+    fullclean tempDocsDir
+    CopyRecursive "docs/output" tempDocsDir true |> tracefn "%A"
+    StageAll tempDocsDir
+    Commit tempDocsDir (sprintf "Update generated documentation for Streams %s, CloudStream %s" Streams.release.NugetVersion CloudStreams.release.NugetVersion)
+    Branches.push tempDocsDir
+)
+
 
 Target "Release" DoNothing
 
@@ -184,18 +200,21 @@ Target "Release" DoNothing
 Target "Prepare" DoNothing
 Target "PrepareRelease" DoNothing
 Target "All" DoNothing
+Target "Help" (fun _ -> PrintTargets() )
 
 "Clean"
   ==> "RestorePackages"
   ==> "AssemblyInfo"
   ==> "Prepare"
   ==> "Build"
-  ==> "RunTests"
+  //==> "RunTests"
   ==> "All"
 
 "All"
   ==> "PrepareRelease" 
   ==> "NuGet"
+  ==> "GenerateDocs"
+  ==> "ReleaseDocs"
   ==> "Release"
 
 RunTargetOrDefault "Release"
