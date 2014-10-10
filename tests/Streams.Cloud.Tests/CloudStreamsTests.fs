@@ -169,7 +169,8 @@
                 | None -> ()
             
                 let ver = typeof<MBrace>.Assembly.GetName().Version.ToString(3)
-                MBraceSettings.MBracedExecutablePath <- Path.Combine(Directory.GetCurrentDirectory(), "../packages/MBrace.Runtime." + ver + "-alpha/tools/mbraced.exe")
+                MBraceSettings.MBracedExecutablePath <- Path.Combine(__SOURCE_DIRECTORY__, "../../packages/MBrace.Runtime." + ver + "-alpha/tools/mbraced.exe")
+                MBraceSettings.DefaultTimeout <- 30 * 1000
                 let runtime = MBraceRuntime.InitLocal(4, debug = true)
                 currentRuntime := Some runtime)
 
