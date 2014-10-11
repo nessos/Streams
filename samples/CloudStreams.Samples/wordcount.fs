@@ -1,7 +1,11 @@
 ﻿
+#if INTERACTIVE
 #load "../../packages/MBrace.Runtime.0.5.7-alpha/bootstrap.fsx" 
 #r "../../bin/Streams.dll"
 #r "../../bin/Streams.Cloud.dll"
+#else 
+module Nessos.Streams.Cloud.Samples.WordCount
+#endif
 
 open System
 open System.IO
@@ -10,9 +14,6 @@ open Nessos.MBrace
 open Nessos.MBrace.Client
 open Nessos.Streams
 open Nessos.Streams.Cloud
-
-let path = "path to your files"
-let files = Directory.GetFiles(path)
 
 /// words ignored by wordcount
 let noiseWords = 
@@ -31,14 +32,29 @@ let noiseWords =
         "shall"
     ]
 
+// Splits a string into words
 let splitWords =
     let regex = new Regex(@"[\W]+", RegexOptions.Compiled)
-    fun word -> regex.Split(word)
+    fun text -> regex.Split(text)
 
+let wordTransform (word : string) = word.Trim().ToLower()
+
+let wordFilter (word : string) = word.Length > 3 && not <| noiseWords.Contains(word)
+
+let files = Directory.GetFiles "path to your files"
+
+let runtime = MBrace.InitLocal(totalNodes = 4)
+let storeClient = runtime.GetStoreClient()
+
+
+
+//
+// Option 1 : CloudArrays API
+//
 
 let lines = 
     files
-    |> Array.map (fun f -> StoreClient.Default.CreateCloudArrayAsync("tmp", File.ReadLines(f)))
+    |> Array.map (fun f -> storeClient.CreateCloudArrayAsync("tmp", File.ReadLines(f)))
     |> Async.Parallel
     |> Async.RunSynchronously
     |> Array.reduce (fun l r -> l.Append(r))
@@ -47,18 +63,35 @@ let lines =
 let getTop count =
     lines
     |> CloudStream.ofCloudArray
-    |> CloudStream.collect (fun line -> 
-        splitWords line
-        |> Stream.ofArray
-        |> Stream.map (fun word -> word.ToLower())
-        |> Stream.map (fun word -> word.Trim()))
-    |> CloudStream.filter (fun word -> word.Length > 3 && not <| noiseWords.Contains(word))
+    |> CloudStream.collect (fun line -> splitWords line |> Stream.ofArray |> Stream.map wordTransform)
+    |> CloudStream.filter wordFilter
     |> CloudStream.countBy id
     |> CloudStream.sortBy (fun (_,c) -> -c) count
     |> CloudStream.toCloudArray
 
-let runtime = MBrace.InitLocal(totalNodes = 4)
+             
+let proc1 = runtime.CreateProcess <@ getTop 20 @>
 
-let proc = runtime.CreateProcess <@ getTop 20 @>
+proc1.AwaitResult() |> Seq.iter (printfn "%A")
 
-proc.AwaitResult() |> Seq.iter (printfn "%A")
+
+//
+// Option 2 : CloudFiles API
+//
+
+let cfiles = storeClient.UploadFiles(files)
+
+[<Cloud>]
+let getTop' count =
+    cfiles
+    |> CloudStream.ofCloudFiles CloudFile.ReadLines
+    |> CloudStream.collect Stream.ofArray 
+    |> CloudStream.collect (fun line -> splitWords line |> Stream.ofArray |> Stream.map wordTransform)
+    |> CloudStream.filter wordFilter
+    |> CloudStream.countBy id
+    |> CloudStream.sortBy (fun (_,c) -> -c) count
+    |> CloudStream.toCloudArray
+
+let proc2 = runtime.CreateProcess <@ getTop' 20 @>
+
+proc2.AwaitResult() |> Seq.iter (printfn "%A")
