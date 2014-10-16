@@ -4,10 +4,10 @@ using System.Reflection;
 [assembly: AssemblyTitleAttribute("Streams")]
 [assembly: AssemblyProductAttribute("Streams")]
 [assembly: AssemblyCompanyAttribute("Nessos Information Technologies")]
-[assembly: AssemblyVersionAttribute("0.2.0")]
-[assembly: AssemblyFileVersionAttribute("0.2.0")]
+[assembly: AssemblyVersionAttribute("0.2.1")]
+[assembly: AssemblyFileVersionAttribute("0.2.1")]
 namespace System {
     internal static class AssemblyVersionInformation {
-        internal const string Version = "0.2.0";
+        internal const string Version = "0.2.1";
     }
 }

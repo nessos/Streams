@@ -166,7 +166,7 @@ Target "NuGet" (fun _ ->
             OutputPath = "nuget"
             Dependencies = 
                 [
-                    "Streams",      RequireExactly "0.2.0"
+                    "Streams",      RequireExactly "0.2.1"
                     "MBrace.Core",  RequireExactly "0.5.8-alpha"
                 ]
             ToolPath = nugetPath
