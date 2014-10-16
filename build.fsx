@@ -167,7 +167,7 @@ Target "NuGet" (fun _ ->
             Dependencies = 
                 [
                     "Streams",      RequireExactly "0.2.0"
-                    "MBrace.Core",  RequireExactly "0.5.7-alpha"
+                    "MBrace.Core",  RequireExactly "0.5.8-alpha"
                 ]
             ToolPath = nugetPath
             AccessKey = getBuildParamOrDefault "nugetkey" ""

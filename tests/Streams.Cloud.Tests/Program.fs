@@ -19,7 +19,7 @@ module Program =
     
 
     // set local MBrace executable location
-    MBraceSettings.MBracedExecutablePath <- "../../../../packages/MBrace.Runtime.0.5.7-alpha/tools/mbraced.exe"
+    MBraceSettings.MBracedExecutablePath <- "../../../../packages/MBrace.Runtime.0.5.8-alpha/tools/mbraced.exe"
 
     //let runtime = MBrace.InitLocal(totalNodes = 4, store = FileSystemStore.LocalTemp)
     [<EntryPoint>]

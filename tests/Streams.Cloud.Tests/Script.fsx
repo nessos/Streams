@@ -1,4 +1,4 @@
-﻿#load "../../packages/MBrace.Runtime.0.5.7-alpha/bootstrap.fsx" 
+﻿#load "../../packages/MBrace.Runtime.0.5.8-alpha/bootstrap.fsx" 
 #r "bin/Debug/Streams.Core.dll"
 #r "bin/Debug/Streams.Cloud.dll"
 

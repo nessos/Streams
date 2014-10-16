@@ -4,6 +4,7 @@ open Nessos.MBrace
 open System
 open System.Collections.Generic
 open System.Runtime.Caching
+open System.Runtime.Serialization
 
 [<Serializable; StructuredFormatDisplay("{StructuredFormatDisplay}")>]
 type internal CachedCloudArray<'T>(source : ICloudArray<'T>, taskId : string) = 
@@ -29,8 +30,17 @@ type internal CachedCloudArray<'T>(source : ICloudArray<'T>, taskId : string) =
         member this.Item 
             with get (index : int64) = untyped.[index]
         member this.GetEnumerator() = untyped.GetEnumerator()
-        member this.Cache() : ICachedCloudArray = failwith "Invalid"
-        member this.Cache() : ICachedCloudArray<'T> = failwith "Invalid"
+        member this.Dispose() = source.Dispose()
+
+    interface ISerializable with
+        member this.GetObjectData(info : SerializationInfo, context : StreamingContext) =
+            info.AddValue("taskId" , taskId, typeof<string>)
+            info.AddValue("source" , source, typeof<ICloudArray<'T>>)
+
+    internal new(info : SerializationInfo, context : StreamingContext) =
+        let taskId    = info.GetValue("taskId", typeof<string>) :?> string
+        let source    = info.GetValue("source", typeof<ICloudArray<'T>>) :?> ICloudArray<'T>
+        new CachedCloudArray<'T>(source, taskId)
 
 [<Sealed;AbstractClass>]
 type internal CloudArrayCache () =
