@@ -339,8 +339,7 @@ module CloudStream =
                                      values.Take(takeCount).ToArray())) }
         let sortByComp = 
             cloud {
-                let! results = stream.Apply collectorf (fun array -> cloud { let! processId = Cloud.GetProcessId() in return! CloudArray.New(sprintf "process%d" processId, array) }) 
-                                                       (fun left right -> left.Append(right))
+                let! results = stream.Apply collectorf (fun x -> cloud { return x }) (fun left right -> left.AddRange(right); left)
                 let result = 
                     let count = results |> Seq.sumBy (fun (keys, _) -> keys.Length)
                     let keys = Array.zeroCreate<'Key> count
