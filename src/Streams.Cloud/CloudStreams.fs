@@ -262,14 +262,13 @@ module CloudStream =
                                 dict.Add(keyValue.Key, stateRef)
                         dict
                     let keyValues = dict |> Seq.map (fun keyValue -> (keyValue.Key, !keyValue.Value)) 
-                    let! processId = Cloud.GetProcessId()
-                    return! CloudArray.New(sprintf "process%d" processId, keyValues)
+                    return keyValues.ToArray()
                 }
             { new CloudStream<'Key * 'State> with
                 member self.Apply<'S, 'R> (collectorf : unit -> Collector<'Key * 'State, 'S>) (projection : 'S -> Cloud<'R>) combiner =
                     cloud {
                         let! result = foldByComp
-                        return! (ofCloudArray result).Apply collectorf projection combiner
+                        return! (ofArray result).Apply collectorf projection combiner
                     }  }
 
     let inline countBy (projection : 'T -> 'Key) (stream : CloudStream<'T>) : CloudStream<'Key * int> =
