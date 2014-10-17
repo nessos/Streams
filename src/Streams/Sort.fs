@@ -33,6 +33,8 @@ module Sort =
                         toArray.[ptr] <- fromArray.[ptr2]
                         toKeys.[ptr] <- fromKeys.[ptr2]
                         ptr2 <- ptr2 + 1
+                ()
+
  
             // define the sort operation
             let parallelSort () =
@@ -97,6 +99,7 @@ module Sort =
                 // if odd iterations return auxArray otherwise array (swapped will be false)
                 if not (iterations % 2 = 0) then  
                     Array.blit auxArray 0 array 0 array.Length
+                    Array.blit auxKeys 0 keys 0 keys.Length
  
             parallelSort()
 
