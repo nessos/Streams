@@ -247,22 +247,18 @@ module CloudStream =
                         dict  }
             let foldByComp = 
                 cloud {
-                    let combiner' (left : ICloudArray<KeyValuePair<'Key, 'State ref>>) (right : ICloudArray<KeyValuePair<'Key, 'State ref>>) = 
-                        left.Append(right)
-                    let! keyValueArray = stream.Apply collectorf (fun dict -> cloud { let! processId = Cloud.GetProcessId() in return! CloudArray.New(sprintf "process%d" processId, dict) }) combiner'
-                    let dict = 
-                        let dict = new Dictionary<'Key, 'State ref>()
-                        for keyValue in keyValueArray do
+                    let combiner' (left : Dictionary<'Key, 'State ref>) (right : Dictionary<'Key, 'State ref>) = 
+                        for keyValue in right do
                             let mutable stateRef = Unchecked.defaultof<'State ref>
-                            if dict.TryGetValue(keyValue.Key, &stateRef) then
+                            if left.TryGetValue(keyValue.Key, &stateRef) then
                                 stateRef := combiner !stateRef !keyValue.Value
                             else
                                 stateRef <- ref <| state ()
                                 stateRef := combiner !stateRef !keyValue.Value
-                                dict.Add(keyValue.Key, stateRef)
-                        dict
-                    let keyValues = dict |> Seq.map (fun keyValue -> (keyValue.Key, !keyValue.Value)) 
-                    return keyValues.ToArray()
+                                left.Add(keyValue.Key, stateRef)
+                        left
+                    let! dict = stream.Apply collectorf (fun x -> cloud { return x }) combiner'
+                    return dict |> Seq.map (fun keyValue -> (keyValue.Key, !keyValue.Value)) |> Seq.toArray
                 }
             { new CloudStream<'Key * 'State> with
                 member self.Apply<'S, 'R> (collectorf : unit -> Collector<'Key * 'State, 'S>) (projection : 'S -> Cloud<'R>) combiner =
