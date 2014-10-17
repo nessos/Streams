@@ -247,24 +247,29 @@ module CloudStream =
                         dict  }
             let foldByComp = 
                 cloud {
-                    let combiner' (left : Dictionary<'Key, 'State ref>) (right : Dictionary<'Key, 'State ref>) = 
-                        for keyValue in right do
+                    let combiner' (left : ICloudArray<KeyValuePair<'Key, 'State ref>>) (right : ICloudArray<KeyValuePair<'Key, 'State ref>>) = 
+                        left.Append(right)
+                    let! keyValueArray = stream.Apply collectorf (fun dict -> cloud { let! processId = Cloud.GetProcessId() in return! CloudArray.New(sprintf "process%d" processId, dict) }) combiner'
+                    let dict = 
+                        let dict = new Dictionary<'Key, 'State ref>()
+                        for keyValue in keyValueArray do
                             let mutable stateRef = Unchecked.defaultof<'State ref>
-                            if left.TryGetValue(keyValue.Key, &stateRef) then
+                            if dict.TryGetValue(keyValue.Key, &stateRef) then
                                 stateRef := combiner !stateRef !keyValue.Value
                             else
                                 stateRef <- ref <| state ()
                                 stateRef := combiner !stateRef !keyValue.Value
-                                left.Add(keyValue.Key, stateRef)
-                        left
-                    let! dict = stream.Apply collectorf (fun x -> cloud { return x }) combiner'
-                    return dict |> Seq.map (fun keyValue -> (keyValue.Key, !keyValue.Value)) |> Seq.toArray
+                                dict.Add(keyValue.Key, stateRef)
+                        dict
+                    let keyValues = dict |> Seq.map (fun keyValue -> (keyValue.Key, !keyValue.Value)) 
+                    let! processId = Cloud.GetProcessId()
+                    return! CloudArray.New(sprintf "process%d" processId, keyValues)
                 }
             { new CloudStream<'Key * 'State> with
                 member self.Apply<'S, 'R> (collectorf : unit -> Collector<'Key * 'State, 'S>) (projection : 'S -> Cloud<'R>) combiner =
                     cloud {
                         let! result = foldByComp
-                        return! (ofArray result).Apply collectorf projection combiner
+                        return! (ofCloudArray result).Apply collectorf projection combiner
                     }  }
 
     let inline countBy (projection : 'T -> 'Key) (stream : CloudStream<'T>) : CloudStream<'Key * int> =
