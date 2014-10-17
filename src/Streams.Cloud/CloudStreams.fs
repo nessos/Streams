@@ -44,11 +44,11 @@ module CloudStream =
 
                         let createTask (files : ICloudFile []) (collector : Collector<'T, 'S>) : Cloud<'R> = 
                             cloud {
-                                let! sources = 
-                                    files |> Array.map (fun file -> CloudFile.Read(file, reader))
-                                          |> Cloud.Parallel
-                                          |> Cloud.ToLocal  
-                                let parStream = ParStream.ofSeq sources
+                                let parStream = 
+                                    files
+                                    |> ParStream.ofSeq 
+                                    |> ParStream.map (fun file -> async { let! s = file.Read() in return! reader s })
+                                    |> ParStream.map Async.RunSynchronously
                                 parStream.Apply collector
                                 return! projection collector.Result
                             }
