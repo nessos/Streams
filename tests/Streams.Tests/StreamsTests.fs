@@ -6,7 +6,7 @@
     open NUnit.Framework
     open Nessos.Streams
 
-    [<TestFixture>]
+    [<TestFixture; Category("Streams.FSharp")>]
     type ``Streams tests`` () =
 
         [<Test>]

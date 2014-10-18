@@ -10,6 +10,7 @@ using Nessos.Streams.CSharp;
 namespace Nessos.Streams.Tests.CSharp
 {
     [TestFixture]
+    [Category("ParStreams.CSharp")]
     public class ParStreamsTests
     {
 

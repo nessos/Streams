@@ -1,0 +1,15 @@
+version: 0.2.0.{build}
+
+configuration: Release
+
+test:
+  assemblies:
+    - Streams.Tests.exe
+    - Streams.Tests.CSharp.exe
+    - Streams.Cloud.Tests.exe
+  categories:
+    - Streams.FSharp
+    - ParStreams.FSharp
+    - Streams.CSharp
+    - ParStreams.CSharp
+    - CloudStreams.RunLocal

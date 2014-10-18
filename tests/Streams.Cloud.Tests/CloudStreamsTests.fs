@@ -148,12 +148,13 @@
                 Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
 
-
+    [<Category("CloudStreams.RunLocal")>]
     type ``#1 RunLocal Tests`` () =
         inherit ``CloudStreams tests`` ()
 
         override __.Evaluate(expr : Cloud<'T>) : 'T = MBrace.RunLocal expr
 
+    [<Category("CloudStreams.Cluster")>]
     type ``#2 Cluster Tests`` () =
         inherit ``CloudStreams tests`` ()
         
@@ -170,7 +171,7 @@
             
                 let ver = typeof<MBrace>.Assembly.GetName().Version.ToString(3)
                 MBraceSettings.MBracedExecutablePath <- Path.Combine(__SOURCE_DIRECTORY__, "../../packages/MBrace.Runtime." + ver + "-alpha/tools/mbraced.exe")
-                MBraceSettings.DefaultTimeout <- 120 * 1000
+                MBraceSettings.DefaultTimeout <- 60 * 1000
                 let runtime = MBraceRuntime.InitLocal(3)
                 currentRuntime := Some runtime)
 

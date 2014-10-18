@@ -7,7 +7,7 @@
     open FSharp.Collections.ParallelSeq
     open Nessos.Streams
 
-    [<TestFixture>]
+    [<TestFixture; Category("ParStreams.FSharp")>]
     type ``ParStreams tests`` () =
 
         [<Test>]
