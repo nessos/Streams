@@ -85,7 +85,7 @@ let cfiles = storeClient.UploadFiles(files)
 let getTop' count =
     cfiles
     |> CloudStream.ofCloudFiles CloudFile.ReadLines
-    |> CloudStream.collect Stream.ofArray 
+    |> CloudStream.collect Stream.ofSeq 
     |> CloudStream.collect (fun line -> splitWords line |> Stream.ofArray |> Stream.map wordTransform)
     |> CloudStream.filter wordFilter
     |> CloudStream.countBy id

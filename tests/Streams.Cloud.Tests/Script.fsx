@@ -1,6 +1,6 @@
 ﻿#load "../../packages/MBrace.Runtime.0.5.8-alpha/bootstrap.fsx" 
-#r "bin/Debug/Streams.Core.dll"
-#r "bin/Debug/Streams.Cloud.dll"
+#r "../../bin/Streams.dll"
+#r "../../bin/Streams.Cloud.dll"
 
 open Nessos.Streams.Cloud
 open Nessos.MBrace
@@ -16,6 +16,27 @@ let runtime = MBrace.InitLocal(totalNodes = 4, store = FileSystemStore.LocalTemp
 let run (cloud : Cloud<'T>) = 
     runtime.Run cloud 
     //MBrace.RunLocal cloud
+
+let xs = [|""; "a"; ""|]
+
+open System.IO
+
+let cfs = 
+    xs |> Array.mapi(fun i text -> 
+        StoreClient.Default.CreateCloudFile(string i + ".txt",
+            (fun (stream : Stream) -> 
+                async {
+                    use sw = new StreamWriter(stream)
+                    sw.Write(text) })))
+
+let x = cfs |> CloudStream.ofCloudFiles CloudFile.ReadAllText
+            |> CloudStream.toArray
+            |> MBrace.RunLocal
+
+let y = cfs |> Array.map (fun cf -> cf.Read())
+            |> Array.map (fun s -> async { let! s = s in return! CloudFile.ReadAllText s })
+            |> Async.Parallel
+            |> Async.RunSynchronously
 
 
 

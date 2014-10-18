@@ -66,25 +66,23 @@
 
         [<Test>]
         member __.``ofCloudFiles`` () =
-            Spec.ForAny<string [] []>(fun (xs : string [][]) ->
+            Spec.ForAny<string []>(fun (xs : string []) ->
                 let cfs = 
-                    xs |> Array.map(fun xs -> 
+                    xs |> Array.map(fun text -> 
                         StoreClient.Default.CreateCloudFile(System.Guid.NewGuid().ToString(),
                             (fun (stream : Stream) -> 
                                 async {
                                     use sw = new StreamWriter(stream)
-                                    xs |> Array.iter (sw.WriteLine) })))
+                                    sw.Write(text) })))
 
-                let x = cfs |> CloudStream.ofCloudFiles CloudFile.ReadLines
-                            |> CloudStream.collect Stream.ofSeq
+                let x = cfs |> CloudStream.ofCloudFiles CloudFile.ReadAllText
                             |> CloudStream.toArray
                             |> __.Evaluate
 
                 let y = cfs |> Array.map (fun cf -> cf.Read())
-                            |> Array.map (fun s -> async { let! s = s in return! CloudFile.ReadLines s })
+                            |> Array.map (fun s -> async { let! s = s in return! CloudFile.ReadAllText s })
                             |> Async.Parallel
                             |> Async.RunSynchronously
-                            |> Array.collect id
 
                 Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
