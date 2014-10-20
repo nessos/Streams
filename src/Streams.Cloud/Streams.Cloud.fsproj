@@ -57,6 +57,7 @@
     <Compile Include="Partitioning.fs" />
     <Compile Include="Readers.fs" />
     <Compile Include="CloudStreams.fs" />
+    <Compile Include="CSharpProxy.fs" />
     <None Include="Script.fsx" />
     <Content Include="packages.config" />
   </ItemGroup>

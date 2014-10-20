@@ -6,12 +6,12 @@ open Nessos.MBrace
 open Nessos.Streams
 open Nessos.Streams.Internals
 
-/// Represents a parallel stream of values in a cloud context.
+/// Represents a distributed Stream of values.
 type CloudStream<'T> = 
     /// Applies the given collector to the CloudStream.
     abstract Apply<'S, 'R> : (unit -> Collector<'T, 'S>) -> ('S -> Cloud<'R>) -> ('R -> 'R -> 'R) -> Cloud<'R>
 
-[<RequireQualifiedAccess>]
+[<RequireQualifiedAccess; CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 /// Provides basic operations on Parallel Streams.
 module CloudStream =
 
@@ -322,8 +322,8 @@ module CloudStream =
     /// </summary>
     /// <param name="projection">A function that maps items from the input CloudStream to keys.</param>
     /// <param name="stream">The input CloudStream.</param>
-    let inline countBy (projection : 'T -> 'Key) (stream : CloudStream<'T>) : CloudStream<'Key * int> =
-        foldBy projection (fun state _ -> state + 1) (+) (fun () -> 0) stream
+    let inline countBy (projection : 'T -> 'Key) (stream : CloudStream<'T>) : CloudStream<'Key * int64> =
+        foldBy projection (fun state _ -> state + 1L) (+) (fun () -> 0L) stream
 
     /// <summary>Returns the sum of the elements.</summary>
     /// <param name="stream">The input CloudStream.</param>
