@@ -17,7 +17,13 @@ let run (cloud : Cloud<'T>) =
     runtime.Run cloud 
     //MBrace.RunLocal cloud
 
+open Nessos.Streams
+
+
 let xs = [|""; "a"; ""|]
+
+xs |> ParStream.ofSeq
+   |> ParStream.toArray
 
 open System.IO
 

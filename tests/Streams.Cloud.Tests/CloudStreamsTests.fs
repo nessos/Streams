@@ -78,11 +78,13 @@
                 let x = cfs |> CloudStream.ofCloudFiles CloudFile.ReadAllText
                             |> CloudStream.toArray
                             |> __.Evaluate
+                            |> Set.ofArray
 
                 let y = cfs |> Array.map (fun cf -> cf.Read())
                             |> Array.map (fun s -> async { let! s = s in return! CloudFile.ReadAllText s })
                             |> Async.Parallel
                             |> Async.RunSynchronously
+                            |> Set.ofArray
 
                 Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
