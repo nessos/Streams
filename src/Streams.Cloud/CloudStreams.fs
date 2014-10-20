@@ -6,14 +6,18 @@ open Nessos.MBrace
 open Nessos.Streams
 open Nessos.Streams.Internals
 
-
+/// Represents a parallel stream of values in a cloud context.
 type CloudStream<'T> = 
+    /// Applies the given collector to the CloudStream.
     abstract Apply<'S, 'R> : (unit -> Collector<'T, 'S>) -> ('S -> Cloud<'R>) -> ('R -> 'R -> 'R) -> Cloud<'R>
 
 [<RequireQualifiedAccess>]
+/// Provides basic operations on Parallel Streams.
 module CloudStream =
 
-    // generator functions
+    /// <summary>Wraps array as a CloudStream.</summary>
+    /// <param name="source">The input array.</param>
+    /// <returns>The result CloudStream.</returns>
     let ofArray (source : 'T []) : CloudStream<'T> =
         { new CloudStream<'T> with
             member self.Apply<'S, 'R> (collectorf : unit -> Collector<'T, 'S>) (projection : 'S -> Cloud<'R>) (combiner : 'R -> 'R -> 'R) =
@@ -33,6 +37,11 @@ module CloudStream =
                         return! projection (collectorf ()).Result
                 } }
 
+    /// <summary>
+    /// Constructs a CloudStream from a collection of CloudFiles using the given reader.
+    /// </summary>
+    /// <param name="reader">A function to transform the contents of a CloudFile to an object.</param>
+    /// <param name="sources">The collection of CloudFiles.</param>
     let ofCloudFiles (reader : System.IO.Stream -> Async<'T>) (sources : seq<ICloudFile>) : CloudStream<'T> =
         { new CloudStream<'T> with
             member self.Apply<'S, 'R> (collectorf : unit -> Collector<'T, 'S>) (projection : 'S -> Cloud<'R>) (combiner : 'R -> 'R -> 'R) =
@@ -58,6 +67,10 @@ module CloudStream =
                         return Array.reduce combiner results
                 } }
 
+    /// <summary>
+    /// Constructs a CloudStream from a CloudArray.
+    /// </summary>
+    /// <param name="source">The input CloudArray.</param>
     let ofCloudArray (source : ICloudArray<'T>) : CloudStream<'T> =
         { new CloudStream<'T> with
             member self.Apply<'S, 'R> (collectorf : unit -> Collector<'T, 'S>) (projection : 'S -> Cloud<'R>) (combiner : 'R -> 'R -> 'R) =
@@ -129,6 +142,10 @@ module CloudStream =
                             
                 } }
 
+    /// <summary>
+    /// Returns a cached version of the given CloudArray.
+    /// </summary>
+    /// <param name="source">The input CloudArray.</param>
     let cache (source : ICloudArray<'T>) : Cloud<ICloudArray<'T>> = 
         cloud {
             let! workerCount = Cloud.GetWorkerCount()
@@ -153,6 +170,11 @@ module CloudStream =
         }
 
     // intermediate functions
+
+    /// <summary>Transforms each element of the input CloudStream.</summary>
+    /// <param name="f">A function to transform items from the input CloudStream.</param>
+    /// <param name="stream">The input CloudStream.</param>
+    /// <returns>The result CloudStream.</returns>
     let inline map (f : 'T -> 'R) (stream : CloudStream<'T>) : CloudStream<'R> =
         { new CloudStream<'R> with
             member self.Apply<'S, 'Result> (collectorf : unit -> Collector<'R, 'S>) (projection : 'S -> Cloud<'Result>) combiner =
@@ -165,7 +187,10 @@ module CloudStream =
                         member self.Result = collector.Result  }
                 stream.Apply collectorf' projection combiner }
 
-
+    /// <summary>Transforms each element of the input CloudStream to a new stream and flattens its elements.</summary>
+    /// <param name="f">A function to transform items from the input CloudStream.</param>
+    /// <param name="stream">The input CloudStream.</param>
+    /// <returns>The result CloudStream.</returns>
     let inline flatMap (f : 'T -> Stream<'R>) (stream : CloudStream<'T>) : CloudStream<'R> =
         { new CloudStream<'R> with
             member self.Apply<'S, 'Result> (collectorf : unit -> Collector<'R, 'S>) (projection : 'S -> Cloud<'Result>) combiner =
@@ -180,9 +205,17 @@ module CloudStream =
                         member self.Result = collector.Result  }
                 stream.Apply collectorf' projection combiner }
 
+    /// <summary>Transforms each element of the input CloudStream to a new stream and flattens its elements.</summary>
+    /// <param name="f">A function to transform items from the input CloudStream.</param>
+    /// <param name="stream">The input CloudStream.</param>
+    /// <returns>The result CloudStream.</returns>
     let inline collect (f : 'T -> Stream<'R>) (stream : CloudStream<'T>) : CloudStream<'R> =
         flatMap f stream
 
+    /// <summary>Filters the elements of the input CloudStream.</summary>
+    /// <param name="predicate">A function to test each source element for a condition.</param>
+    /// <param name="stream">The input CloudStream.</param>
+    /// <returns>The result CloudStream.</returns>
     let inline filter (predicate : 'T -> bool) (stream : CloudStream<'T>) : CloudStream<'T> =
         { new CloudStream<'T> with
             member self.Apply<'S, 'R> (collectorf : unit -> Collector<'T, 'S>) (projection : 'S -> Cloud<'R>) combiner =
@@ -197,6 +230,13 @@ module CloudStream =
 
 
     // terminal functions
+
+    /// <summary>Applies a function to each element of the CloudStream, threading an accumulator argument through the computation. If the input function is f and the elements are i0...iN, then this function computes f (... (f s i0)...) iN.</summary>
+    /// <param name="folder">A function that updates the state with each element from the CloudStream.</param>
+    /// <param name="combiner">A function that combines partial states into a new state.</param>
+    /// <param name="state">A function that produces the initial state.</param>
+    /// <param name="stream">The input CloudStream.</param>
+    /// <returns>The final result.</returns>
     let inline fold (folder : 'State -> 'T -> 'State) (combiner : 'State -> 'State -> 'State) 
                     (state : unit -> 'State) (stream : CloudStream<'T>) : Cloud<'State> =
             let collectorf () =  
@@ -213,6 +253,13 @@ module CloudStream =
                         acc }
             stream.Apply collectorf (fun x -> cloud { return x }) combiner
 
+    /// <summary>Applies a key-generating function to each element of a CloudStream and return a CloudStream yielding unique keys and the result of the threading an accumulator.</summary>
+    /// <param name="projection">A function to transform items from the input CloudStream to keys.</param>
+    /// <param name="folder">A function that updates the state with each element from the CloudStream.</param>
+    /// <param name="combiner">A function that combines partial states into a new state.</param>
+    /// <param name="state">A function that produces the initial state.</param>
+    /// <param name="stream">The input CloudStream.</param>
+    /// <returns>The final result.</returns>
     let inline foldBy (projection : 'T -> 'Key) 
                       (folder : 'State -> 'T -> 'State) 
                       (combiner : 'State -> 'State -> 'State) 
@@ -270,18 +317,31 @@ module CloudStream =
                         let! result = foldByComp
                         return! (ofArray result).Apply collectorf projection combiner
                     }  }
-
+    /// <summary>
+    /// Applies a key-generating function to each element of a CloudStream and return a CloudStream yielding unique keys and their number of occurrences in the original sequence.
+    /// </summary>
+    /// <param name="projection">A function that maps items from the input CloudStream to keys.</param>
+    /// <param name="stream">The input CloudStream.</param>
     let inline countBy (projection : 'T -> 'Key) (stream : CloudStream<'T>) : CloudStream<'Key * int> =
         foldBy projection (fun state _ -> state + 1) (+) (fun () -> 0) stream
 
+    /// <summary>Returns the sum of the elements.</summary>
+    /// <param name="stream">The input CloudStream.</param>
+    /// <returns>The sum of the elements.</returns>
     let inline sum (stream : CloudStream< ^T >) : Cloud< ^T > 
             when ^T : (static member ( + ) : ^T * ^T -> ^T) 
             and  ^T : (static member Zero : ^T) = 
         fold (+) (+) (fun () -> LanguagePrimitives.GenericZero) stream
 
+    /// <summary>Returns the total number of elements of the CloudStream.</summary>
+    /// <param name="stream">The input CloudStream.</param>
+    /// <returns>The total number of elements.</returns>
     let inline length (stream : CloudStream<'T>) : Cloud<int64> =
         fold (fun acc _  -> 1L + acc) (+) (fun () -> 0L) stream
 
+    /// <summary>Creates an array from the given CloudStream.</summary>
+    /// <param name="stream">The input CloudStream.</param>
+    /// <returns>The result array.</returns>    
     let inline toArray (stream : CloudStream<'T>) : Cloud<'T[]> =
         cloud {
             let! arrayCollector = 
@@ -291,6 +351,9 @@ module CloudStream =
             return arrayCollector.ToArray()
         }
 
+    /// <summary>Creates a CloudArray from the given CloudStream.</summary>
+    /// <param name="stream">The input CloudStream.</param>
+    /// <returns>The result CloudArray.</returns>    
     let inline toCloudArray (stream : CloudStream<'T>) : Cloud<ICloudArray<'T>> =
         let collectorf () =  
             let results = new List<List<'T>>()
@@ -314,6 +377,11 @@ module CloudStream =
                                                 return! CloudArray.New(sprintf "process%d" processId, array) }) 
                                 (fun left right -> left.Append(right))
 
+    /// <summary>Applies a key-generating function to each element of the input CloudStream and yields the CloudStream of the given length, ordered by keys.</summary>
+    /// <param name="projection">A function to transform items of the input CloudStream into comparable keys.</param>
+    /// <param name="stream">The input CloudStream.</param>
+    /// <param name="takeCount">The number of elements to return.</param>
+    /// <returns>The result CloudStream.</returns>  
     let inline sortBy (projection : 'T -> 'Key) (takeCount : int) (stream : CloudStream<'T>) : CloudStream<'T> = 
         let collectorf () =  
             let results = new List<List<'T>>()

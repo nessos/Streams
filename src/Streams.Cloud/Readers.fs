@@ -3,7 +3,9 @@
     open System.IO
 
     [<AbstractClass; Sealed>]
+    /// Common readers for a CloudFile.
     type CloudFile =
+        /// Read lazily the given stream as a sequence of lines.
         static member ReadLines : Stream -> Async<seq<string>> =
             fun stream -> 
                 async { 
@@ -13,6 +15,7 @@
                             yield sr.ReadLine() }
                 }
 
+        /// Read the given stream as an array of lines.
         static member ReadAllLines : Stream -> Async<string []> =
             fun stream -> 
                 async { 
@@ -21,13 +24,14 @@
                                   yield sr.ReadLine() |]
                 }
 
+        /// Read the given stream as a string.
         static member ReadAllText : Stream -> Async<string> =
             fun stream -> 
                 async { 
                     use sr = new StreamReader(stream)
-                    return sr.ReadToEnd()
+                    return sr.ReadToEnd() 
                 }
-
+        /// Read the given stream as an array of bytes.
         static member ReadAllBytes : Stream -> Async<byte []> =
             fun stream -> 
                 async {
