@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>Collector<'T, 'R> - Streams</title>
+    <title>CloudFile - Streams</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content=""/>
     <meta name="author" content="Nick Palladinos, Kostas Rontogiannis"/>
@@ -35,53 +35,89 @@
 
 
 
-<h1>Collector<'T, 'R></h1>
+<h1>CloudFile</h1>
 <div class="xmldoc">
-<p>Collects elements into a mutable result container.</p>
+<p>Common readers for a CloudFile.</p>
 </div>
-  <h3>Instance members</h3>
+  <h3>Static members</h3>
   <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Instance member</td><td>Description</td></tr>
+      <tr><td>Static member</td><td>Description</td></tr>
     </thead>
     <tbody>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '67', 67)" onmouseover="showTip(event, '67', 67)">
-            Iterator()
+          <code onmouseout="hideTip(event, '69', 69)" onmouseover="showTip(event, '69', 69)">
+            ReadAllBytes
           </code>
-          <div class="tip" id="67">
-            <strong>Signature:</strong> unit -&gt; &#39;T -&gt; bool<br />
-              <strong>Modifiers:</strong> abstract<br />
+          <div class="tip" id="69">
+            <strong>Signature:</strong> Stream -&gt; Async&lt;byte []&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L13-13" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/Readers.fs#L35-35" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>Gets an iterator over the elements.</p>
+          <p>Read the given stream as an array of bytes.</p>
 
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '68', 68)" onmouseover="showTip(event, '68', 68)">
-            Result
+          <code onmouseout="hideTip(event, '70', 70)" onmouseover="showTip(event, '70', 70)">
+            ReadAllLines
           </code>
-          <div class="tip" id="68">
-            <strong>Signature:</strong> &#39;R<br />
-              <strong>Modifiers:</strong> abstract<br />
+          <div class="tip" id="70">
+            <strong>Signature:</strong> Stream -&gt; Async&lt;string []&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L15-15" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/Readers.fs#L19-19" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>The result of the collector.</p>
+          <p>Read the given stream as an array of lines.</p>
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '71', 71)" onmouseover="showTip(event, '71', 71)">
+            ReadAllText
+          </code>
+          <div class="tip" id="71">
+            <strong>Signature:</strong> Stream -&gt; Async&lt;string&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/Readers.fs#L28-28" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Read the given stream as a string.</p>
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '72', 72)" onmouseover="showTip(event, '72', 72)">
+            ReadLines
+          </code>
+          <div class="tip" id="72">
+            <strong>Signature:</strong> Stream -&gt; Async&lt;seq&lt;string&gt;&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/Readers.fs#L9-9" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Read lazily the given stream as a sequence of lines.</p>
 
         </td>
       </tr>
