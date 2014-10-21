@@ -11,7 +11,7 @@ using Runtime = Nessos.MBrace.Client.MBraceRuntime;
 using Node = Nessos.MBrace.Client.MBraceNode;
 using Settings = Nessos.MBrace.Client.MBraceSettings;
 
-namespace Streams.Cloud.CSharp.MBraceClient;
+namespace Streams.Cloud.CSharp.MBraceClient
 {
 	/// <summary>
 	/// MBraceNode wrapper class.
