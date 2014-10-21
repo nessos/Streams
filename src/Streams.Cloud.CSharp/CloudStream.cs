@@ -71,6 +71,15 @@ namespace Nessos.Streams.Cloud.CSharp
             return CSharpProxy.OfCloudFiles<T>(sources, reader);
         }
 
+        /// <summary>
+        /// Returns a cached version of the given CloudArray.
+        /// </summary>
+        /// <param name="source">The input CloudArray.</param>
+        public static Cloud<ICloudArray<TSource>> Cache<TSource>(this ICloudArray<TSource> source)
+        {
+            return CloudStreamModule.cache(source);
+        }
+
         /// <summary>Transforms each element of the input CloudStream.</summary>
         /// <param name="f">A function to transform items from the input CloudStream.</param>
         /// <param name="stream">The input CloudStream.</param>

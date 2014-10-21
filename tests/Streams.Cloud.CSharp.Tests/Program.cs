@@ -9,14 +9,19 @@ using Nessos.Streams.Cloud.CSharp.MBrace;
 
 namespace Streams.Cloud.CSharp.Tests
 {
-    class Program
+    public class Person { public string Name; public int Age; }
+
+    public class Program
     {
-        static void Main(string[] args)
+        static int f(int x) { return x * x; }
+
+        public static void Main(string[] args)
         {
+            var xs = Enumerable.Range(1, 100).ToArray();
             var query =
-                   (from i in Enumerable.Range(1, 100).ToArray().AsCloudStream()
-                    where i % 2 == 0
-                    select i * i).ToArray();
+                   (from i in xs.AsCloudStream()
+                    select i)
+                   .ToArray();
 
             var x = MBrace.RunLocal(query);
 
@@ -30,6 +35,10 @@ namespace Streams.Cloud.CSharp.Tests
             var ps = rt.CreateProcess(query);
 
             var z = ps.AwaitResult();
+
+            rt.ShowProcessInfo();
+
+            rt.Kill();
         }
     }
 }
