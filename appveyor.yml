@@ -15,4 +15,4 @@ test:
     - ParStreams.CSharp
     - CloudStreams.RunLocal
     - CloudStreams.CSharp.RunLocal
-    - CloudStreams.CSharp.Cluster
+    #- CloudStreams.CSharp.Cluster
