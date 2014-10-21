@@ -32,11 +32,36 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Core, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\packages\FSharp.Core.Microsoft.Signed.3.1.1.1\lib\net45\FSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="FsPickler">
+      <HintPath>..\..\packages\FsPickler.0.9.11\lib\net45\FsPickler.dll</HintPath>
+    </Reference>
+    <Reference Include="FsPickler.Json">
+      <HintPath>..\..\packages\FsPickler.Json.0.9.11\lib\net45\FsPickler.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="MBrace.Client">
+      <HintPath>..\..\packages\MBrace.Client.0.5.8-alpha\lib\net45\MBrace.Client.dll</HintPath>
+    </Reference>
     <Reference Include="MBrace.Core">
       <HintPath>..\..\packages\MBrace.Core.0.5.8-alpha\lib\net45\MBrace.Core.dll</HintPath>
     </Reference>
     <Reference Include="MBrace.Lib">
       <HintPath>..\..\packages\MBrace.Core.0.5.8-alpha\lib\net45\MBrace.Lib.dll</HintPath>
+    </Reference>
+    <Reference Include="MBrace.Runtime.Base">
+      <HintPath>..\..\packages\MBrace.Client.0.5.8-alpha\lib\net45\MBrace.Runtime.Base.dll</HintPath>
+    </Reference>
+    <Reference Include="MBrace.Store">
+      <HintPath>..\..\packages\MBrace.Store.0.5.8-alpha\lib\net45\MBrace.Store.dll</HintPath>
+    </Reference>
+    <Reference Include="MBrace.Utils">
+      <HintPath>..\..\packages\MBrace.Client.0.5.8-alpha\lib\net45\MBrace.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -45,9 +70,25 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Thespian">
+      <HintPath>..\..\packages\Thespian.0.0.11-alpha\lib\net45\Thespian.dll</HintPath>
+    </Reference>
+    <Reference Include="Thespian.Cluster">
+      <HintPath>..\..\packages\Thespian.0.0.11-alpha\lib\net45\Thespian.Cluster.dll</HintPath>
+    </Reference>
+    <Reference Include="UnionArgParser">
+      <HintPath>..\..\packages\UnionArgParser.0.8.0\lib\net40\UnionArgParser.dll</HintPath>
+    </Reference>
+    <Reference Include="Unquote">
+      <HintPath>..\..\packages\Unquote.2.2.2\lib\net40\Unquote.dll</HintPath>
+    </Reference>
+    <Reference Include="Vagrant">
+      <HintPath>..\..\packages\Vagrant.0.2.6\lib\net45\Vagrant.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CloudStream.cs" />
+    <Compile Include="MBraceRuntime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +102,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
