@@ -136,7 +136,7 @@
         member __.``countBy`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> CloudStream.ofArray |> CloudStream.countBy id |> CloudStream.toArray |> __.Evaluate
-                let y = xs |> Seq.countBy id |> Seq.toArray
+                let y = xs |> Seq.countBy id |> Seq.map (fun (k,c) -> k, int64 c) |> Seq.toArray
                 Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
 
