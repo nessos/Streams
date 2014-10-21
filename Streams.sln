@@ -79,6 +79,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Streams.Cloud.Samples", "sa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streams.Cloud.CSharp", "src\Streams.Cloud.CSharp\Streams.Cloud.CSharp.csproj", "{81ADDB26-D5FF-404D-9620-36F9097E9CF1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streams.Cloud.CSharp.Tests", "tests\Streams.Cloud.CSharp.Tests\Streams.Cloud.CSharp.Tests.csproj", "{7780067D-021D-4942-B630-B7DD03EFB069}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -117,6 +119,10 @@ Global
 		{81ADDB26-D5FF-404D-9620-36F9097E9CF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81ADDB26-D5FF-404D-9620-36F9097E9CF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81ADDB26-D5FF-404D-9620-36F9097E9CF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7780067D-021D-4942-B630-B7DD03EFB069}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7780067D-021D-4942-B630-B7DD03EFB069}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7780067D-021D-4942-B630-B7DD03EFB069}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7780067D-021D-4942-B630-B7DD03EFB069}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -136,5 +142,6 @@ Global
 		{E6852495-8012-4694-BC0F-A5376CD84B1F} = {0ECB96CE-A102-47CB-90AD-EBE1A39DB837}
 		{217E171A-C313-41AC-89D8-45B8B137469B} = {2B437217-9A05-49FB-98A5-B0F16955D966}
 		{81ADDB26-D5FF-404D-9620-36F9097E9CF1} = {0ECB96CE-A102-47CB-90AD-EBE1A39DB837}
+		{7780067D-021D-4942-B630-B7DD03EFB069} = {15DAA044-35EF-41F9-AB85-9D341CCC7B47}
 	EndGlobalSection
 EndGlobal
