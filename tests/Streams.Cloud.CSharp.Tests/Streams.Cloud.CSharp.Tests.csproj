@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -28,7 +28,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimpleTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -71,6 +72,14 @@
     <ProjectReference Include="..\..\src\Streams.Cloud\Streams.Cloud.fsproj">
       <Project>{18f60ac5-898d-45c5-8713-bb0539d4200e}</Project>
       <Name>Streams.Cloud</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Streams.CSharp\Streams.CSharp.csproj">
+      <Project>{e6852495-8012-4694-bc0f-a5376cd84b1f}</Project>
+      <Name>Streams.CSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Streams\Streams.fsproj">
+      <Project>{f3482666-f39c-4f49-8d0b-3583328d2c42}</Project>
+      <Name>Streams</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -29,6 +29,9 @@ namespace Nessos.Streams.Cloud.CSharp.MBrace
         }
     }
 
+    /// <summary>
+    /// Static API wrapper.
+    /// </summary>
     public static class MBrace
     {
         public static T RunLocal<T>(Cloud<T> computation)

@@ -36,6 +36,7 @@ let testAssemblies =
         "bin/Streams.Tests.exe"
         "bin/Streams.Tests.CSharp.exe"
         "bin/Streams.Cloud.Tests.exe"
+        "bin/Streams.Cloud.CSharp.Tests.exe"
     ]
 
 //
@@ -71,7 +72,8 @@ Target "AssemblyInfo" (fun _ ->
 
     CreateFSharpAssemblyInfo "src/Streams/AssemblyInfo.fs" <| attributes Streams.release.AssemblyVersion
     CreateCSharpAssemblyInfo "src/Streams.CSharp/Properties/AssemblyInfo.cs" <| attributes Streams.release.AssemblyVersion
-    CreateFSharpAssemblyInfo "src/Streams/AssemblyInfo.fs" <| attributes CloudStreams.release.AssemblyVersion
+    CreateFSharpAssemblyInfo "src/Streams.Cloud/AssemblyInfo.fs" <| attributes CloudStreams.release.AssemblyVersion
+    CreateCSharpAssemblyInfo "src/Streams.Cloud.CSharp/Properties/AssemblyInfo.cs" <| attributes CloudStreams.release.AssemblyVersion
 )
 
 

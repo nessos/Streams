@@ -7,9 +7,12 @@ test:
     - Streams.Tests.exe
     - Streams.Tests.CSharp.exe
     - Streams.Cloud.Tests.exe
+    - Streams.Cloud.CSharp.Tests.exe
   categories:
     - Streams.FSharp
     - ParStreams.FSharp
     - Streams.CSharp
     - ParStreams.CSharp
     - CloudStreams.RunLocal
+    - CloudStreams.CSharp.RunLocal
+    - CloudStreams.CSharp.Cluster

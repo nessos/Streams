@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using Nessos.Streams.Cloud.CSharp;
 using Nessos.Streams.Cloud.CSharp.MBrace;
 
-namespace Streams.Cloud.CSharp.Tests
+namespace Nessos.Streams.Cloud.CSharp.Tests
 {
     public class Person { public string Name; public int Age; }
 
@@ -23,8 +22,8 @@ namespace Streams.Cloud.CSharp.Tests
                     select i)
                    .ToArray();
 
-            var x = MBrace.RunLocal(query);
-
+            var x = MBrace.MBrace.RunLocal(query); // wat?
+            
             var version = typeof(Nessos.MBrace.Cloud).Assembly.GetName().Version.ToString(3);
             Settings.MBracedExecutablePath = "../../../../packages/MBrace.Runtime." + version + "-alpha/tools/mbraced.exe";
 
