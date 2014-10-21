@@ -5,9 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Nessos.Streams.Cloud.CSharp;
 using Nessos.Streams.Cloud.CSharp.MBrace;
+using System.IO;
+using System.Reflection;
 
 namespace Nessos.Streams.Cloud.CSharp.Tests
 {
+    [Serializable]
     public class Person { public string Name; public int Age; }
 
     public class Program
@@ -19,13 +22,15 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
             var xs = Enumerable.Range(1, 100).ToArray();
             var query =
                    (from i in xs.AsCloudStream()
-                    select i)
+                    select new Person { Name = i.ToString(), Age = i })
                    .ToArray();
 
             var x = MBrace.MBrace.RunLocal(query); // wat?
             
             var version = typeof(Nessos.MBrace.Cloud).Assembly.GetName().Version.ToString(3);
-            Settings.MBracedExecutablePath = "../../../../packages/MBrace.Runtime." + version + "-alpha/tools/mbraced.exe";
+            var path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            var mbraced = Path.Combine(path, @"..\packages\MBrace.Runtime." + version + @"-alpha\tools\mbraced.exe");
+            Settings.MBracedExecutablePath = mbraced;
 
             var rt = Runtime.InitLocal(3);
 
