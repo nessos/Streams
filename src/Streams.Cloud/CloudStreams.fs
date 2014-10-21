@@ -12,7 +12,7 @@ type CloudStream<'T> =
     abstract Apply<'S, 'R> : (unit -> Collector<'T, 'S>) -> ('S -> Cloud<'R>) -> ('R -> 'R -> 'R) -> Cloud<'R>
 
 [<RequireQualifiedAccess; CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-/// Provides basic operations on Parallel Streams.
+/// Provides basic operations on CloudStreams.
 module CloudStream =
 
     /// <summary>Wraps array as a CloudStream.</summary>
