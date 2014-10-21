@@ -7,23 +7,20 @@ using Nessos.MBrace;
 using Nessos.MBrace.Client;
 using Microsoft.FSharp.Core;
 using Microsoft.FSharp.Collections;
-using Runtime = Nessos.MBrace.Client.MBraceRuntime;
-using Node = Nessos.MBrace.Client.MBraceNode;
-using Settings = Nessos.MBrace.Client.MBraceSettings;
 
-namespace Streams.Cloud.CSharp.MBraceClient
+namespace Nessos.Streams.Cloud.CSharp.MBrace
 {
 	/// <summary>
 	/// MBraceNode wrapper class.
 	/// </summary>
-	public class MBraceNode
+	public class Node
 	{
-		internal Node node;
-		internal MBraceNode (Node node) { this.node = node; }
+		internal MBraceNode node;
+		internal Node (MBraceNode node) { this.node = node; }
 
-		public MBraceNode Connect(string uri) 
+		public Node Connect(string uri) 
 		{
-			return new MBraceNode(Node.Connect(uri));
+			return new Node(MBraceNode.Connect(uri));
 		}
 
 		public TimeSpan Ping()
@@ -32,13 +29,21 @@ namespace Streams.Cloud.CSharp.MBraceClient
 		}
 	}
 
+	public static class MBrace
+	{
+		public static T RunLocal<T>(Cloud<T> computation)
+		{
+			return Nessos.MBrace.Client.ClientExtensions.MBrace.RunLocal(computation, null);
+		}
+	}
+
 	/// <summary>
 	/// Process wrapper class.
 	/// </summary>
-	public class MBraceProcess<T>
+	public class Process<T>
 	{
-		internal Process<T> process;
-		internal MBraceProcess(Process<T> p) { this.process = p; }
+		internal Nessos.MBrace.Client.Process<T> process;
+        internal Process(Nessos.MBrace.Client.Process<T> p) { this.process = p; }
 
 		public T AwaitResult()
 		{
@@ -51,45 +56,48 @@ namespace Streams.Cloud.CSharp.MBraceClient
 		}
 	}
 
-	public static class MBraceSettings
+    /// <summary>
+    /// MBraceSettings wrapper class.
+    /// </summary>
+	public static class Settings
 	{
 		public static string MBracedExecutablePath
 		{
-			get { return Settings.MBracedExecutablePath;  }
-			set { Settings.MBracedExecutablePath = value; }
+			get { return MBraceSettings.MBracedExecutablePath;  }
+            set { MBraceSettings.MBracedExecutablePath = value; }
 		}
 
 		public static Nessos.MBrace.Store.ICloudStore DefaultStore
 		{
-			get { return Settings.DefaultStore; }
-			set { Settings.DefaultStore = value; }
+            get { return MBraceSettings.DefaultStore; }
+            set { MBraceSettings.DefaultStore = value; }
 		}
 	}
 
 	/// <summary>
 	/// MBraceRuntime wrapper class.
 	/// </summary>
-	public class MBraceRuntime
+	public class Runtime
 	{
-		Runtime runtime;
+		MBraceRuntime runtime;
 
-		static MBraceRuntime InitLocal(int totalNodes)
+		public static Runtime InitLocal(int totalNodes)
 		{
-			return new MBraceRuntime(Runtime.InitLocal(totalNodes, null, null, null, null, null, null, null));
+			return new Runtime(MBraceRuntime.InitLocal(totalNodes, null, null, null, null, null, null, null));
 		}
 
-		static MBraceRuntime Connect(string uri)
+		public static Runtime Connect(string uri)
 		{
-			return new MBraceRuntime(Runtime.Connect(uri));
+			return new Runtime(MBraceRuntime.Connect(uri));
 		}
 
-		static MBraceRuntime Boot(MBraceNode [] nodes)
+		public static Runtime Boot(Node[] nodes)
 		{
-			var nodeList = nodes.Aggregate(FSharpList<Node>.Empty, (s,n) => FSharpList<Node>.Cons(n.node,s));
-			return new MBraceRuntime(Runtime.Boot(nodeList, null, null, null));
+			var nodeList = nodes.Aggregate(FSharpList<MBraceNode>.Empty, (s,n) => FSharpList<MBraceNode>.Cons(n.node,s));
+			return new Runtime(MBraceRuntime.Boot(nodeList, null, null, null));
 		}
 
-		private MBraceRuntime(Runtime runtime)
+		internal Runtime(MBraceRuntime runtime)
 		{
 			this.runtime = runtime;
 		}
@@ -99,9 +107,9 @@ namespace Streams.Cloud.CSharp.MBraceClient
 			return this.runtime.Run(computation, null, null);
 		}
 
-		public MBraceProcess<T> CreateProcess<T>(Cloud<T> computation)
+		public Process<T> CreateProcess<T>(Cloud<T> computation)
 		{
-			return new MBraceProcess<T>(this.runtime.CreateProcess<T>(computation, null));
+			return new Process<T>(this.runtime.CreateProcess<T>(computation, null));
 		}
 
 		public void ShowInfo(bool showPerformanceCounters = false)
