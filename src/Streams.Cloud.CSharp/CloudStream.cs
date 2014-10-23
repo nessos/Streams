@@ -36,7 +36,7 @@ namespace Nessos.Streams.Cloud.CSharp
         /// <param name="reader">A function to transform the contents of a CloudFile to an object.</param>
         /// <param name="sources">The collection of CloudFiles.</param>
         /// <returns>The result CloudStream.</returns>
-        public static CloudStream<TResult> OfCloudFiles<TResult>(this IEnumerable<ICloudFile> sources, Func<System.IO.Stream, Task<TResult>> reader)
+        public static CloudStream<TResult> AsCloudStream<TResult>(this IEnumerable<ICloudFile> sources, Func<System.IO.Stream, Task<TResult>> reader)
         {
             return CSharpProxy.OfCloudFiles<TResult>(sources, reader);
         }
