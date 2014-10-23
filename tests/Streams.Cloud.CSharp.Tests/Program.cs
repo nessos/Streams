@@ -7,6 +7,7 @@ using Nessos.Streams.Cloud.CSharp;
 using Nessos.Streams.Cloud.CSharp.MBrace;
 using System.IO;
 using System.Reflection;
+using Nessos.Streams.CSharp;
 
 namespace Nessos.Streams.Cloud.CSharp.Tests
 {
@@ -19,14 +20,15 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
 
         public static void Main(string[] args)
         {
-            var xs = Enumerable.Range(1, 100).ToArray();
-            var query =
-                   (from i in xs.AsCloudStream()
-                    select new Person { Name = i.ToString(), Age = i })
-                   .ToArray();
+
+            var xs = Enumerable.Range(1, 10).ToArray();
+            var query = xs
+                        .AsCloudStream()
+                        .SelectMany<int,int>(i => xs.AsStream())
+                        .ToArray();
 
             var x = MBrace.MBrace.RunLocal(query); // wat?
-            
+
             var version = typeof(Nessos.MBrace.Cloud).Assembly.GetName().Version.ToString(3);
             var path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             var mbraced = Path.Combine(path, @"..\packages\MBrace.Runtime." + version + @"-alpha\tools\mbraced.exe");
@@ -36,7 +38,11 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
 
             var y = rt.Run(query);
 
-            var ps = rt.CreateProcess(query);
+            var q = from l in xs.AsCloudStream()
+                    where l % 2 == 0
+                    select new { Name = l.ToString(), Age = f(l) };
+
+            var ps = rt.CreateProcess(q.ToArray());
 
             var z = ps.AwaitResult();
 
