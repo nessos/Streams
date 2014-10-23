@@ -99,6 +99,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CloudFile.cs" />
     <Compile Include="CloudStream.cs" />
     <Compile Include="MBraceRuntime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

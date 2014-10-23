@@ -49,20 +49,8 @@ type public CSharpProxy =
 
     static member Sum(stream : CloudStream<decimal>) = 
         CloudStream.sum stream
+        
 
-
-
-    static member OfAllLines(sources : seq<ICloudFile>) =
-        CloudStream.ofCloudFiles CloudFile.ReadAllLines sources
-
-    static member OfLines(sources : seq<ICloudFile>) =
-        CloudStream.ofCloudFiles CloudFile.ReadLines sources
-
-    static member OfAllText(sources : seq<ICloudFile>) =
-        CloudStream.ofCloudFiles CloudFile.ReadAllText sources
-
-    static member OfAllBytes(sources : seq<ICloudFile>) =
-        CloudStream.ofCloudFiles CloudFile.ReadAllBytes sources
 
     static member OfCloudFiles(sources : seq<ICloudFile>, reader : Func<IO.Stream, Task<'T>>) =
         CloudStream.ofCloudFiles (fun stream -> Async.AwaitTask(reader.Invoke(stream))) sources

@@ -20,8 +20,11 @@ namespace Nessos.Streams.Cloud.CSharp.Samples
 
             var runtime = Runtime.InitLocal(3);
 
+            WordCount.FilesPath = @"path to your files";
             var top1 = WordCount.RunWithCloudFiles(runtime);
+            var top2 = WordCount.RunWithCloudArray(runtime);
 
+            runtime.Kill();
         }
     }
 }

@@ -6,31 +6,10 @@ using System.Threading.Tasks;
 using Nessos.Streams;
 using Nessos.Streams.Internals.Cloud;
 using Nessos.MBrace;
+using System.IO;
 
 namespace Nessos.Streams.Cloud.CSharp
 {
-    /// <summary>
-    /// Common CloudFile readers.
-    /// </summary>
-    public enum CloudFile
-    {
-        /// <summary>
-        /// Read file as a string.
-        /// </summary>
-        ReadAllText,
-        /// <summary>
-        /// Lazily read all lines.
-        /// </summary>
-        ReadLines,
-        /// <summary>
-        /// Read all lines.
-        /// </summary>
-        ReadAllLines,
-        /// <summary>
-        /// Read all bytes.
-        /// </summary>
-        ReadAllBytes
-    }
 
     /// <summary>
     /// CloudStream operations
@@ -51,27 +30,6 @@ namespace Nessos.Streams.Cloud.CSharp
         public static CloudStream<TSource> AsCloudStream<TSource>(this ICloudArray<TSource> source)
         {
             return CloudStreamModule.ofCloudArray<TSource>(source);
-        }
-
-        /// <summary>Constructs a CloudStream from a collection of CloudFiles using the given reader.</summary>
-        /// <param name="reader">A common CloudFile reader.</param>
-        /// <param name="sources">The collection of CloudFiles.</param>
-        /// <returns>The result CloudStream.</returns>
-        public static CloudStream<TResult> OfCloudFiles<TResult>(this IEnumerable<ICloudFile> sources, CSharp.CloudFile reader)
-        {
-            switch (reader)
-            {
-                case CloudFile.ReadAllText:
-                    return CSharpProxy.OfAllText(sources) as CloudStream<TResult>;
-                case CloudFile.ReadLines:
-                    return CSharpProxy.OfLines(sources) as CloudStream<TResult>;
-                case CloudFile.ReadAllLines:
-                    return CSharpProxy.OfAllLines(sources) as CloudStream<TResult>;
-                case CloudFile.ReadAllBytes:
-                    return CSharpProxy.OfAllBytes(sources) as CloudStream<TResult>;
-                default:
-                    throw new InvalidOperationException("Invalid cloudfile reader");
-            }
         }
 
         /// <summary>Constructs a CloudStream from a collection of CloudFiles using the given reader.</summary>

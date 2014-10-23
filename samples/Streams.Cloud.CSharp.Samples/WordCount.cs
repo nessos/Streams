@@ -13,8 +13,7 @@ namespace Nessos.Streams.Cloud.CSharp.Samples
 {
     static class WordCount
     {
-        static string path = @"C:\dev\github-repositories\MBrace.Demos\data\Shakespeare";
-        static string[] files = Directory.GetFiles(path);
+        static string[] files;
 
         #region NoiseWords
         static HashSet<string> noiseWords = 
@@ -52,19 +51,41 @@ namespace Nessos.Streams.Cloud.CSharp.Samples
         } 
         #endregion
 
+        public static string FilesPath { set { files = Directory.GetFiles(value); } } 
+
         public static IEnumerable<Tuple<string,long>> RunWithCloudFiles(Runtime runtime)
         {
             var cfiles = StoreClient.Default.UploadFiles(files, "wordcount");
             var count = 20;
 
             var query = cfiles
-                        .OfCloudFiles<IEnumerable<string>>(CloudFile.ReadLines)
-                        .SelectMany(lines => lines.AsStream())
-                        .SelectMany(line => line.SplitWords().AsStream().Select(WordTransform))
-                        .Where(WordFilter)
-                        .CountBy(w => w)
-                        .OrderBy(t => -t.Item2, count) 
-                        .ToArray();
+                            .OfCloudFiles(CloudFile.ReadLines)
+                            .SelectMany(lines => lines.AsStream())
+                            .SelectMany(line => line.SplitWords().AsStream().Select(WordTransform))
+                            .Where(WordFilter)
+                            .CountBy(w => w)
+                            .OrderBy(t => -t.Item2, count) 
+                            .ToArray();
+
+            var result = runtime.Run(query);
+            return result;
+        }
+
+        public static IEnumerable<Tuple<string, long>> RunWithCloudArray(Runtime runtime)
+        {
+            var clines = files
+                            .Select(file => StoreClient.Default.CreateCloudArray("tmp", File.ReadLines(file)))
+                            .Aggregate((l, r) => l.Append(r));
+
+            var count = 20;
+
+            var query = clines
+                            .AsCloudStream()
+                            .SelectMany(line => line.SplitWords().AsStream().Select(WordTransform))
+                            .Where(WordFilter)
+                            .CountBy(w => w)
+                            .OrderBy(t => -t.Item2, count)
+                            .ToArray();
 
             var result = runtime.Run(query);
             return result;
