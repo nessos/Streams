@@ -13,6 +13,8 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
+#pragma warning disable 618 // obsolete nunit attribute
+
 namespace Nessos.Streams.Cloud.CSharp.Tests
 {
     [Category("CloudStreams.CSharp.RunLocal")]

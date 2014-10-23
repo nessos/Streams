@@ -14,9 +14,21 @@ namespace Nessos.Streams.Cloud.CSharp
     /// </summary>
     public enum CloudFile
     {
+        /// <summary>
+        /// Read file as a string.
+        /// </summary>
         ReadAllText,
+        /// <summary>
+        /// Lazily read all lines.
+        /// </summary>
         ReadLines,
+        /// <summary>
+        /// Read all lines.
+        /// </summary>
         ReadAllLines,
+        /// <summary>
+        /// Read all bytes.
+        /// </summary>
         ReadAllBytes
     }
 
