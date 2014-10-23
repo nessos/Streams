@@ -7,6 +7,8 @@ using Nessos.MBrace;
 using Nessos.MBrace.Client;
 using Microsoft.FSharp.Core;
 using Microsoft.FSharp.Collections;
+using MBraceStoreClient = Nessos.MBrace.Client.StoreClient;
+using Nessos.Streams.Internals.Cloud;
 
 namespace Nessos.Streams.Cloud.CSharp.MBrace
 {
@@ -82,6 +84,55 @@ namespace Nessos.Streams.Cloud.CSharp.MBrace
     }
 
     /// <summary>
+    /// StoreClient wrapper.
+    /// </summary>
+    public class StoreClient 
+    {
+        internal MBraceStoreClient client;
+        internal StoreClient(MBraceStoreClient c)
+        {
+            this.client = c;
+        }
+        /// <summary>
+        /// Gets the default StoreClient.
+        /// </summary>
+        public static StoreClient Default { get { return new StoreClient(MBraceStoreClient.Default); } }
+
+        /// <summary>
+        /// Upload given files as CloudFiles.
+        /// </summary>
+        /// <param name="paths"></param>
+        /// <param name="container"></param>
+        /// <returns></returns>
+        public ICloudFile[] UploadFiles(string[] paths, string container)
+        {
+            return this.client.UploadFiles(paths, FSharpOption<string>.Some(container));
+        }
+
+        /// <summary>
+        /// Get contained CloudFiles.
+        /// </summary>
+        /// <param name="container"></param>
+        /// <returns></returns>
+        public ICloudFile[] EnumerateCloudFiles(string container)
+        {
+            return this.client.EnumerateCloudFiles(container);
+        }
+
+        /// <summary>
+        /// Create a new CloudArray.
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <param name="container"></param>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        public ICloudArray<TSource> CreateCloudArray<TSource>(string container, IEnumerable<TSource> values)
+        {
+            return this.client.CreateCloudArray<TSource>(container, values);
+        }
+    }
+
+    /// <summary>
     /// MBraceSettings wrapper class.
     /// </summary>
     public static class Settings
@@ -91,7 +142,7 @@ namespace Nessos.Streams.Cloud.CSharp.MBrace
         /// </summary>
         public static string MBracedExecutablePath
         {
-            get { return MBraceSettings.MBracedExecutablePath;  }
+            get { return MBraceSettings.MBracedExecutablePath;  } 
             set { MBraceSettings.MBracedExecutablePath = value; }
         }
 
