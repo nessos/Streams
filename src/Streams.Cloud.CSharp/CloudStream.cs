@@ -28,35 +28,35 @@ namespace Nessos.Streams.Cloud.CSharp
         /// <summary>Wraps array as a CloudStream.</summary>
         /// <param name="source">The input array.</param>
         /// <returns>The result CloudStream.</returns>
-        public static CloudStream<T> AsCloudStream<T>(this T[] source)
+        public static CloudStream<TSource> AsCloudStream<TSource>(this TSource[] source)
         {
-            return CloudStreamModule.ofArray<T>(source);
+            return CloudStreamModule.ofArray<TSource>(source);
         }
 
         /// <summary>Constructs a CloudStream from a CloudArray.\.</summary>
         /// <param name="source">The input array.</param>
         /// <returns>The result CloudStream.</returns>
-        public static CloudStream<T> AsCloudStream<T>(this ICloudArray<T> source)
+        public static CloudStream<TSource> AsCloudStream<TSource>(this ICloudArray<TSource> source)
         {
-            return CloudStreamModule.ofCloudArray<T>(source);
+            return CloudStreamModule.ofCloudArray<TSource>(source);
         }
 
         /// <summary>Constructs a CloudStream from a collection of CloudFiles using the given reader.</summary>
         /// <param name="reader">A common CloudFile reader.</param>
         /// <param name="sources">The collection of CloudFiles.</param>
         /// <returns>The result CloudStream.</returns>
-        public static CloudStream<T> OfCloudFiles<T>(this IEnumerable<ICloudFile> sources, CSharp.CloudFile reader)
+        public static CloudStream<TResult> OfCloudFiles<TResult>(this IEnumerable<ICloudFile> sources, CSharp.CloudFile reader)
         {
             switch (reader)
             {
                 case CloudFile.ReadAllText:
-                    return CSharpProxy.OfAllText(sources) as CloudStream<T>;
+                    return CSharpProxy.OfAllText(sources) as CloudStream<TResult>;
                 case CloudFile.ReadLines:
-                    return CSharpProxy.OfLines(sources) as CloudStream<T>;
+                    return CSharpProxy.OfLines(sources) as CloudStream<TResult>;
                 case CloudFile.ReadAllLines:
-                    return CSharpProxy.OfAllLines(sources) as CloudStream<T>;
+                    return CSharpProxy.OfAllLines(sources) as CloudStream<TResult>;
                 case CloudFile.ReadAllBytes:
-                    return CSharpProxy.OfAllBytes(sources) as CloudStream<T>;
+                    return CSharpProxy.OfAllBytes(sources) as CloudStream<TResult>;
                 default:
                     throw new InvalidOperationException("Invalid cloudfile reader");
             }
@@ -66,9 +66,9 @@ namespace Nessos.Streams.Cloud.CSharp
         /// <param name="reader">A function to transform the contents of a CloudFile to an object.</param>
         /// <param name="sources">The collection of CloudFiles.</param>
         /// <returns>The result CloudStream.</returns>
-        public static CloudStream<T> OfCloudFiles<T>(this IEnumerable<ICloudFile> sources, Func<System.IO.Stream, Task<T>> reader)
+        public static CloudStream<TResult> OfCloudFiles<TResult>(this IEnumerable<ICloudFile> sources, Func<System.IO.Stream, Task<TResult>> reader)
         {
-            return CSharpProxy.OfCloudFiles<T>(sources, reader);
+            return CSharpProxy.OfCloudFiles<TResult>(sources, reader);
         }
 
         /// <summary>

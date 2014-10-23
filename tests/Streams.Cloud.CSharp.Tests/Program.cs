@@ -20,7 +20,6 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
 
         public static void Main(string[] args)
         {
-
             var xs = Enumerable.Range(1, 10).ToArray();
             var query = xs
                         .AsCloudStream()

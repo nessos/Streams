@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FsCheck.Fluent;
 using NUnit.Framework;
+using Nessos.Streams;
 using Nessos.Streams.CSharp;
 using Nessos.Streams.Cloud.CSharp;
 using Nessos.Streams.Cloud.CSharp.MBrace;
@@ -38,8 +39,8 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
             var version = typeof(Nessos.MBrace.Cloud).Assembly.GetName().Version.ToString(3);
             var path = Path.GetDirectoryName(this.GetFileDir());
             Settings.MBracedExecutablePath = Path.Combine(path, "../../packages/MBrace.Runtime." + version + "-alpha/tools/mbraced.exe");
-
             rt = Runtime.InitLocal(3);
+
         }
 
         [TestFixtureTearDown]
@@ -98,7 +99,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsCloudStream().SelectMany(i => xs.AsStream()).ToArray();
+                var x = xs.AsCloudStream().SelectMany<int,int>(i => xs.AsStream()).ToArray();
                 var y = xs.AsParallel().SelectMany(i => xs).ToArray();
                 return this.Eval(x).SequenceEqual(y);
             }).QuickCheckThrowOnFailure();
@@ -146,6 +147,64 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
             {
                 var x = xs.AsCloudStream().Select(i => i + 1).OrderBy(i => i,10).ToArray();
                 var y = xs.AsParallel().Select(i => i + 1).OrderBy(i => i).Take(10).ToArray();
+                return this.Eval(x).SequenceEqual(y);
+            }).QuickCheckThrowOnFailure();
+        }
+
+        [Test]
+        public void CustomObject1()
+        {
+            Spec.ForAny<int[]>(xs =>
+            {
+                var x = xs.AsCloudStream().Select(i => new Custom1 { Name = i.ToString(), Age = i }).ToArray();
+                var y = xs.AsParallel().Select(i => new Custom1 { Name = i.ToString(), Age = i }).ToArray();
+                return this.Eval(x).Zip(y, (l, r) => l.Name == r.Name && l.Age == r.Age).All(b => b == true);
+            }).QuickCheckThrowOnFailure();
+        }
+
+        [Test]
+        public void CustomObject2()
+        {
+            Spec.ForAny<int[]>(xs =>
+            {
+                var x = xs.AsCloudStream().Select(i => new Custom2 { Name = i.ToString(), Age = i }).ToArray();
+                var y = xs.AsParallel().Select(i => new Custom2 { Name = i.ToString(), Age = i }).ToArray();
+                return this.Eval(x).Zip(y, (l, r) => l.Name == r.Name && l.Age == r.Age).All(b => b == true);
+            }).QuickCheckThrowOnFailure();
+        }
+
+        [Test]
+        public void AnonymousType()
+        {
+            Spec.ForAny<int[]>(xs =>
+            {
+                var x = xs.AsCloudStream().Select(i => new { Value = i }).ToArray();
+                var y = xs.AsParallel().Select(i => new { Value = i }).ToArray();
+                return this.Eval(x).SequenceEqual(y);
+            }).QuickCheckThrowOnFailure();
+        }
+
+        [Test]
+        public void CapturedVariable()
+        {
+            Spec.ForAny<int[]>(xs =>
+            {
+                var ys = Enumerable.Range(1, 10).ToArray();
+                var x = xs.AsCloudStream().SelectMany<int,int>(_ => ys.AsStream()).ToArray();
+                var y = xs.AsParallel().SelectMany<int,int>(_ => ys).ToArray();
+                return this.Eval(x).SequenceEqual(y);
+            }).QuickCheckThrowOnFailure();
+        }
+
+        [Test]
+        public void ComprehensionSyntax()
+        {
+            Spec.ForAny<int[]>(xs =>
+            {
+                var x = (from x1 in xs.AsCloudStream()
+                         select x1 * x1).ToArray();
+                var y = (from x2 in xs.AsParallel()
+                         select x2 * x2).ToArray();
                 return this.Eval(x).SequenceEqual(y);
             }).QuickCheckThrowOnFailure();
         }
