@@ -15,6 +15,9 @@ type CloudStream<'T> =
 /// Provides basic operations on CloudStreams.
 module CloudStream =
 
+    /// Maximum combined stream length used in ofCloudFiles.
+    let private maxCloudFileCombinedLength = 1024L * 1024L * 1024L
+
     /// <summary>Wraps array as a CloudStream.</summary>
     /// <param name="source">The input array.</param>
     /// <returns>The result CloudStream.</returns>
@@ -51,19 +54,41 @@ module CloudStream =
                     else
                         let! workerCount = Cloud.GetWorkerCount()
 
-                        let createTask (files : ICloudFile []) (collector : Collector<'T, 'S>) : Cloud<'R> = 
+                        let createTask (files : ICloudFile []) (collectorf : unit -> Collector<'T, 'S>) : Cloud<'R> = 
                             cloud {
-                                let parStream = 
-                                    files
-                                    |> ParStream.ofSeq 
-                                    |> ParStream.map (fun file -> async { let! s = file.Read() in return! reader s })
-                                    |> ParStream.map Async.RunSynchronously
-                                parStream.Apply collector
-                                return! projection collector.Result
+                                let rec partitionByLength (files : ICloudFile []) index (currLength : int64) (currAcc : ICloudFile list) (acc : ICloudFile list list)=
+                                    async {
+                                        if index >= files.Length then return (currAcc :: acc) |> List.filter (not << List.isEmpty)
+                                        else
+                                            use! stream = files.[index].Read()
+                                            if stream.Length >= maxCloudFileCombinedLength then
+                                                return! partitionByLength files (index + 1) stream.Length [files.[index]] (currAcc :: acc)
+                                            elif stream.Length + currLength >= maxCloudFileCombinedLength then
+                                                return! partitionByLength files index 0L [] (currAcc :: acc)
+                                            else
+                                                return! partitionByLength files (index + 1) (currLength + stream.Length) (files.[index] :: currAcc) acc
+                                    }
+                                let! partitions = partitionByLength files 0 0L [] [] |> Cloud.OfAsync
+
+                                let result = new ResizeArray<'R>(partitions.Length)
+                                for fs in partitions do
+                                    let collector = collectorf()
+                                    let parStream = 
+                                        fs
+                                        |> ParStream.ofSeq 
+                                        |> ParStream.map (fun file -> async { let! s = file.Read() in return! reader s })
+                                        |> ParStream.map Async.RunSynchronously
+                                    parStream.Apply collector
+                                    let! partial = projection collector.Result
+                                    result.Add(partial)
+                                if result.Count = 0 then
+                                    return! projection (collectorf ()).Result
+                                else
+                                    return Array.reduce combiner (result.ToArray())
                             }
 
                         let partitions = sources |> Seq.toArray |> Partitions.ofArray workerCount
-                        let! results = partitions |> Array.map (fun cfiles -> createTask cfiles (collectorf())) |> Cloud.Parallel
+                        let! results = partitions |> Array.map (fun cfiles -> createTask cfiles collectorf) |> Cloud.Parallel
                         return Array.reduce combiner results
                 } }
 

@@ -1,4 +1,4 @@
-﻿#load "../../packages/MBrace.Runtime.0.5.8-alpha/bootstrap.fsx" 
+﻿#load "../../packages/MBrace.Runtime.0.5.9-alpha/bootstrap.fsx" 
 #r "../../bin/Streams.dll"
 #r "../../bin/Streams.Cloud.dll"
 
@@ -17,13 +17,44 @@ let run (cloud : Cloud<'T>) =
     runtime.Run cloud 
     //MBrace.RunLocal cloud
 
-open Nessos.Streams
+open System.IO
+let xs = [|null|] : string []
+let cfs = 
+    xs |> Array.map(fun text -> 
+        StoreClient.Default.CreateCloudFile(System.Guid.NewGuid().ToString(),
+            (fun (stream : Stream) -> 
+                async {
+                    use sw = new StreamWriter(stream)
+                    sw.Write(text) })))
 
 
-let xs = [|""; "a"; ""|]
+let rec partitionByLength (files : ICloudFile []) index (currLength : int64) (currAcc : ICloudFile list) (acc : ICloudFile list list)=
+    async {
+        let max = 1L
+        if index >= files.Length then return (currAcc :: acc) |> List.filter (not << List.isEmpty)
+        else
+            use! stream = files.[index].Read()
+            if stream.Length >= max then
+                return! partitionByLength files (index + 1) stream.Length [files.[index]] (currAcc :: acc)
+            elif stream.Length + currLength >= max then
+                return! partitionByLength files index 0L [] (currAcc :: acc)
+            else
+                return! partitionByLength files (index + 1) (currLength + stream.Length) (files.[index] :: currAcc) acc
+    }
 
-xs |> ParStream.ofSeq
-   |> ParStream.toArray
+let partitions = partitionByLength cfs 0 0L [] [] |> Async.RunSynchronously
+
+let x = cfs |> CloudStream.ofCloudFiles CloudFile.ReadAllText
+            |> CloudStream.toArray
+            |> MBrace.RunLocal
+            |> Set.ofArray
+
+let y = cfs |> Array.map (fun cf -> cf.Read())
+            |> Array.map (fun s -> async { let! s = s in return! CloudFile.ReadAllText s })
+            |> Async.Parallel
+            |> Async.RunSynchronously
+            |> Set.ofArray
+
 
 open System.IO
 
