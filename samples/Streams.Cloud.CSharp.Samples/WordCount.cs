@@ -59,7 +59,7 @@ namespace Nessos.Streams.Cloud.CSharp.Samples
             var count = 20;
 
             var query = cfiles
-                            .OfCloudFiles(CloudFile.ReadLines)
+                            .AsCloudStream(CloudFile.ReadLines)
                             .SelectMany(lines => lines.AsStream())
                             .SelectMany(line => line.SplitWords().AsStream().Select(WordTransform))
                             .Where(WordFilter)
