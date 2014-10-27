@@ -34,12 +34,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MBrace.Core, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Core, Version=0.5.10.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Core.0.5.9-alpha\lib\net45\MBrace.Core.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.10-alpha\lib\net45\MBrace.Core.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Lib">
-      <HintPath>..\..\packages\MBrace.Core.0.5.9-alpha\lib\net45\MBrace.Lib.dll</HintPath>
+    <Reference Include="MBrace.Lib, Version=0.5.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\MBrace.Core.0.5.10-alpha\lib\net45\MBrace.Lib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

@@ -38,41 +38,41 @@
       <Private>True</Private>
       <HintPath>..\..\packages\FSharp.Core.Microsoft.Signed.3.1.1.1\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
-    <Reference Include="FsPickler, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="FsPickler, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\FsPickler.1.0.2\lib\net45\FsPickler.dll</HintPath>
+      <HintPath>..\..\packages\FsPickler.1.0.3\lib\net45\FsPickler.dll</HintPath>
     </Reference>
-    <Reference Include="FsPickler.Json, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="FsPickler.Json, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\FsPickler.Json.1.0.2\lib\net45\FsPickler.Json.dll</HintPath>
+      <HintPath>..\..\packages\FsPickler.Json.1.0.3\lib\net45\FsPickler.Json.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Client, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Client, Version=0.5.10.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Client.0.5.9-alpha\lib\net45\MBrace.Client.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Client.0.5.10-alpha\lib\net45\MBrace.Client.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Core, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Core, Version=0.5.10.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Core.0.5.9-alpha\lib\net45\MBrace.Core.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.10-alpha\lib\net45\MBrace.Core.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Lib, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Lib, Version=0.5.10.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Core.0.5.9-alpha\lib\net45\MBrace.Lib.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.10-alpha\lib\net45\MBrace.Lib.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Runtime.Base, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Runtime.Base, Version=0.5.10.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Client.0.5.9-alpha\lib\net45\MBrace.Runtime.Base.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Client.0.5.10-alpha\lib\net45\MBrace.Runtime.Base.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Store, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Store, Version=0.5.10.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Store.0.5.9-alpha\lib\net45\MBrace.Store.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Store.0.5.10-alpha\lib\net45\MBrace.Store.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Utils, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Utils, Version=0.5.10.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Client.0.5.9-alpha\lib\net45\MBrace.Utils.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Client.0.5.10-alpha\lib\net45\MBrace.Utils.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.5\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -94,8 +94,9 @@
     <Reference Include="Unquote">
       <HintPath>..\..\packages\Unquote.2.2.2\lib\net40\Unquote.dll</HintPath>
     </Reference>
-    <Reference Include="Vagrant">
-      <HintPath>..\..\packages\Vagrant.0.2.6\lib\net45\Vagrant.dll</HintPath>
+    <Reference Include="Vagrant, Version=0.2.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Vagrant.0.2.7\lib\net45\Vagrant.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

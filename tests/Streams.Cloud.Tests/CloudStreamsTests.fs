@@ -1,6 +1,6 @@
 ﻿namespace Nessos.Streams.Cloud.Tests
     #nowarn "0444" // Disable mbrace warnings
-    
+    #nowarn "0044" // Nunit obsolete
     open System.Threading
     open System.Linq
     open FsCheck.Fluent
