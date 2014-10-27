@@ -16,14 +16,14 @@
       <tags>@tags@</tags>
 		@dependencies@
 		<references>
-			<reference file="Streams.Core.dll" />
-			<reference file="Streams.Core.CSharp.dll" />
+			<reference file="Streams.dll" />
+			<reference file="Streams.CSharp.dll" />
 		</references>
     </metadata>
     <files>
-        <file src="..\src\Streams.Core\bin\Release\Streams.Core.dll" target="lib\Streams.Core.dll" />
-        <file src="..\src\Streams.Core\bin\Release\Streams.Core.XML" target="lib\Streams.Core.XML" />
-		<file src="..\src\Streams.Core.CSharp\bin\Release\Streams.Core.CSharp.dll" target="lib\Streams.Core.CSharp.dll" />
-        <file src="..\src\Streams.Core.CSharp\bin\Release\Streams.Core.XML" target="lib\Streams.Core.CSharp.XML" />
+        <file src="..\bin\Streams.dll" target="lib\Streams.dll" />
+        <file src="..\bin\Streams.XML" target="lib\Streams.XML" />
+		    <file src="..\bin\Streams.CSharp.dll" target="lib\Streams.CSharp.dll" />
+        <file src="..\bin\Streams.XML" target="lib\Streams.CSharp.XML" />
     </files>
 </package>
