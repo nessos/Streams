@@ -42,11 +42,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="FsPickler">
-      <HintPath>..\..\packages\FsPickler.1.0.3\lib\net45\FsPickler.dll</HintPath>
+      <HintPath>..\..\packages\FsPickler.1.0.2\lib\net45\FsPickler.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FsPickler.Json">
-      <HintPath>..\..\packages\FsPickler.Json.1.0.3\lib\net45\FsPickler.Json.dll</HintPath>
+      <HintPath>..\..\packages\FsPickler.Json.1.0.2\lib\net45\FsPickler.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MBrace.Client">
@@ -97,7 +97,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="UnionArgParser">
-      <HintPath>..\..\packages\UnionArgParser.0.8.2\lib\net40\UnionArgParser.dll</HintPath>
+      <HintPath>..\..\packages\UnionArgParser.0.8.0\lib\net40\UnionArgParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Unquote">
@@ -105,7 +105,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Vagrant">
-      <HintPath>..\..\packages\Vagrant.0.2.7\lib\net45\Vagrant.dll</HintPath>
+      <HintPath>..\..\packages\Vagrant.0.2.6\lib\net45\Vagrant.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
