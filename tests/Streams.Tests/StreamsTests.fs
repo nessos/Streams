@@ -87,6 +87,49 @@
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``minBy`` () =
+            Spec.ForAny<int[]>(fun xs -> 
+                if Array.isEmpty xs then
+                    try let _ = xs |> Stream.ofArray |> Stream.minBy (fun i -> i + 1) in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x = xs |> Stream.ofArray |> Stream.minBy (fun i -> i + 1)
+                    let y = xs |> Seq.minBy (fun i -> i + 1)
+                    x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``maxBy`` () =
+            Spec.ForAny<int[]>(fun xs -> 
+                if Array.isEmpty xs then 
+                    try let _ = xs |> Stream.ofArray |> Stream.maxBy (fun i -> i + 1) in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x = xs |> Stream.ofArray |> Stream.maxBy (fun i -> i + 1)
+                    let y = xs |> Seq.maxBy (fun i -> i + 1)
+                    x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``countBy`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.countBy (fun i -> i % 5) |> Stream.toArray
+                let y = xs |> Seq.countBy (fun i -> i % 5) |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``foldBy`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs 
+                        |> Stream.ofArray 
+                        |> Stream.foldBy id (fun ts t -> t :: ts) (fun () -> []) // groupBy implementation
+                        |> Stream.map (fun (key, values) -> (key, values |> Seq.length))
+                        |> Stream.toArray
+                let y = xs  
+                        |> Seq.groupBy id 
+                        |> Seq.map (fun (key, values) -> (key, values |> Seq.length))
+                        |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
         member __.``groupBy`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs 

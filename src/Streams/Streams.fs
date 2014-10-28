@@ -195,6 +195,66 @@ module Stream =
         Array.Sort(keys.ToArray(), array)
         array |> ofArray
 
+    /// <summary>Locates the maximum element of the stream by given key.</summary>
+    /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+    /// <param name="source">The input stream.</param>
+    /// <returns>The maximum item.</returns>  
+    let inline maxBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : Stream<'T>) : 'T =
+        let result =
+            fold (fun state t -> 
+                let k = projection t 
+                match state with 
+                | None -> Some (t, k)
+                | Some (_, k') when k' < k -> Some (t, k) 
+                | _ -> state) None source
+
+        match result with
+        | None -> invalidArg "source" "The input sequence was empty."
+        | Some (t,_) -> t
+
+    /// <summary>Locates the minimum element of the stream by given key.</summary>
+    /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+    /// <param name="source">The input stream.</param>
+    /// <returns>The maximum item.</returns>  
+    let inline minBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : Stream<'T>) : 'T =
+        let result = 
+            fold (fun state t ->
+                let k = projection t 
+                match state with 
+                | None -> Some (t, k)
+                | Some (_, k') when k' > k -> Some (t, k) 
+                | _ -> state) None source
+
+        match result with
+        | None -> invalidArg "source" "The input sequence was empty."
+        | Some (t,_) -> t
+
+    /// <summary>Applies a state-updating function to a stream of inputs, grouped by key projection.</summary>
+    /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+    /// <param name="folder">Folding function.</param>
+    /// <param name="init">State initializing function.</param>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
+    let inline foldBy (projection : 'T -> 'Key) (folder : 'State -> 'T -> 'State) 
+                        (init : unit -> 'State) (stream : Stream<'T>) : Stream<'Key * 'State> =
+
+        let dict = new Dictionary<'Key, 'State ref>()
+
+        let inline body (t : 'T) =
+            let key = projection t
+            let ok, state = dict.TryGetValue key
+            let state =
+                if ok then state
+                else
+                    let state = ref <| init ()
+                    dict.Add(key, state)
+                    state
+
+            state := folder state.Value t
+
+        do iter body stream
+        dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value.Value))
+
     /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and a sequence of all elements that have each key.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
     /// <param name="stream">The input stream.</param>
@@ -211,6 +271,13 @@ module Stream =
                 dict.Add(key, grouping)
             grouping.Add(array.[i])
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))
+
+    /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and their frequency.</summary>
+    /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
+    let inline countBy (project : 'T -> 'Key) (stream : Stream<'T>) : Stream<'Key * int> =
+        foldBy project (fun c _ -> c + 1) (fun () -> 0) stream
 
     /// <summary>Returns the first element for which the given function returns true. Returns None if no such element exists.</summary>
     /// <param name="predicate">A function to test each source element for a condition.</param>
