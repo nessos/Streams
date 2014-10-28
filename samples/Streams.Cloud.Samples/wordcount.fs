@@ -1,7 +1,7 @@
 ﻿
 #if INTERACTIVE
 #load "../../packages/MBrace.Runtime.0.5.8-alpha/bootstrap.fsx" 
-#r "../../bin/Streams.dll"
+#r "../../bin/Streams.Core.dll"
 #r "../../bin/Streams.Cloud.dll"
 #else 
 module Nessos.Streams.Cloud.Samples.WordCount

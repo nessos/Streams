@@ -8,9 +8,9 @@
     <ProjectGuid>f3482666-f39c-4f49-8d0b-3583328d2c42</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Streams</RootNamespace>
-    <AssemblyName>Streams</AssemblyName>
+    <AssemblyName>Streams.Core</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>Streams</Name>
+    <Name>Streams.Core</Name>
     <TargetFrameworkProfile />
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
   </PropertyGroup>
