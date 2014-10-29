@@ -173,4 +173,27 @@
                 let y = xs |> Seq.countBy (fun i -> i % 5) |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
+
+        [<Test>]
+        member __.``minBy`` () =
+            Spec.ForAny<int[]>(fun xs -> 
+                if Array.isEmpty xs then
+                    try let _ = xs |> ParStream.ofArray |> ParStream.minBy (fun i -> i + 1) in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x = xs |> ParStream.ofArray |> ParStream.minBy (fun i -> i + 1)
+                    let y = xs |> Seq.minBy (fun i -> i + 1)
+                    x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``maxBy`` () =
+            Spec.ForAny<int[]>(fun xs -> 
+                if Array.isEmpty xs then 
+                    try let _ = xs |> ParStream.ofArray |> ParStream.maxBy (fun i -> i + 1) in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x = xs |> ParStream.ofArray |> ParStream.maxBy (fun i -> i + 1)
+                    let y = xs |> Seq.maxBy (fun i -> i + 1)
+                    x = y).QuickCheckThrowOnFailure()
+
        

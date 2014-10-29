@@ -241,6 +241,57 @@ module ParStream =
     let inline toResizeArray (stream : ParStream<'T>) : ResizeArray<'T> =
         new ResizeArray<'T>(toArray stream)
 
+
+    /// <summary>Locates the maximum element of the parallel stream by given key.</summary>
+    /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
+    /// <param name="source">The input parallel stream.</param>
+    /// <returns>The maximum item.</returns>  
+    let inline maxBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : ParStream<'T>) : 'T =
+        let result =
+            fold (fun state t -> 
+                let key = projection t 
+                match state with 
+                | None -> Some (ref t, ref key)
+                | Some (refValue, refKey) when !refKey < key -> 
+                    refValue := t
+                    refKey := key
+                    state
+                | _ -> state) (fun left right -> 
+                                    match left, right with
+                                    | Some (_, key), Some (_, key') ->
+                                        if !key' > !key then right else left
+                                    | None, _ -> right
+                                    | _, None -> left) (fun () -> None) source
+
+        match result with
+        | None -> invalidArg "source" "The input sequence was empty."
+        | Some (refValue,_) -> !refValue
+
+    /// <summary>Locates the minimum element of the parallel stream by given key.</summary>
+    /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
+    /// <param name="source">The input parallel stream.</param>
+    /// <returns>The maximum item.</returns>  
+    let inline minBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : ParStream<'T>) : 'T =
+        let result = 
+            fold (fun state t ->
+                let key = projection t 
+                match state with 
+                | None -> Some (ref t, ref key)
+                | Some (refValue, refKey) when !refKey > key -> 
+                    refValue := t
+                    refKey := key
+                    state 
+                | _ -> state) (fun left right -> 
+                                    match left, right with
+                                    | Some (_, key), Some (_, key') ->
+                                        if !key' > !key then left else right
+                                    | None, _ -> right
+                                    | _, None -> left) (fun () -> None) source
+
+        match result with
+        | None -> invalidArg "source" "The input sequence was empty."
+        | Some (refValue,_) -> !refValue
+
     /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream ordered by keys.</summary>
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
     /// <param name="stream">The input parallel stream.</param>

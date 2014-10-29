@@ -202,15 +202,18 @@ module Stream =
     let inline maxBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : Stream<'T>) : 'T =
         let result =
             fold (fun state t -> 
-                let k = projection t 
+                let key = projection t 
                 match state with 
-                | None -> Some (t, k)
-                | Some (_, k') when k' < k -> Some (t, k) 
+                | None -> Some (ref t, ref key)
+                | Some (refValue, refKey) when !refKey < key -> 
+                    refValue := t
+                    refKey := key
+                    state
                 | _ -> state) None source
 
         match result with
         | None -> invalidArg "source" "The input sequence was empty."
-        | Some (t,_) -> t
+        | Some (refValue, _) -> !refValue
 
     /// <summary>Locates the minimum element of the stream by given key.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
@@ -219,15 +222,18 @@ module Stream =
     let inline minBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : Stream<'T>) : 'T =
         let result = 
             fold (fun state t ->
-                let k = projection t 
+                let key = projection t 
                 match state with 
-                | None -> Some (t, k)
-                | Some (_, k') when k' > k -> Some (t, k) 
+                | None -> Some (ref t, ref key)
+                | Some (refValue, refKey) when !refKey > key -> 
+                    refValue := t
+                    refKey := key
+                    state
                 | _ -> state) None source
 
         match result with
         | None -> invalidArg "source" "The input sequence was empty."
-        | Some (t,_) -> t
+        | Some (refValue, _) -> !refValue
 
     /// <summary>Applies a state-updating function to a stream of inputs, grouped by key projection.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>

@@ -1,15 +1,32 @@
 ﻿#time
 
-#r "bin/Release/Streams.Core.dll"
-#r "bin/Release/Streams.Core.CSharp.dll"
+#r "../../bin/Streams.Core.dll"
+#r "../../bin/Streams.CSharp.dll"
 
 open System
 open System.Linq
-open Nessos.Streams.Core
-open Nessos.Streams.Core.CSharp
+open Nessos.Streams
+open Nessos.Streams.CSharp
 
 
-let data = [|1..10000000|] |> Array.map (fun i -> int64 <| (i % 1000000))
+let data = [|1..100000000|] |> Array.map (fun i -> int64 <| (i % 1000000))
+
+
+data
+|> Stream.ofArray
+|> Stream.maxBy id
+
+data
+|> ParStream.ofArray
+|> ParStream.maxBy id
+
+data
+|> ParStream.ofArray
+|> ParStream.minBy id
+
+data
+|> Stream.ofArray
+|> Stream.minBy id
 
 data
 |> Seq.filter (fun x -> x % 2L = 0L)
