@@ -173,6 +173,41 @@ module ParStream =
                         member self.Result = collector.Result }
                 stream.Apply collector }
 
+
+    /// <summary>Returns the elements of the parallel stream up to a specified count.</summary>
+    /// <param name="n">The number of items to take.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result prallel stream.</returns>
+    let inline take (n : int) (stream : ParStream<'T>) : ParStream<'T> =
+        if n < 0 then
+            raise <| new System.ArgumentException("The input must be non-negative.")
+        { new ParStream<'T> with
+            member self.Apply<'S> (collector : Collector<'T, 'S>) =
+                let collector = 
+                    let count = ref 0
+                    { new Collector<'T, 'S> with
+                        member self.Iterator() = 
+                            let iter = collector.Iterator()
+                            (fun value -> if Interlocked.Increment count <= n then iter value else false)
+                        member self.Result = collector.Result }
+                stream.Apply collector }
+
+    /// <summary>Returns a parallel stream that skips N elements of the input parallel stream and then yields the remaining elements of the stream.</summary>
+    /// <param name="n">The number of items to skip.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result parallel stream.</returns>
+    let inline skip (n : int) (stream : ParStream<'T>) : ParStream<'T> =
+        { new ParStream<'T> with
+            member self.Apply<'S> (collector : Collector<'T, 'S>) =
+                let collector = 
+                    let count = ref 0
+                    { new Collector<'T, 'S> with
+                        member self.Iterator() = 
+                            let iter = collector.Iterator()
+                            (fun value -> if Interlocked.Increment count > n then iter value else true)
+                        member self.Result = collector.Result }
+                stream.Apply collector }
+
     // terminal functions
 
     /// <summary>Applies the given function to each element of the parallel stream.</summary>

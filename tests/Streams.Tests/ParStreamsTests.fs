@@ -83,6 +83,22 @@
                 x = y).QuickCheckThrowOnFailure()
 
 
+        [<Test>]
+        member __.``take`` () =
+            Spec.ForAny<int[] * int>(fun (xs, (n : int)) ->
+                let n = System.Math.Abs(n) 
+                let x = xs |> ParStream.ofArray |> ParStream.take n |> ParStream.length
+                let y = xs.Take(n).Count()
+                x = y).QuickCheckThrowOnFailure()
+
+
+
+        [<Test>]
+        member __.``skip`` () =
+            Spec.ForAny<int[] * int>(fun (xs, (n : int)) -> 
+                let x = xs |> ParStream.ofArray |> ParStream.skip n |> ParStream.length
+                let y = xs.Skip(n).Count()
+                x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``sortBy`` () =
