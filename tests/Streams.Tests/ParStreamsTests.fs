@@ -150,4 +150,27 @@
                 let y = xs |> PSeq.forall (fun n -> n % 2 = 0) 
                 x = y).QuickCheckThrowOnFailure()
 
+
+        [<Test>]
+        member __.``foldBy`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs 
+                        |> ParStream.ofArray 
+                        |> ParStream.foldBy id (fun ts t -> t :: ts) (fun l r -> l @ r) (fun () -> []) // groupBy implementation
+                        |> ParStream.map (fun (key, values) -> (key, values |> Seq.length))
+                        |> ParStream.toArray
+                let y = xs  
+                        |> Seq.groupBy id 
+                        |> Seq.map (fun (key, values) -> (key, values |> Seq.length))
+                        |> Seq.toArray
+                set x = set y).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
+        member __.``countBy`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.countBy (fun i -> i % 5) |> Stream.toArray
+                let y = xs |> Seq.countBy (fun i -> i % 5) |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
        

@@ -266,6 +266,60 @@ module ParStream =
         Sort.parallelSort keyArray' valueArray'
         valueArray' |> ofArray
 
+
+    /// <summary>Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and the result of the threading an accumulator.</summary>
+    /// <param name="projection">A function to transform items from the input ParStream to keys.</param>
+    /// <param name="folder">A function that updates the state with each element from the ParStream.</param>
+    /// <param name="combiner">A function that combines partial states into a new state.</param>
+    /// <param name="state">A function that produces the initial state.</param>
+    /// <param name="stream">The input ParStream.</param>
+    /// <returns>The final result.</returns>
+    let inline foldBy (projection : 'T -> 'Key) 
+                      (folder : 'State -> 'T -> 'State) 
+                      (combiner : 'State -> 'State -> 'State) 
+                      (state : unit -> 'State) (stream : ParStream<'T>) : ParStream<'Key * 'State> =
+        let results = new List<Dictionary<'Key, 'State ref>>()
+        let collector = 
+            { new Collector<'T,  Object> with
+                member self.Iterator() = 
+                    let dict = new Dictionary<'Key, 'State ref>()
+                    results.Add(dict)
+                    (fun value -> 
+                            let key = projection value
+                            let mutable stateRef = Unchecked.defaultof<'State ref>
+                            if dict.TryGetValue(key, &stateRef) then
+                                stateRef := folder !stateRef value
+                            else
+                                stateRef <- ref <| state ()
+                                stateRef := folder !stateRef value
+                                dict.Add(key, stateRef)
+                            true)
+                member self.Result = 
+                    raise <| System.InvalidOperationException() }
+        stream.Apply collector
+        let dict = 
+            let dict = new Dictionary<'Key, 'State ref>()
+            for result in results do
+                for keyValue in result do
+                    let mutable stateRef = Unchecked.defaultof<'State ref>
+                    if dict.TryGetValue(keyValue.Key, &stateRef) then
+                        stateRef := combiner !stateRef !keyValue.Value
+                    else
+                        stateRef <- ref <| state ()
+                        stateRef := combiner !stateRef !keyValue.Value
+                        dict.Add(keyValue.Key, stateRef)
+            dict
+        dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, !keyValue.Value))
+        
+
+    /// <summary>
+    /// Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and their number of occurrences in the original sequence.
+    /// </summary>
+    /// <param name="projection">A function that maps items from the input ParStream to keys.</param>
+    /// <param name="stream">The input ParStream.</param>
+    let inline countBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * int64> =
+        foldBy projection (fun state _ -> state + 1L) (+) (fun () -> 0L) stream
+
     /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream of unique keys and a sequence of all elements that have each key.</summary>
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
     /// <param name="stream">The input parallel stream.</param>
@@ -274,7 +328,7 @@ module ParStream =
         let dict = new ConcurrentDictionary<'Key, Tuple<int ref, 'T [] ref>>()
         
         let collector = 
-            { new Collector<'T, int> with
+            { new Collector<'T, Object> with
                 member self.Iterator() = 
                     // A (mostly) lock-free ConcurrentList.Add
                     let rec groupingAdd (value : 'T) (grouping : Tuple<int ref, 'T [] ref>) = 
