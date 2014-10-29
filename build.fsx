@@ -140,7 +140,7 @@ Target "NuGet" (fun _ ->
     NuGet (fun p -> 
         { p with   
             Authors = authors
-            Project = project
+            Project = "Streams"
             Summary = summary
             Description = description
             Version = Streams.nugetVersion
@@ -155,7 +155,7 @@ Target "NuGet" (fun _ ->
     NuGet (fun p -> 
         { p with   
             Authors = authors
-            Project = project
+            Project = "Streams.CSharp"
             Summary = summary
             Description = description
             Version = Streams.nugetVersion
