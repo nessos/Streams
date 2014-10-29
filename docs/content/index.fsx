@@ -17,8 +17,10 @@ A lightweight F#/C# library for efficient functional-style pipelines on streams 
   <div class="span6">
     <div class="well well-small" id="nuget">
       Install via <a href="https://nuget.org/packages/Streams">NuGet</a>:
-      <pre>PM> Install-Package Streams</pre>
-      <pre>PM> Install-Package Streams.CSharp</pre>
+      <pre>PM> Install-Package Streams
+PM> Install-Package Streams.CSharp
+PM> Install-Package Streams.Cloud -Pre
+PM> Install-Package Streams.Cloud.CSharp -Pre</pre>
     </div>
   </div>
   <div class="span1"></div>

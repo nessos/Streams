@@ -66,6 +66,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "img", "img", "{A9BADA98-176
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{7E8195EC-5B5E-478C-B8D5-52F474AA6377}"
 	ProjectSection(SolutionItems) = preProject
+		nuget\Streams.Cloud.CSharp.nuspec = nuget\Streams.Cloud.CSharp.nuspec
 		nuget\Streams.Cloud.nuspec = nuget\Streams.Cloud.nuspec
 		nuget\Streams.CSharp.nuspec = nuget\Streams.CSharp.nuspec
 		nuget\Streams.nuspec = nuget\Streams.nuspec

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
       <id>@project@</id>
@@ -14,13 +14,15 @@
       <releaseNotes>@releaseNotes@</releaseNotes>
       <copyright>Copyright 2014</copyright>
       <tags>@tags@</tags>
-		@dependencies@
-		<references>
-			<reference file="Streams.CSharp.dll" />
-		</references>
+    @dependencies@
+    <references>
+      <reference file="Streams.Cloud.CSharp.dll" />
+    </references>
     </metadata>
     <files>
-		    <file src="..\bin\Streams.CSharp.dll" target="lib\Streams.CSharp.dll" />
-        <file src="..\bin\Streams.CSharp.XML" target="lib\Streams.CSharp.XML" />
+        <file src="..\bin\Streams.Cloud.dll" target="lib\Streams.Cloud.dll" />
+        <file src="..\bin\Streams.Cloud.XML" target="lib\Streams.Cloud.XML" />
+        <file src="..\bin\Streams.Cloud.CSharp.dll" target="lib\Streams.Cloud.CSharp.dll" />
+        <file src="..\bin\Streams.Cloud.CSharp.XML" target="lib\Streams.Cloud.CSharp.XML" />
     </files>
 </package>

@@ -233,33 +233,31 @@ module Stream =
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
     /// <param name="folder">Folding function.</param>
     /// <param name="init">State initializing function.</param>
-    /// <param name="stream">The input stream.</param>
+    /// <param name="source">The input stream.</param>
     /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
     let inline foldBy (projection : 'T -> 'Key) (folder : 'State -> 'T -> 'State) 
-                        (init : unit -> 'State) (stream : Stream<'T>) : Stream<'Key * 'State> =
+                        (init : unit -> 'State) (source : Stream<'T>) : Stream<'Key * 'State> =
 
         let dict = new Dictionary<'Key, 'State ref>()
 
         let inline body (t : 'T) =
             let key = projection t
-            let ok, state = dict.TryGetValue key
-            let state =
-                if ok then state
-                else
-                    let state = ref <| init ()
-                    dict.Add(key, state)
-                    state
+            let mutable container = Unchecked.defaultof<'State ref>
+            if not <| dict.TryGetValue(key, &container) then
+                container <- ref <| init ()
+                dict.Add(key, container)
 
-            state := folder state.Value t
+            container := folder container.Value t
+            true
 
-        do iter body stream
+        let (Stream iter) = source in iter body
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value.Value))
 
     /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and a sequence of all elements that have each key.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
-    /// <param name="stream">The input stream.</param>
+    /// <param name="source">The input stream.</param>
     /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
-    let inline groupBy (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'Key * seq<'T>>  =
+    let inline groupBy (projection : 'T -> 'Key) (source : Stream<'T>) : Stream<'Key * seq<'T>>  =
         let dict = new Dictionary<'Key, List<'T>>()
         
         let inline body (t : 'T) = 
@@ -270,8 +268,8 @@ module Stream =
                 dict.Add(key, grouping)
             grouping.Add(t)
             true
-        let (Stream iterf) =  stream
-        iterf body
+
+        let (Stream iterf) = source in iterf body
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))
 
     /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and their frequency.</summary>
