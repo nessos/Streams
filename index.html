@@ -42,8 +42,9 @@
   <div class="span6">
     <div class="well well-small" id="nuget">
       Install via <a href="https://nuget.org/packages/Streams">NuGet</a>:
-      <pre>PM> Install-Package Streams</pre>
-      <pre>PM> Install-Package Streams.CSharp</pre>
+      <pre>PM> Install-Package Streams
+PM> Install-Package Streams.CSharp
+PM> Install-Package Streams.Cloud -Pre</pre>
     </div>
   </div>
   <div class="span1"></div>
@@ -141,20 +142,20 @@
 <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs4', 40)" onmouseover="showTip(event, 'fs4', 40)" class="i">Array</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs18', 41)" onmouseover="showTip(event, 'fs18', 41)" class="i">sum</span>
 
 <span class="c">// Parallel</span>
-<span class="k">open</span> <span onmouseout="hideTip(event, 'fs19', 42)" onmouseover="showTip(event, 'fs19', 42)" class="i">FSharp</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs20', 43)" onmouseover="showTip(event, 'fs20', 43)" class="i">Collections</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs21', 44)" onmouseover="showTip(event, 'fs21', 44)" class="i">ParallelSeq</span>
+<span class="k">open</span> <span class="i">FSharp</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs19', 42)" onmouseover="showTip(event, 'fs19', 42)" class="i">Collections</span><span class="o">.</span><span class="i">ParallelSeq</span>
 
 <span class="c">// Real: 00:00:00.017, CPU: 00:00:00.078, GC gen0: 0, gen1: 0, gen2: 0</span>
-<span onmouseout="hideTip(event, 'fs3', 45)" onmouseover="showTip(event, 'fs3', 45)" class="i">data</span>
-<span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs22', 46)" onmouseover="showTip(event, 'fs22', 46)" class="i">ParStream</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs23', 47)" onmouseover="showTip(event, 'fs23', 47)" class="i">ofArray</span>
-<span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs22', 48)" onmouseover="showTip(event, 'fs22', 48)" class="i">ParStream</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs24', 49)" onmouseover="showTip(event, 'fs24', 49)" class="i">filter</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs10', 50)" onmouseover="showTip(event, 'fs10', 50)" class="i">x</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs10', 51)" onmouseover="showTip(event, 'fs10', 51)" class="i">x</span> <span class="o">%</span> <span class="n">2L</span> <span class="o">=</span> <span class="n">0L</span>)
-<span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs22', 52)" onmouseover="showTip(event, 'fs22', 52)" class="i">ParStream</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs25', 53)" onmouseover="showTip(event, 'fs25', 53)" class="i">map</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs10', 54)" onmouseover="showTip(event, 'fs10', 54)" class="i">x</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs10', 55)" onmouseover="showTip(event, 'fs10', 55)" class="i">x</span> <span class="o">+</span> <span class="n">1L</span>)
-<span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs22', 56)" onmouseover="showTip(event, 'fs22', 56)" class="i">ParStream</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs26', 57)" onmouseover="showTip(event, 'fs26', 57)" class="i">sum</span>
+<span onmouseout="hideTip(event, 'fs3', 43)" onmouseover="showTip(event, 'fs3', 43)" class="i">data</span>
+<span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs20', 44)" onmouseover="showTip(event, 'fs20', 44)" class="i">ParStream</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs21', 45)" onmouseover="showTip(event, 'fs21', 45)" class="i">ofArray</span>
+<span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs20', 46)" onmouseover="showTip(event, 'fs20', 46)" class="i">ParStream</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs22', 47)" onmouseover="showTip(event, 'fs22', 47)" class="i">filter</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs10', 48)" onmouseover="showTip(event, 'fs10', 48)" class="i">x</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs10', 49)" onmouseover="showTip(event, 'fs10', 49)" class="i">x</span> <span class="o">%</span> <span class="n">2L</span> <span class="o">=</span> <span class="n">0L</span>)
+<span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs20', 50)" onmouseover="showTip(event, 'fs20', 50)" class="i">ParStream</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs23', 51)" onmouseover="showTip(event, 'fs23', 51)" class="i">map</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs10', 52)" onmouseover="showTip(event, 'fs10', 52)" class="i">x</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs10', 53)" onmouseover="showTip(event, 'fs10', 53)" class="i">x</span> <span class="o">+</span> <span class="n">1L</span>)
+<span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs20', 54)" onmouseover="showTip(event, 'fs20', 54)" class="i">ParStream</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs24', 55)" onmouseover="showTip(event, 'fs24', 55)" class="i">sum</span>
 
 <span class="c">// Real: 00:00:00.045, CPU: 00:00:00.187, GC gen0: 0, gen1: 0, gen2: 0</span>
-<span onmouseout="hideTip(event, 'fs3', 58)" onmouseover="showTip(event, 'fs3', 58)" class="i">data</span>
-<span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs27', 59)" onmouseover="showTip(event, 'fs27', 59)" class="i">PSeq</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs28', 60)" onmouseover="showTip(event, 'fs28', 60)" class="i">filter</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs10', 61)" onmouseover="showTip(event, 'fs10', 61)" class="i">x</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs10', 62)" onmouseover="showTip(event, 'fs10', 62)" class="i">x</span> <span class="o">%</span> <span class="n">2L</span> <span class="o">=</span> <span class="n">0L</span>)
-<span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs27', 63)" onmouseover="showTip(event, 'fs27', 63)" class="i">PSeq</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs29', 64)" onmouseover="showTip(event, 'fs29', 64)" class="i">map</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs10', 65)" onmouseover="showTip(event, 'fs10', 65)" class="i">x</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs10', 66)" onmouseover="showTip(event, 'fs10', 66)" class="i">x</span> <span class="o">+</span> <span class="n">1L</span>)
-<span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs27', 67)" onmouseover="showTip(event, 'fs27', 67)" class="i">PSeq</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs30', 68)" onmouseover="showTip(event, 'fs30', 68)" class="i">sum</span></pre>
+<span onmouseout="hideTip(event, 'fs3', 56)" onmouseover="showTip(event, 'fs3', 56)" class="i">data</span>
+<span class="o">|&gt;</span> <span class="i">PSeq</span><span class="o">.</span><span class="i">filter</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs10', 57)" onmouseover="showTip(event, 'fs10', 57)" class="i">x</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs10', 58)" onmouseover="showTip(event, 'fs10', 58)" class="i">x</span> <span class="o">%</span> <span class="n">2L</span> <span class="o">=</span> <span class="n">0L</span>)
+<span class="o">|&gt;</span> <span class="i">PSeq</span><span class="o">.</span><span class="i">map</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs10', 59)" onmouseover="showTip(event, 'fs10', 59)" class="i">x</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs10', 60)" onmouseover="showTip(event, 'fs10', 60)" class="i">x</span> <span class="o">+</span> <span class="n">1L</span>)
+<span class="o">|&gt;</span> <span class="i">PSeq</span><span class="o">.</span><span class="i">sum</span></pre>
 </td>
 </tr>
 </table>
@@ -191,18 +192,12 @@ For more information see the <a href="https://github.com/nessos/Streams/blob/mas
 <div class="tip" id="fs16">val sum : source:seq&lt;&#39;T&gt; -&gt; &#39;T (requires member ( + ) and member get_Zero)<br /><br />Full name: Microsoft.FSharp.Collections.Seq.sum</div>
 <div class="tip" id="fs17">val filter : predicate:(&#39;T -&gt; bool) -&gt; array:&#39;T [] -&gt; &#39;T []<br /><br />Full name: Microsoft.FSharp.Collections.Array.filter</div>
 <div class="tip" id="fs18">val sum : array:&#39;T [] -&gt; &#39;T (requires member ( + ) and member get_Zero)<br /><br />Full name: Microsoft.FSharp.Collections.Array.sum</div>
-<div class="tip" id="fs19">namespace FSharp</div>
-<div class="tip" id="fs20">namespace FSharp.Collections</div>
-<div class="tip" id="fs21">namespace FSharp.Collections.ParallelSeq</div>
-<div class="tip" id="fs22">Multiple items<br />module ParStream<br /><br />from Nessos.Streams<br /><br />--------------------<br />type ParStream&lt;&#39;T&gt; =<br />&#160;&#160;interface<br />&#160;&#160;&#160;&#160;abstract member Apply : Collector&lt;&#39;T,&#39;R&gt; -&gt; unit<br />&#160;&#160;end<br /><br />Full name: Nessos.Streams.ParStream&lt;_&gt;</div>
-<div class="tip" id="fs23">val ofArray : source:&#39;T [] -&gt; ParStream&lt;&#39;T&gt;<br /><br />Full name: Nessos.Streams.ParStream.ofArray</div>
-<div class="tip" id="fs24">val filter : predicate:(&#39;T -&gt; bool) -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; ParStream&lt;&#39;T&gt;<br /><br />Full name: Nessos.Streams.ParStream.filter</div>
-<div class="tip" id="fs25">val map : f:(&#39;T -&gt; &#39;R) -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; ParStream&lt;&#39;R&gt;<br /><br />Full name: Nessos.Streams.ParStream.map</div>
-<div class="tip" id="fs26">val sum : stream:ParStream&lt;&#39;T&gt; -&gt; &#39;T (requires member ( + ) and member get_Zero)<br /><br />Full name: Nessos.Streams.ParStream.sum</div>
-<div class="tip" id="fs27">module PSeq<br /><br />from FSharp.Collections.ParallelSeq</div>
-<div class="tip" id="fs28">val filter : predicate:(&#39;T -&gt; bool) -&gt; source:seq&lt;&#39;T&gt; -&gt; pseq&lt;&#39;T&gt;<br /><br />Full name: FSharp.Collections.ParallelSeq.PSeq.filter</div>
-<div class="tip" id="fs29">val map : mapping:(&#39;T -&gt; &#39;U) -&gt; source:seq&lt;&#39;T&gt; -&gt; pseq&lt;&#39;U&gt;<br /><br />Full name: FSharp.Collections.ParallelSeq.PSeq.map</div>
-<div class="tip" id="fs30">val sum : source:seq&lt;&#39;T&gt; -&gt; &#39;T (requires member ( + ) and member get_Zero)<br /><br />Full name: FSharp.Collections.ParallelSeq.PSeq.sum</div>
+<div class="tip" id="fs19">namespace Microsoft.FSharp.Collections</div>
+<div class="tip" id="fs20">Multiple items<br />module ParStream<br /><br />from Nessos.Streams<br /><br />--------------------<br />type ParStream&lt;&#39;T&gt; =<br />&#160;&#160;interface<br />&#160;&#160;&#160;&#160;abstract member Apply : Collector&lt;&#39;T,&#39;R&gt; -&gt; unit<br />&#160;&#160;end<br /><br />Full name: Nessos.Streams.ParStream&lt;_&gt;</div>
+<div class="tip" id="fs21">val ofArray : source:&#39;T [] -&gt; ParStream&lt;&#39;T&gt;<br /><br />Full name: Nessos.Streams.ParStream.ofArray</div>
+<div class="tip" id="fs22">val filter : predicate:(&#39;T -&gt; bool) -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; ParStream&lt;&#39;T&gt;<br /><br />Full name: Nessos.Streams.ParStream.filter</div>
+<div class="tip" id="fs23">val map : f:(&#39;T -&gt; &#39;R) -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; ParStream&lt;&#39;R&gt;<br /><br />Full name: Nessos.Streams.ParStream.map</div>
+<div class="tip" id="fs24">val sum : stream:ParStream&lt;&#39;T&gt; -&gt; &#39;T (requires member ( + ) and member get_Zero)<br /><br />Full name: Nessos.Streams.ParStream.sum</div>
 
         </div>
         <div class="span3">
