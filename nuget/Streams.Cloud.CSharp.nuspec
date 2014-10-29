@@ -20,8 +20,6 @@
     </references>
     </metadata>
     <files>
-        <file src="..\bin\Streams.Cloud.dll" target="lib\Streams.Cloud.dll" />
-        <file src="..\bin\Streams.Cloud.XML" target="lib\Streams.Cloud.XML" />
         <file src="..\bin\Streams.Cloud.CSharp.dll" target="lib\Streams.Cloud.CSharp.dll" />
         <file src="..\bin\Streams.Cloud.CSharp.XML" target="lib\Streams.Cloud.CSharp.XML" />
     </files>
