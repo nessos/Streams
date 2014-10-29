@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!--This file represents the results of running a test suite-->
+<test-results name="C:\Users\developer001\Source\Repos\Streams\bin\Streams.Tests.exe" total="66" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2014-10-27" time="15:40:48">
+  <environment nunit-version="2.6.3.13283" clr-version="2.0.50727.5483" os-version="Microsoft Windows NT 6.1.7601 Service Pack 1" platform="Win32NT" cwd="C:\Users\developer001\Source\Repos\Streams" machine-name="NPAL" user="Developer001" user-domain="NESSOS" />
+  <culture-info current-culture="el-GR" current-uiculture="en-US" />
+  <test-suite type="Test Project" name="" executed="True" result="Success" success="True" time="7.096" asserts="0">
+    <results>
+      <test-suite type="Assembly" name="C:\Users\developer001\Source\Repos\Streams\bin\Streams.Tests.exe" executed="True" result="Success" success="True" time="3.732" asserts="0">
+        <results>
+          <test-suite type="Namespace" name="Nessos" executed="True" result="Success" success="True" time="3.715" asserts="0">
+            <results>
+              <test-suite type="Namespace" name="Streams" executed="True" result="Success" success="True" time="3.714" asserts="0">
+                <results>
+                  <test-suite type="Namespace" name="Tests" executed="True" result="Success" success="True" time="3.714" asserts="0">
+                    <results>
+                      <test-suite type="TestFixture" name="ParStreams tests" executed="True" result="Success" success="True" time="2.075" asserts="0">
+                        <categories>
+                          <category name="ParStreams.FSharp" />
+                        </categories>
+                        <results>
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.choose" executed="True" result="Success" success="True" time="0.526" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.collect" executed="True" result="Success" success="True" time="0.056" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.exists" executed="True" result="Success" success="True" time="0.038" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.filter" executed="True" result="Success" success="True" time="0.023" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.find" executed="True" result="Success" success="True" time="0.040" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.fold" executed="True" result="Success" success="True" time="0.039" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.forall" executed="True" result="Success" success="True" time="0.018" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.groupBy" executed="True" result="Success" success="True" time="0.168" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.length" executed="True" result="Success" success="True" time="0.025" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.map" executed="True" result="Success" success="True" time="0.021" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.ofArray" executed="True" result="Success" success="True" time="0.022" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.ofResizeArray/toResizeArray" executed="True" result="Success" success="True" time="0.039" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.ofSeq" executed="True" result="Success" success="True" time="0.048" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.pick" executed="True" result="Success" success="True" time="0.046" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.sortBy" executed="True" result="Success" success="True" time="0.139" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.sum" executed="True" result="Success" success="True" time="0.027" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.tryFind" executed="True" result="Success" success="True" time="0.022" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.ParStreams tests.tryPick" executed="True" result="Success" success="True" time="0.013" asserts="0" />
+                        </results>
+                      </test-suite>
+                      <test-suite type="TestFixture" name="Streams tests" executed="True" result="Success" success="True" time="1.559" asserts="0">
+                        <categories>
+                          <category name="Streams.FSharp" />
+                        </categories>
+                        <results>
+                          <test-case name="Nessos.Streams.Tests.Streams tests.choose" executed="True" result="Success" success="True" time="0.015" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.collect" executed="True" result="Success" success="True" time="0.025" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.collect/take" executed="True" result="Success" success="True" time="0.076" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.exists" executed="True" result="Success" success="True" time="0.008" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.filter" executed="True" result="Success" success="True" time="0.011" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.find" executed="True" result="Success" success="True" time="0.012" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.fold" executed="True" result="Success" success="True" time="0.011" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.forall" executed="True" result="Success" success="True" time="0.008" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.groupBy" executed="True" result="Success" success="True" time="0.035" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.length" executed="True" result="Success" success="True" time="0.007" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.map" executed="True" result="Success" success="True" time="0.009" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.ofArray" executed="True" result="Success" success="True" time="0.009" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.ofResizeArray/toResizeArray" executed="True" result="Success" success="True" time="0.009" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.ofSeq" executed="True" result="Success" success="True" time="0.009" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.pick" executed="True" result="Success" success="True" time="0.011" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.skip" executed="True" result="Success" success="True" time="0.016" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.sortBy" executed="True" result="Success" success="True" time="0.016" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.sum" executed="True" result="Success" success="True" time="0.008" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.take" executed="True" result="Success" success="True" time="0.014" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.takeWhile" executed="True" result="Success" success="True" time="0.010" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.tryFind" executed="True" result="Success" success="True" time="0.007" asserts="0" />
+                          <test-case name="Nessos.Streams.Tests.Streams tests.tryPick" executed="True" result="Success" success="True" time="0.008" asserts="0" />
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="Assembly" name="C:\Users\developer001\Source\Repos\Streams\bin\Streams.Tests.CSharp.exe" executed="True" result="Success" success="True" time="2.516" asserts="0">
+        <results>
+          <test-suite type="Namespace" name="Nessos" executed="True" result="Success" success="True" time="2.499" asserts="0">
+            <results>
+              <test-suite type="Namespace" name="Streams" executed="True" result="Success" success="True" time="2.499" asserts="0">
+                <results>
+                  <test-suite type="Namespace" name="Tests" executed="True" result="Success" success="True" time="2.499" asserts="0">
+                    <results>
+                      <test-suite type="Namespace" name="CSharp" executed="True" result="Success" success="True" time="2.498" asserts="0">
+                        <results>
+                          <test-suite type="TestFixture" name="ParStreamsTests" executed="True" result="Success" success="True" time="1.486" asserts="0">
+                            <categories>
+                              <category name="ParStreams.CSharp" />
+                            </categories>
+                            <results>
+                              <test-case name="Nessos.Streams.Tests.CSharp.ParStreamsTests.Aggregate" executed="True" result="Success" success="True" time="0.454" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.ParStreamsTests.Count" executed="True" result="Success" success="True" time="0.024" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.ParStreamsTests.First" executed="True" result="Success" success="True" time="0.037" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.ParStreamsTests.GroupBy" executed="True" result="Success" success="True" time="0.135" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.ParStreamsTests.OfArray" executed="True" result="Success" success="True" time="0.018" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.ParStreamsTests.OfEnumerable" executed="True" result="Success" success="True" time="0.033" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.ParStreamsTests.OfList" executed="True" result="Success" success="True" time="0.029" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.ParStreamsTests.OrderBy" executed="True" result="Success" success="True" time="0.178" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.ParStreamsTests.Select" executed="True" result="Success" success="True" time="0.021" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.ParStreamsTests.SelectMany" executed="True" result="Success" success="True" time="0.047" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.ParStreamsTests.Sum" executed="True" result="Success" success="True" time="0.022" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.ParStreamsTests.Where" executed="True" result="Success" success="True" time="0.025" asserts="0" />
+                            </results>
+                          </test-suite>
+                          <test-suite type="TestFixture" name="StreamsTests" executed="True" result="Success" success="True" time="0.957" asserts="0">
+                            <categories>
+                              <category name="Streams.CSharp" />
+                            </categories>
+                            <results>
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.Aggregate" executed="True" result="Success" success="True" time="0.009" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.Count" executed="True" result="Success" success="True" time="0.008" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.First" executed="True" result="Success" success="True" time="0.011" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.GroupBy" executed="True" result="Success" success="True" time="0.032" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.OfArray" executed="True" result="Success" success="True" time="0.007" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.OfEnumerable" executed="True" result="Success" success="True" time="0.010" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.OfList" executed="True" result="Success" success="True" time="0.012" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.OrderBy" executed="True" result="Success" success="True" time="0.019" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.Select" executed="True" result="Success" success="True" time="0.008" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.SelectMany" executed="True" result="Success" success="True" time="0.016" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.Skip" executed="True" result="Success" success="True" time="0.011" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.Sum" executed="True" result="Success" success="True" time="0.008" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.Take" executed="True" result="Success" success="True" time="0.011" asserts="0" />
+                              <test-case name="Nessos.Streams.Tests.CSharp.StreamsTests.Where" executed="True" result="Success" success="True" time="0.012" asserts="0" />
+                            </results>
+                          </test-suite>
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>
