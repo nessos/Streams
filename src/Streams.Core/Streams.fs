@@ -260,16 +260,18 @@ module Stream =
     /// <param name="stream">The input stream.</param>
     /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
     let inline groupBy (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'Key * seq<'T>>  =
-        let array = toArray stream
         let dict = new Dictionary<'Key, List<'T>>()
-        let mutable grouping = Unchecked.defaultof<List<'T>>
-
-        for i = 0 to array.Length - 1 do
-            let key = projection array.[i]
+        
+        let inline body (t : 'T) = 
+            let mutable grouping = Unchecked.defaultof<List<'T>>
+            let key = projection t
             if not <| dict.TryGetValue(key, &grouping) then
                 grouping <- new List<'T>()
                 dict.Add(key, grouping)
-            grouping.Add(array.[i])
+            grouping.Add(t)
+            true
+        let (Stream iterf) =  stream
+        iterf body
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))
 
     /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and their frequency.</summary>

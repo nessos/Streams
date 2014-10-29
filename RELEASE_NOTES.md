@@ -1,5 +1,5 @@
-#### 0.2.1
-* Bug fixes.
+#### 0.2.2
+* ParStream bug fixes and performance improvements.
 
 #### 0.2.0
 * New functions (choose, tryFind, find, tryPick, pick, exists, forall) for Stream and ParStream.
