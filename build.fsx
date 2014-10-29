@@ -200,8 +200,9 @@ Target "NuGet" (fun _ ->
             OutputPath = "nuget"
             Dependencies = 
                 [
-                    "Streams",      RequireExactly Streams.nugetVersion
-                    "MBrace.Core",  RequireExactly "0.5.10-alpha"
+                    "Streams",          RequireExactly Streams.nugetVersion
+                    "Streams.Cloud",    RequireExactly CloudStreams.nugetVersion
+                    "MBrace.Client",    RequireExactly "0.5.10-alpha"
                     "FSharp.Core.Microsoft.Signed", "3.1.1.1"
                 ]
             ToolPath = nugetPath
