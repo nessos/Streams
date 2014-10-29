@@ -352,7 +352,7 @@ module ParStream =
         let valueArray' = valueArray.ToArray()
         Sort.parallelSort keyArray' valueArray'
         match takeCount with 
-        | Some count -> valueArray' |> Seq.take count |> ofSeq
+        | Some count -> valueArray' |> Seq.take count |> Seq.toArray |> ofArray
         | None -> valueArray' |> ofArray
 
 
