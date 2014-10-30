@@ -1,3 +1,6 @@
+#### 0.2.4
+* Introduce order semantics.
+
 #### 0.2.3
 * Added MaxBy,MinBy,AggregateBy/foldBy, Take, Skip and CountBy methods in Stream and ParStream.
 

@@ -247,5 +247,21 @@ namespace Nessos.Streams.CSharp
         {
             return CSharpProxy.CountBy(stream, projection);
         }
+
+        /// <summary>Returns a parallel stream that preserves ordering.</summary>
+        /// <param name="stream">The input parallel stream.</param>
+        /// <returns>The result parallel stream as ordered.</returns>
+        public static ParStream<TSource> AsOrdered<TSource>(this ParStream<TSource> stream)
+        {
+            return ParStream.ordered(stream);
+        }
+
+        /// <summary>Returns a parallel stream that is unordered.</summary>
+        /// <param name="stream">The input parallel stream.</param>
+        /// <returns>The result parallel stream as unordered.</returns>
+        public static ParStream<TSource> AsUnordered<TSource>(this ParStream<TSource> stream)
+        {
+            return ParStream.unordered(stream);
+        }
     }
 }
