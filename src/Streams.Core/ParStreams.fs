@@ -329,10 +329,9 @@ module ParStream =
 
     /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream ordered by keys.</summary>
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
-    /// <param name="takeCount">Option type that indicates with Some the number of elements to return and with None to return all elements.</param>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result parallel stream.</returns>    
-    let inline sortBy (projection : 'T -> 'Key) (takeCount : int option) (stream : ParStream<'T>) : ParStream<'T>  =
+    let inline sortBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'T>  =
         // explicit use of Tuple<ArrayCollector<'Key>, ArrayCollector<'T>> to avoid temp heap allocations of (ArrayCollector<'Key> * ArrayCollector<'T>) 
         let keyValueTuple = 
             fold (fun (keyValueTuple : Tuple<ArrayCollector<'Key>, ArrayCollector<'T>>) value -> 
@@ -351,10 +350,7 @@ module ParStream =
         let keyArray' = keyArray.ToArray()
         let valueArray' = valueArray.ToArray()
         Sort.parallelSort keyArray' valueArray'
-        match takeCount with 
-        | Some count -> valueArray' |> Seq.take count |> Seq.toArray |> ofArray
-        | None -> valueArray' |> ofArray
-
+        valueArray' |> ofArray
 
     /// <summary>Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and the result of the threading an accumulator.</summary>
     /// <param name="projection">A function to transform items from the input ParStream to keys.</param>
