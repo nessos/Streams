@@ -117,7 +117,38 @@ type public CSharpProxy =
         ParStream.forall (fun x -> func.Invoke(x)) stream
 
 
-    
-    
+    static member MaxBy<'T,'U when 'U : comparison>(stream : Stream<'T>, func : Func<'T,'U>) =
+        Stream.maxBy (fun x -> func.Invoke(x)) stream
 
+    static member MaxBy<'T,'U when 'U : comparison>(stream : ParStream<'T>, func : Func<'T,'U>) =
+        ParStream.maxBy (fun x -> func.Invoke(x)) stream
 
+    static member MinBy<'T,'U when 'U : comparison>(stream : Stream<'T>, func : Func<'T,'U>) =
+        Stream.minBy (fun x -> func.Invoke(x)) stream
+
+    static member MinBy<'T,'U when 'U : comparison>(stream : ParStream<'T>, func : Func<'T,'U>) =
+        ParStream.minBy (fun x -> func.Invoke(x)) stream
+
+    static member CountBy<'T,'U when 'U : equality>(stream : Stream<'T>, func : Func<'T,'U>) =
+        Stream.countBy (fun x -> func.Invoke(x)) stream
+
+    static member CountBy<'T,'U when 'U : equality>(stream : ParStream<'T>, func : Func<'T,'U>) =
+        ParStream.countBy (fun x -> func.Invoke(x)) stream
+
+    static member AggregateBy<'T,'Key, 'State when 'Key : equality>(stream : Stream<'T>, proj : Func<'T,'Key>, folder : Func<'State,'T,'State>, init : Func<'State>) =
+        Stream.foldBy (fun x -> proj.Invoke(x)) (fun x s -> folder.Invoke(x,s)) (fun () -> init.Invoke()) stream
+
+    static member AggregateBy<'T,'Key, 'State when 'Key : equality>(stream : ParStream<'T>, proj : Func<'T,'Key>, folder : Func<'State,'T,'State>, combiner : Func<'State,'State,'State>, init : Func<'State>) =
+        ParStream.foldBy (fun x -> proj.Invoke(x)) (fun x s -> folder.Invoke(x,s)) (fun s0 s1 -> combiner.Invoke(s0,s1)) (fun () -> init.Invoke()) stream
+
+//    static member Skip<'T>(stream : Stream<'T>, count : int) =
+//        Stream.skip count stream
+//
+//    static member Skip<'T>(stream : ParStream<'T>, count : int) =
+//        ParStream.skip count stream
+//    
+//    static member Take<'T>(stream : Stream<'T>, count : int) =
+//        Stream.skip count stream
+//
+//    static member Take<'T>(stream : ParStream<'T>, count : int) =
+//        ParStream.skip count stream    

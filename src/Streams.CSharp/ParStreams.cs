@@ -188,5 +188,64 @@ namespace Nessos.Streams.CSharp
         {
             return CSharpProxy.All(stream, predicate);
         }
+
+
+        /// <summary>Returns the elements of the parallel stream up to a specified count.</summary>
+        /// <param name="n">The number of items to take.</param>
+        /// <param name="stream">The input parallel stream.</param>
+        /// <returns>The result parallel stream.</returns>
+        public static ParStream<TSource> Take<TSource>(this ParStream<TSource> stream, int n)
+        {
+            return ParStream.take(n, stream);
+        }
+
+        /// <summary>Returns a stream that skips N elements of the input parallel stream and then yields the remaining elements of the stream.</summary>
+        /// <param name="n">The number of items to skip.</param>
+        /// <param name="stream">The input parallel stream.</param>
+        /// <returns>The result parallel stream.</returns>
+        public static ParStream<TSource> Skip<TSource>(this ParStream<TSource> stream, int n)
+        {
+            return ParStream.skip(n, stream);
+        }
+
+        /// <summary>Locates the maximum element of the parallel stream by given key.</summary>
+        /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+        /// <param name="source">The input stream.</param>
+        /// <returns>The maximum item.</returns>  
+        public static TSource MaxBy<TSource, TKey>(this ParStream<TSource> source, Func<TSource, TKey> projection)
+        {
+            return CSharpProxy.MaxBy(source, projection);
+        }
+
+        /// <summary>Locates the minimum element of the parallel stream by given key.</summary>
+        /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+        /// <param name="source">The input stream.</param>
+        /// <returns>The maximum item.</returns>  
+        public static TSource MinBy<TSource, TKey>(this ParStream<TSource> source, Func<TSource, TKey> projection)
+        {
+            return CSharpProxy.MinBy(source, projection);
+        }
+
+        /// <summary>Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and the result of the threading an accumulator.</summary>
+        /// <param name="projection">A function to transform items from the input ParStream to keys.</param>
+        /// <param name="folder">A function that updates the state with each element from the ParStream.</param>
+        /// <param name="combiner">A function that combines partial states into a new state.</param>
+        /// <param name="state">A function that produces the initial state.</param>
+        /// <param name="stream">The input ParStream.</param>
+        /// <returns>The final result.</returns> 
+        public static ParStream<Tuple<TKey, TState>> AggregateBy<TSource, TKey, TState>(this ParStream<TSource> stream, Func<TSource, TKey> projection, Func<TState, TSource, TState> folder, Func<TState, TState, TState> combiner, Func<TState> state)
+        {
+            return CSharpProxy.AggregateBy(stream, projection, folder, combiner, state);
+        }
+
+        /// <summary>
+        /// Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and their number of occurrences in the original sequence.
+        /// </summary>
+        /// <param name="projection">A function that maps items from the input ParStream to keys.</param>
+        /// <param name="stream">The input ParStream.</param>
+        public static ParStream<Tuple<TKey, int>> CountBy<TSource, TKey>(this ParStream<TSource> stream, Func<TSource, TKey> projection)
+        {
+            return CSharpProxy.CountBy(stream, projection);
+        }
     }
 }

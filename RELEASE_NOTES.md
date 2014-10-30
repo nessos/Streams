@@ -1,3 +1,6 @@
+#### 0.2.3
+* Added MaxBy,MinBy,AggregateBy/foldBy, Take, Skip and CountBy methods in Stream and ParStream.
+
 #### 0.2.2
 * ParStream bug fixes and performance improvements.
 
