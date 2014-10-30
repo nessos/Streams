@@ -84,7 +84,7 @@
 
 
         [<Test>]
-        member __.``take`` () =
+        member __.``take/unordered`` () =
             Spec.ForAny<int[] * int>(fun (xs, (n : int)) ->
                 let n = System.Math.Abs(n) 
                 let x = xs |> ParStream.ofArray |> ParStream.take n |> ParStream.length
@@ -92,12 +92,27 @@
                 x = y).QuickCheckThrowOnFailure()
 
 
+        [<Test>]
+        member __.``take/ordered`` () =
+            Spec.ForAny<int[] * int>(fun (xs, (n : int)) ->
+                let n = System.Math.Abs(n) 
+                let x = xs |> ParStream.ofArray |> ParStream.sortBy id |> ParStream.take n |> ParStream.toArray
+                let y = xs.OrderBy(fun x -> x).Take(n).ToArray()
+                x = y).QuickCheckThrowOnFailure()
+
 
         [<Test>]
-        member __.``skip`` () =
+        member __.``skip/unordered`` () =
             Spec.ForAny<int[] * int>(fun (xs, (n : int)) -> 
                 let x = xs |> ParStream.ofArray |> ParStream.skip n |> ParStream.length
                 let y = xs.Skip(n).Count()
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``skip/ordered`` () =
+            Spec.ForAny<int[] * int>(fun (xs, (n : int)) -> 
+                let x = xs |> ParStream.ofArray |> ParStream.sortBy id |> ParStream.skip n |> ParStream.toArray
+                let y = xs.OrderBy(fun x -> x).Skip(n).ToArray()
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
