@@ -402,8 +402,8 @@ module ParStream =
     /// </summary>
     /// <param name="projection">A function that maps items from the input ParStream to keys.</param>
     /// <param name="stream">The input ParStream.</param>
-    let inline countBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * int64> =
-        foldBy projection (fun state _ -> state + 1L) (+) (fun () -> 0L) stream
+    let inline countBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * int> =
+        foldBy projection (fun state _ -> state + 1) (+) (fun () -> 0) stream
 
     /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream of unique keys and a sequence of all elements that have each key.</summary>
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
