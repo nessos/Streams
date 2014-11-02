@@ -1,6 +1,6 @@
 ﻿
 #if INTERACTIVE
-#load "../../packages/MBrace.Runtime.0.5.8-alpha/bootstrap.fsx" 
+#load "../../packages/MBrace.Runtime.0.5.10-alpha/bootstrap.fsx" 
 #r "../../bin/Streams.Core.dll"
 #r "../../bin/Streams.Cloud.dll"
 #else 
