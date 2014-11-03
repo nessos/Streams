@@ -31,6 +31,13 @@
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``toSeq`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.map ((+)1) |> Stream.toSeq |> Seq.length
+                let y = xs |> Seq.map ((+)1) |> Seq.length 
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
         member __.``map`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> Stream.ofArray |> Stream.map (fun n -> 2 * n) |> Stream.toArray
@@ -216,3 +223,5 @@
                 let x = xs |> Stream.ofArray |> Stream.forall (fun n -> n % 2 = 0) 
                 let y = xs |> Seq.forall (fun n -> n % 2 = 0) 
                 x = y).QuickCheckThrowOnFailure()
+
+

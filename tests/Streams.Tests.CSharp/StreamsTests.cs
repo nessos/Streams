@@ -49,6 +49,18 @@ namespace Nessos.Streams.Tests.CSharp
         }
 
         [Test]
+        public void ToEnumerable()
+        {
+            Spec.ForAny<List<int>>(xs =>
+            {
+                IEnumerable<int> _xs = xs;
+                var x = _xs.AsStream().Select(i => i + 1).ToEnumerable().Count();
+                var y = _xs.Select(i => i + 1).Count();
+                return x == y;
+            }).QuickCheckThrowOnFailure();
+        }
+
+        [Test]
         public void Select()
         {
             Spec.ForAny<int[]>(xs =>

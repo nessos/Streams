@@ -150,6 +150,14 @@ namespace Nessos.Streams.CSharp
             return Stream.toArray(stream);
         }
 
+        /// <summary>Creates an IEnumerable from the given stream.</summary>
+        /// <param name="stream">The input stream.</param>
+        /// <returns>The result IEnumerable.</returns>    
+        public static IEnumerable<TSource> ToEnumerable<TSource>(this Stream<TSource> stream)
+        {
+            return Stream.toSeq(stream);
+        }
+
         /// <summary>Creates an ResizeArray from the given stream.</summary>
         /// <param name="stream">The input stream.</param>
         /// <returns>The result ResizeArray.</returns>    
