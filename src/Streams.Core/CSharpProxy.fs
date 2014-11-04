@@ -141,6 +141,9 @@ type public CSharpProxy =
     static member AggregateBy<'T,'Key, 'State when 'Key : equality>(stream : ParStream<'T>, proj : Func<'T,'Key>, folder : Func<'State,'T,'State>, combiner : Func<'State,'State,'State>, init : Func<'State>) =
         ParStream.foldBy (fun x -> proj.Invoke(x)) (fun x s -> folder.Invoke(x,s)) (fun s0 s1 -> combiner.Invoke(s0,s1)) (fun () -> init.Invoke()) stream
 
+    static member Zip<'TFirst, 'TSecond, 'TResult>(first : Stream<'TFirst>, second : Stream<'TSecond>, resultSelector : Func<'TFirst, 'TSecond, 'TResult>) = 
+        Stream.zipWith (fun x y -> resultSelector.Invoke(x, y)) first second
+
 //    static member Skip<'T>(stream : Stream<'T>, count : int) =
 //        Stream.skip count stream
 //

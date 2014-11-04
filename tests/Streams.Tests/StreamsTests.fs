@@ -225,3 +225,12 @@
                 x = y).QuickCheckThrowOnFailure()
 
 
+
+        [<Test>]
+        member __.``zipWith`` () =
+            Spec.ForAny<(int[] * int[])>(fun (xs, ys) ->
+                let x = xs |> Stream.ofArray |> Stream.zipWith (fun x y -> x + y) (ys |> Stream.ofArray) |> Stream.toArray
+                let y = xs |> Seq.zip ys |> Seq.map (fun (x, y) -> x + y) |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+

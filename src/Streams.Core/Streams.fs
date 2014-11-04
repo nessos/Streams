@@ -176,6 +176,23 @@ module Stream =
                 if !counter > n then iterf value else true)
         Stream iter
 
+
+    /// <summary>Applies a specified function to the corresponding elements of two streams, producing a stream of the results.</summary>
+    /// <param name="f">The combiner function.</param>
+    /// <param name="first">The first input stream.</param>
+    /// <param name="second">The second input stream.</param>
+    /// <returns>The result stream.</returns>
+    let inline zipWith (f : 'T -> 'S -> 'R) (first : Stream<'T>) (second : Stream<'S>) : Stream<'R> =
+        let current = ref Unchecked.defaultof<'S>
+        let (Stream secondf) = second
+        let (_, next) = secondf (fun v -> current := v; true)
+        Stream (fun iterf -> 
+                    let (Stream firstf) = first
+                    firstf (fun v -> 
+                                if next() then
+                                    iterf (f v !current)
+                                else false )) 
+
     // terminal functions
 
     /// <summary>Applies a function to each element of the stream, threading an accumulator argument through the computation. If the input function is f and the elements are i0...iN, then this function computes f (... (f s i0)...) iN.</summary>

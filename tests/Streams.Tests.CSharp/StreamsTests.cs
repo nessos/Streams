@@ -225,5 +225,16 @@ namespace Nessos.Streams.Tests.CSharp
                 return x == y;
             }).QuickCheckThrowOnFailure();
         }
+
+
+        public void Zip()
+        {
+            Spec.ForAny<Tuple<int[], int[]>>(tuple =>
+            {
+                var xs = tuple.Item1.AsStream().Zip(tuple.Item2.AsStream(), (x, y) => x + y).ToArray();
+                var ys = tuple.Item1.Zip(tuple.Item2, (x, y) => x + y).ToArray();
+                return xs == ys;
+            }).QuickCheckThrowOnFailure();
+        }
     }
 }

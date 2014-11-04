@@ -249,5 +249,16 @@ namespace Nessos.Streams.CSharp
         {
             return CSharpProxy.CountBy(stream, projection);
         }
+
+
+        /// <summary>Applies a specified function to the corresponding elements of two streams, producing a stream of the results.</summary>
+        /// <param name="resultSelector">The combiner function.</param>
+        /// <param name="first">The first input stream.</param>
+        /// <param name="second">The second input stream.</param>
+        /// <returns>The result stream.</returns>
+        public static Stream<TResult> Zip<TFirst, TSecond, TResult>(this Stream<TFirst> first, Stream<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector)
+        {
+            return CSharpProxy.Zip(first, second, resultSelector);
+        }
     }
 }
