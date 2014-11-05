@@ -222,7 +222,7 @@ module CloudStream =
                             let iter = collector.Iterator()
                             (fun value -> 
                                 let (Stream streamf) = f value
-                                streamf iter; true)
+                                let (bulk, _) = streamf iter in bulk (); true)
                         member self.Result = collector.Result  }
                 stream.Apply collectorf' projection combiner }
 

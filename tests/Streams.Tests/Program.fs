@@ -7,15 +7,13 @@ module Program =
 
     [<EntryPoint>]
     let main argv = 
-        let data = [|1..10000000|] |> Array.map (fun i -> int64 <| (i % 100000))
+        let xs, ys = [|3; 0|], [|42|]
         let start = DateTime.Now
         let result = 
-            data
-            |> ParStream.ofArray
-            |> ParStream.map (fun x -> x + 1L)
-            |> ParStream.groupBy id
-            |> ParStream.length
+            xs |> Stream.ofArray |> Stream.filter (fun x -> x % 2 = 0) |> Stream.zipWith (fun x y -> x + y) (ys |> Stream.ofArray) |> Stream.toArray
 
-        printfn "%A" <| DateTime.Now - start
+        let r = xs |> Seq.filter (fun x -> x % 2 = 0) |> Seq.zip ys |> Seq.map (fun (x, y) -> x + y) |> Seq.toArray
+
+        printfn "%A - %A " r result
         0
 

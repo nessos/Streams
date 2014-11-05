@@ -33,8 +33,8 @@
         [<Test>]
         member __.``toSeq`` () =
             Spec.ForAny<int[]>(fun xs ->
-                let x = xs |> Stream.ofArray |> Stream.map ((+)1) |> Stream.toSeq |> Seq.length
-                let y = xs |> Seq.map ((+)1) |> Seq.length 
+                let x = xs |> Stream.ofArray |> Stream.filter (fun x -> x % 2 = 0) |> Stream.map ((+)1) |> Stream.toSeq |> Seq.length
+                let y = xs |> Seq.filter (fun x -> x % 2 = 0) |> Seq.map ((+)1) |> Seq.length 
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
@@ -229,8 +229,8 @@
         [<Test>]
         member __.``zipWith`` () =
             Spec.ForAny<(int[] * int[])>(fun (xs, ys) ->
-                let x = xs |> Stream.ofArray |> Stream.zipWith (fun x y -> x + y) (ys |> Stream.ofArray) |> Stream.toArray
-                let y = xs |> Seq.zip ys |> Seq.map (fun (x, y) -> x + y) |> Seq.toArray
+                let x = xs |> Stream.ofArray |> Stream.filter (fun x -> x % 2 = 0) |> Stream.zipWith (fun x y -> x + y) (ys |> Stream.ofArray) |> Stream.toArray
+                let y = xs |> Seq.filter (fun x -> x % 2 = 0) |> Seq.zip ys |> Seq.map (fun (x, y) -> x + y) |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
 

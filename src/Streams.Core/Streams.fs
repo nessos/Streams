@@ -182,16 +182,47 @@ module Stream =
     /// <param name="first">The first input stream.</param>
     /// <param name="second">The second input stream.</param>
     /// <returns>The result stream.</returns>
-    let inline zipWith (f : 'T -> 'S -> 'R) (first : Stream<'T>) (second : Stream<'S>) : Stream<'R> =
-        let current = ref Unchecked.defaultof<'S>
+    let zipWith (f : 'T -> 'S -> 'R) (first : Stream<'T>) (second : Stream<'S>) : Stream<'R> =
+        let firstCurrent = ref Unchecked.defaultof<'T>
+        let firstFlag = ref false
+        let (Stream firstf) = first
+        let (_, firstNext) = firstf (fun v -> firstCurrent := v; firstFlag := true; true)
+        let secondCurrent = ref Unchecked.defaultof<'S>
+        let secondFlag = ref false
         let (Stream secondf) = second
-        let (_, next) = secondf (fun v -> current := v; true)
-        Stream (fun iterf -> 
-                    let (Stream firstf) = first
-                    firstf (fun v -> 
-                                if next() then
-                                    iterf (f v !current)
-                                else false )) 
+        let (_, secondNext) = secondf (fun v -> secondCurrent := v; secondFlag := true; true)
+        let iter iterf =
+            let bulk = 
+                (fun () ->
+                    let mutable next = true
+                    while next do
+                        while firstNext () && not !firstFlag do ()
+                        while secondNext () && not !secondFlag do ()
+
+                        if !firstFlag && !secondFlag then
+                            firstFlag := false
+                            secondFlag := false
+                            next <- iterf (f !firstCurrent !secondCurrent)
+                        else
+                            next <- false
+                        ())
+            let next = 
+                let flag = ref true
+                (fun () ->
+                    if not !flag then
+                        false
+                    else
+                        while firstNext () && not !firstFlag do ()
+                        while secondNext () && not !secondFlag do ()
+                        if !firstFlag && !secondFlag then
+                            firstFlag := false
+                            secondFlag := false
+                            flag := iterf (f !firstCurrent !secondCurrent)
+                            true
+                        else
+                            false)
+            (bulk, next)
+        Stream iter
 
     // terminal functions
 
@@ -236,9 +267,12 @@ module Stream =
         seq  {
                 let (Stream streamf) = stream
                 let current = ref Unchecked.defaultof<'T>
-                let (_, next) = streamf (fun v -> current := v; true)
+                let flag = ref false
+                let (_, next) = streamf (fun v -> current := v; flag := true; true)
                 while next () do
-                    yield !current
+                    if !flag then
+                        flag := false
+                        yield !current
         }
 
     /// <summary>Creates an ResizeArray from the given stream.</summary>
