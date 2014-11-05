@@ -52,12 +52,7 @@ let storeClient = runtime.GetStoreClient()
 // Option 1 : CloudArrays API
 //
 
-let lines = 
-    files
-    |> Array.map (fun f -> storeClient.CreateCloudArrayAsync("tmp", File.ReadLines(f)))
-    |> Async.Parallel
-    |> Async.RunSynchronously
-    |> Array.reduce (fun l r -> l.Append(r))
+let lines = storeClient.CreateCloudArray("tmp", files |> Seq.collect(fun f -> File.ReadLines(f)))
 
 [<Cloud>]
 let getTop count =
