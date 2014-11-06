@@ -1,3 +1,6 @@
+#### 0.2.5
+* Support for pull-based operators, implemented ofSeq and zip methods.
+
 #### 0.2.4
 * Introduce order semantics.
 
