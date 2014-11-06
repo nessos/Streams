@@ -181,7 +181,7 @@ Target "NuGet" (fun _ ->
             Dependencies = 
                 [
                     "Streams",      RequireExactly Streams.nugetVersion
-                    "MBrace.Core",  RequireExactly "0.5.10-alpha"
+                    "MBrace.Core",  RequireExactly "0.5.13-alpha"
                 ]
             ToolPath = nugetPath
             AccessKey = getBuildParamOrDefault "nugetkey" ""
@@ -202,7 +202,7 @@ Target "NuGet" (fun _ ->
                 [
                     "Streams",          RequireExactly Streams.nugetVersion
                     "Streams.Cloud",    RequireExactly CloudStreams.nugetVersion
-                    "MBrace.Client",    RequireExactly "0.5.10-alpha"
+                    "MBrace.Client",    RequireExactly "0.5.13-alpha"
                     "FSharp.Core.Microsoft.Signed", "3.1.1.1"
                 ]
             ToolPath = nugetPath

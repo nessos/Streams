@@ -38,13 +38,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\FsCheck.1.0.1\lib\net45\FsCheck.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Core, Version=0.5.10.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Core, Version=0.5.13.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Core.0.5.10-alpha\lib\net45\MBrace.Core.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.13-alpha\lib\net45\MBrace.Core.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Lib, Version=0.5.10.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Lib, Version=0.5.13.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Core.0.5.10-alpha\lib\net45\MBrace.Lib.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.13-alpha\lib\net45\MBrace.Lib.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=3.0.5378.31154, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

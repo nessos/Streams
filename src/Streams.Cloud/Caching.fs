@@ -26,10 +26,6 @@ type internal CachedCloudArray<'T>(source : ICloudArray<'T>, taskId : string) =
         member this.Item 
             with get (index : int64) = source.[index]
         member this.GetEnumerator() = source.GetEnumerator()
-        member this.GetPartition(index : int) = untyped.GetPartition(index)
-        member this.Append(cloudArray : ICloudArray) = untyped.Append(cloudArray)
-        member this.Item 
-            with get (index : int64) = untyped.[index]
         member this.GetEnumerator() = untyped.GetEnumerator()
         member this.Dispose() = source.Dispose()
 

@@ -85,27 +85,27 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="MBrace.Client">
-      <HintPath>..\..\packages\MBrace.Client.0.5.10-alpha\lib\net45\MBrace.Client.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Client.0.5.13-alpha\lib\net45\MBrace.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MBrace.Core">
-      <HintPath>..\..\packages\MBrace.Core.0.5.10-alpha\lib\net45\MBrace.Core.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.13-alpha\lib\net45\MBrace.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MBrace.Lib">
-      <HintPath>..\..\packages\MBrace.Core.0.5.10-alpha\lib\net45\MBrace.Lib.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.13-alpha\lib\net45\MBrace.Lib.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MBrace.Runtime.Base">
-      <HintPath>..\..\packages\MBrace.Client.0.5.10-alpha\lib\net45\MBrace.Runtime.Base.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Client.0.5.13-alpha\lib\net45\MBrace.Runtime.Base.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MBrace.Store">
-      <HintPath>..\..\packages\MBrace.Store.0.5.10-alpha\lib\net45\MBrace.Store.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Store.0.5.13-alpha\lib\net45\MBrace.Store.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MBrace.Utils">
-      <HintPath>..\..\packages\MBrace.Client.0.5.10-alpha\lib\net45\MBrace.Utils.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Client.0.5.13-alpha\lib\net45\MBrace.Utils.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />

@@ -63,11 +63,11 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MBrace.Core">
-      <HintPath>..\..\packages\MBrace.Core.0.5.10-alpha\lib\net45\MBrace.Core.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.13-alpha\lib\net45\MBrace.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MBrace.Lib">
-      <HintPath>..\..\packages\MBrace.Core.0.5.10-alpha\lib\net45\MBrace.Lib.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.13-alpha\lib\net45\MBrace.Lib.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -78,8 +78,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Caching" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Streams.Core\Streams.Core.fsproj">
       <Name>Streams.Core</Name>
       <Project>{f3482666-f39c-4f49-8d0b-3583328d2c42}</Project>
