@@ -16,7 +16,7 @@ module Stream =
 
     /// <summary>The empty stream.</summary>
     /// <returns>An empty stream.</returns>
-    let empty : Stream<'T> =
+    let empty<'T> : Stream<'T> =
         let iter iterf =
             let next () = false
             (ignore, next)
