@@ -233,4 +233,11 @@
                 let y = xs |> Seq.filter (fun x -> x % 2 = 0) |> Seq.zip ys |> Seq.map (fun (x, y) -> x + y) |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
+        [<Test>]
+        member __.``empty`` () =
+            //for bulk
+            Assert.AreEqual(0, Stream.empty<int> |> Stream.length)
+            //for next
+            Assert.AreEqual(0, Stream.empty<int> |> Stream.toSeq |> Seq.length)
+
 
