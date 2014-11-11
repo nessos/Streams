@@ -240,4 +240,11 @@
             //for next
             Assert.AreEqual(0, Stream.empty<int> |> Stream.toSeq |> Seq.length)
 
+        [<Test>]
+        member __.``concat`` () =
+            Spec.ForAny<int[][]>(fun xs ->
+                let x = xs |> Seq.map Stream.ofArray |> Stream.concat |> Stream.toArray
+                let y = xs |> Seq.concat |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
 
