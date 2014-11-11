@@ -209,15 +209,14 @@ module Stream =
         let iter iterf =
             let current = ref Unchecked.defaultof<'T>
             let bulk =
-                fun () ->                    
+                fun () ->
                     for stream in streams do
                         let (Stream streamF) = stream
                         let (_, nextF) = streamF (fun v -> current := v; true)
-                        let mutable flag = false
                         let mutable next = true
-                        while not flag && next do
-                            flag <- nextF()
-                            if flag then next <- iterf !current
+                        while next do
+                            if nextF() then next <- iterf !current
+                            else next <- false
 
             let next =
                 let flag = ref true
