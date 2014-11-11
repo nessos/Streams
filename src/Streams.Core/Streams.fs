@@ -13,6 +13,31 @@ type Stream<'T> = Stream of (('T -> bool) -> (unit -> unit) * (unit -> bool))
 /// Provides basic operations on Streams.
 [<RequireQualifiedAccessAttribute>]
 module Stream =
+
+    /// <summary>The empty stream.</summary>
+    /// <returns>An empty stream.</returns>
+    let empty : Stream<'T> =
+        let iter iterf =
+            let next () = false
+            (ignore, next)
+        Stream iter
+
+    /// <summary>Creates a singleton stream.</summary>
+    /// <param name="source">The singleton stream element</param>
+    /// <returns>A stream of just the given element</returns>
+    let inline singleton (source: 'T) : Stream<'T> =
+        let iter iterf =
+            let bulk () = iterf source |> ignore
+            let next =
+                let pulled = ref false
+                fun () ->
+                    if !pulled then false
+                    else
+                        iterf source |> ignore
+                        pulled := true
+                        true
+            (bulk, next)
+        Stream iter
            
     /// <summary>Wraps array as a stream.</summary>
     /// <param name="source">The input array.</param>
@@ -174,6 +199,43 @@ module Stream =
             streamf (fun value -> 
                 incr counter
                 if !counter > n then iterf value else true)
+        Stream iter
+
+
+    /// <summary>Concatenates a collection of streams.</summary>
+    /// <param name="streams">The sequence of streams to concatenate.</param>
+    /// <returns>The concatenated stream.</returns>
+    let inline concat (streams: #seq<Stream<'T>>): Stream<'T> =
+        let iter iterf =
+            let current = ref Unchecked.defaultof<'T>
+            let bulk =
+                fun () ->                    
+                    for stream in streams do
+                        let (Stream streamF) = stream
+                        let (_, nextF) = streamF (fun v -> current := v; true)
+                        let mutable flag = false
+                        let mutable next = true
+                        while not flag && next do
+                            flag <- nextF()
+                            if flag then next <- iterf !current
+
+            let next =
+                let flag = ref true
+                if Seq.length streams = 0 then fun () -> false
+                else
+                    fun () ->
+                        if not !flag then false
+                        else
+                            let stream = Seq.head streams
+                            let (Stream streamF) = stream
+                            let (_, nextF) = streamF (fun v -> current := v; true)
+
+                            let hasNext = nextF()
+                            if hasNext then flag := iterf !current
+                            hasNext
+
+            (bulk, next)
+
         Stream iter
 
 
