@@ -106,10 +106,21 @@ data.AsParStream()
     .Select(fun x -> x + 1L)
     .Sum()
 
+   
+   
 
 
-#r "../../packages/FSharp.Collections.ParallelSeq.1.0/lib/net40/FSharp.Collections.ParallelSeq.dll"
+#r "../../packages/FSharp.Collections.ParallelSeq.1.0.2/lib/net40/FSharp.Collections.ParallelSeq.dll"
 open FSharp.Collections.ParallelSeq
+
+for i in 1..100 do
+    System.Threading.Thread.Sleep 1000
+    printfn "Testing..."
+    let xs = [| for i in 1..10000 -> i |]
+
+    let x = xs |> ParStream.ofArray |> ParStream.map ((+) 1) |> ParStream.sortBy id |> ParStream.toArray
+    let y = xs |> Seq.map ((+) 1) |> Seq.sortBy id |> Seq.toArray
+    assert(x = y)
 
 data
 |> PSeq.map (fun x -> x + 1L)
