@@ -10,6 +10,10 @@
     [<TestFixture; Category("ParStreams.FSharp")>]
     type ``ParStreams tests`` () =
 
+        [<OneTimeSetUp>]
+        member __.SetUp() =
+            System.Threading.ThreadPool.SetMinThreads(200, 200) |> ignore
+
         [<Test>]
         member __.``ofArray`` () =
             Spec.ForAny<int[]>(fun xs ->
@@ -119,7 +123,7 @@
         member __.``sortBy`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> ParStream.ofArray |> ParStream.map ((+) 1) |> ParStream.sortBy id |> ParStream.toArray
-                let y = xs |> PSeq.map ((+) 1) |> PSeq.sortBy id |> PSeq.toArray
+                let y = xs |> Seq.map ((+) 1) |> Seq.sortBy id |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
 
