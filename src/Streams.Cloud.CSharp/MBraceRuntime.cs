@@ -130,6 +130,18 @@ namespace Nessos.Streams.Cloud.CSharp.MBrace
         {
             return this.client.CreateCloudArray<TSource>(container, values);
         }
+
+        /// <summary>
+        /// Get existing CloudArray.
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <param name="container"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public ICloudArray<TSource> GetCloudArray<TSource>(string container, string name)
+        {
+            return this.client.GetCloudArray<TSource>(container, name);
+        }
     }
 
     /// <summary>

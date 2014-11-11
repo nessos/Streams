@@ -46,29 +46,29 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\FsPickler.Json.1.0.2\lib\net45\FsPickler.Json.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Client, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Client, Version=0.5.13.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Client.0.5.9-alpha\lib\net45\MBrace.Client.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Client.0.5.13-alpha\lib\net45\MBrace.Client.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Core, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Core, Version=0.5.13.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Core.0.5.9-alpha\lib\net45\MBrace.Core.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.13-alpha\lib\net45\MBrace.Core.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Lib, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Lib, Version=0.5.13.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Core.0.5.9-alpha\lib\net45\MBrace.Lib.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.13-alpha\lib\net45\MBrace.Lib.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Runtime.Base, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Runtime.Base, Version=0.5.13.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Client.0.5.9-alpha\lib\net45\MBrace.Runtime.Base.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Client.0.5.13-alpha\lib\net45\MBrace.Runtime.Base.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Store, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Store, Version=0.5.13.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Store.0.5.9-alpha\lib\net45\MBrace.Store.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Store.0.5.13-alpha\lib\net45\MBrace.Store.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Utils, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Utils, Version=0.5.13.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Client.0.5.9-alpha\lib\net45\MBrace.Utils.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Client.0.5.13-alpha\lib\net45\MBrace.Utils.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -81,17 +81,20 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Thespian">
+    <Reference Include="Thespian, Version=0.0.11.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Thespian.0.0.11-alpha\lib\net45\Thespian.dll</HintPath>
     </Reference>
-    <Reference Include="Thespian.Cluster">
+    <Reference Include="Thespian.Cluster, Version=0.0.11.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Thespian.0.0.11-alpha\lib\net45\Thespian.Cluster.dll</HintPath>
     </Reference>
-    <Reference Include="UnionArgParser, Version=0.8.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="UnionArgParser, Version=0.8.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\UnionArgParser.0.8.2\lib\net40\UnionArgParser.dll</HintPath>
+      <HintPath>..\..\packages\UnionArgParser.0.8.0\lib\net40\UnionArgParser.dll</HintPath>
     </Reference>
-    <Reference Include="Unquote">
+    <Reference Include="Unquote, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Unquote.2.2.2\lib\net40\Unquote.dll</HintPath>
     </Reference>
     <Reference Include="Vagrant">
@@ -109,9 +112,9 @@
       <Project>{18f60ac5-898d-45c5-8713-bb0539d4200e}</Project>
       <Name>Streams.Cloud</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Streams\Streams.fsproj">
+    <ProjectReference Include="..\Streams.Core\Streams.Core.fsproj">
       <Project>{f3482666-f39c-4f49-8d0b-3583328d2c42}</Project>
-      <Name>Streams</Name>
+      <Name>Streams.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

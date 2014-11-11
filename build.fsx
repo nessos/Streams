@@ -70,7 +70,7 @@ Target "AssemblyInfo" (fun _ ->
             Attribute.FileVersion version
         ]
 
-    CreateFSharpAssemblyInfo "src/Streams/AssemblyInfo.fs" <| attributes Streams.release.AssemblyVersion
+    CreateFSharpAssemblyInfo "src/Streams.Core/AssemblyInfo.fs" <| attributes Streams.release.AssemblyVersion
     CreateCSharpAssemblyInfo "src/Streams.CSharp/Properties/AssemblyInfo.cs" <| attributes Streams.release.AssemblyVersion
     CreateFSharpAssemblyInfo "src/Streams.Cloud/AssemblyInfo.fs" <| attributes CloudStreams.release.AssemblyVersion
     CreateCSharpAssemblyInfo "src/Streams.Cloud.CSharp/Properties/AssemblyInfo.cs" <| attributes CloudStreams.release.AssemblyVersion
@@ -135,26 +135,38 @@ FinalTarget "CloseTestRunner" (fun _ ->
 Target "NuGet" (fun _ ->
     let nugetPath = ".nuget/NuGet.exe"
 
-    let mkNuGetPackage project =
-        // Format the description to fit on a single line (remove \r\n and double-spaces)
-        let description = description.Replace("\r", "").Replace("\n", "").Replace("  ", " ")
-        NuGet (fun p -> 
-            { p with   
-                Authors = authors
-                Project = project
-                Summary = summary
-                Description = description
-                Version = Streams.nugetVersion
-                ReleaseNotes = String.concat " " Streams.release.Notes
-                Tags = tags
-                OutputPath = "nuget"
-                ToolPath = nugetPath
-                AccessKey = getBuildParamOrDefault "nugetkey" ""
-                Publish = hasBuildParam "nugetkey" })
-            ("nuget/" + project + ".nuspec")
+    let description = description.Replace("\r", "").Replace("\n", "").Replace("  ", " ")
+    
+    NuGet (fun p -> 
+        { p with   
+            Authors = authors
+            Project = "Streams"
+            Summary = summary
+            Description = description
+            Version = Streams.nugetVersion
+            ReleaseNotes = String.concat " " Streams.release.Notes
+            Tags = tags
+            OutputPath = "nuget"
+            ToolPath = nugetPath
+            AccessKey = getBuildParamOrDefault "nugetkey" ""
+            Publish = hasBuildParam "nugetkey" })
+        ("nuget/Streams.nuspec")
 
-    mkNuGetPackage "Streams"
-    mkNuGetPackage "Streams.CSharp"
+    NuGet (fun p -> 
+        { p with   
+            Authors = authors
+            Project = "Streams.CSharp"
+            Summary = summary
+            Description = description
+            Version = Streams.nugetVersion
+            ReleaseNotes = String.concat " " Streams.release.Notes
+            Tags = tags
+            OutputPath = "nuget"
+            Dependencies = [ "Streams", RequireExactly Streams.nugetVersion ]
+            ToolPath = nugetPath
+            AccessKey = getBuildParamOrDefault "nugetkey" ""
+            Publish = hasBuildParam "nugetkey" })
+        ("nuget/Streams.CSharp.nuspec")
 
     NuGet (fun p -> 
         { p with   
@@ -168,13 +180,35 @@ Target "NuGet" (fun _ ->
             OutputPath = "nuget"
             Dependencies = 
                 [
-                    "Streams",      RequireExactly "0.2.1"
-                    "MBrace.Core",  RequireExactly "0.5.8-alpha"
+                    "Streams",      RequireExactly Streams.nugetVersion
+                    "MBrace.Core",  RequireExactly "0.5.13-alpha"
                 ]
             ToolPath = nugetPath
             AccessKey = getBuildParamOrDefault "nugetkey" ""
             Publish = hasBuildParam "nugetkey" })
         ("nuget/Streams.Cloud.nuspec")
+
+    NuGet (fun p -> 
+        { p with   
+            Authors = authors
+            Project = "Streams.Cloud.CSharp"
+            Summary = summary
+            Description = description
+            Version = CloudStreams.nugetVersion
+            ReleaseNotes = String.concat " " CloudStreams.release.Notes
+            Tags = tags
+            OutputPath = "nuget"
+            Dependencies = 
+                [
+                    "Streams",          RequireExactly Streams.nugetVersion
+                    "Streams.Cloud",    RequireExactly CloudStreams.nugetVersion
+                    "MBrace.Client",    RequireExactly "0.5.13-alpha"
+                    "FSharp.Core.Microsoft.Signed", "3.1.1.1"
+                ]
+            ToolPath = nugetPath
+            AccessKey = getBuildParamOrDefault "nugetkey" ""
+            Publish = hasBuildParam "nugetkey" })
+        ("nuget/Streams.Cloud.CSharp.nuspec")
 )
 
 Target "GenerateDocs" (fun _ ->

@@ -1,3 +1,12 @@
+#### 0.2.5
+* Support for pull-based operators, implemented ofSeq and zip methods.
+
+#### 0.2.4
+* Introduce order semantics.
+
+#### 0.2.3
+* Added MaxBy,MinBy,AggregateBy/foldBy, Take, Skip and CountBy methods in Stream and ParStream.
+
 #### 0.2.2
 * ParStream bug fixes and performance improvements.
 

@@ -49,6 +49,18 @@ namespace Nessos.Streams.Tests.CSharp
         }
 
         [Test]
+        public void ToEnumerable()
+        {
+            Spec.ForAny<List<int>>(xs =>
+            {
+                IEnumerable<int> _xs = xs;
+                var x = _xs.AsStream().Select(i => i + 1).ToEnumerable().Count();
+                var y = _xs.Select(i => i + 1).Count();
+                return x == y;
+            }).QuickCheckThrowOnFailure();
+        }
+
+        [Test]
         public void Select()
         {
             Spec.ForAny<int[]>(xs =>
@@ -211,6 +223,17 @@ namespace Nessos.Streams.Tests.CSharp
                 var x = xs.AsStream().All(i => i % 2 == 0);
                 var y = xs.All(i => i % 2 == 0);
                 return x == y;
+            }).QuickCheckThrowOnFailure();
+        }
+
+
+        public void Zip()
+        {
+            Spec.ForAny<Tuple<int[], int[]>>(tuple =>
+            {
+                var xs = tuple.Item1.AsStream().Zip(tuple.Item2.AsStream(), (x, y) => x + y).ToArray();
+                var ys = tuple.Item1.Zip(tuple.Item2, (x, y) => x + y).ToArray();
+                return xs == ys;
             }).QuickCheckThrowOnFailure();
         }
     }

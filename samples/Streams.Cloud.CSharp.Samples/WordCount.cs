@@ -73,9 +73,7 @@ namespace Nessos.Streams.Cloud.CSharp.Samples
 
         public static IEnumerable<Tuple<string, long>> RunWithCloudArray(Runtime runtime)
         {
-            var clines = files
-                            .Select(file => StoreClient.Default.CreateCloudArray("tmp", File.ReadLines(file)))
-                            .Aggregate((l, r) => l.Append(r));
+            var clines = StoreClient.Default.CreateCloudArray("tmp", files.SelectMany(file => File.ReadLines(file)));
 
             var count = 20;
 

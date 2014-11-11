@@ -2,8 +2,13 @@
 open System
 open System.Collections.Generic
 
+// ('T -> bool) is the composed continutation with 'T for the current value 
+// and bool is a flag for early termination
+// (unit -> unit) is a function for bulk processing
+// (unit -> bool) is a function for on-demand processing
+
 /// Represents a Stream of values.
-type Stream<'T> = Stream of (('T -> bool) -> unit)
+type Stream<'T> = Stream of (('T -> bool) -> (unit -> unit) * (unit -> bool))
 
 /// Provides basic operations on Streams.
 [<RequireQualifiedAccessAttribute>]
@@ -14,11 +19,24 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline ofArray (source : 'T []) : Stream<'T> =
         let iter iterf =
-            let mutable i = 0
-            let mutable next = true
-            while i < source.Length && next do
-                next <- iterf source.[i]
-                i <- i + 1
+            let bulk = 
+                (fun () ->
+                    let mutable i = 0
+                    let mutable next = true
+                    while i < source.Length && next do
+                        next <- iterf source.[i]
+                        i <- i + 1)
+            let next = 
+                let i = ref 0
+                let flag = ref true
+                fun () -> 
+                    if not !flag || !i >= source.Length then
+                        false
+                    else
+                        flag := iterf source.[!i] 
+                        incr i
+                        true
+            (bulk, next)
         Stream iter
 
     /// <summary>Wraps ResizeArray as a stream.</summary>
@@ -26,11 +44,24 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline ofResizeArray (source : ResizeArray<'T>) : Stream<'T> =
         let iter iterf =
-            let mutable i = 0
-            let mutable next = true
-            while i < source.Count && next do
-                next <- iterf source.[i]
-                i <- i + 1
+            let bulk = 
+                (fun () ->
+                    let mutable i = 0
+                    let mutable next = true
+                    while i < source.Count && next do
+                        next <- iterf source.[i]
+                        i <- i + 1)
+            let next = 
+                let i = ref 0
+                let flag = ref true
+                fun () -> 
+                    if not !flag || !i >= source.Count then
+                        false
+                    else
+                        flag := iterf source.[!i] 
+                        incr i
+                        true
+            (bulk, next)
         Stream iter
 
     /// <summary>Wraps seq as a stream.</summary>
@@ -38,10 +69,23 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline ofSeq (source : seq<'T>) : Stream<'T> =
         let iter iterf = 
-            use enumerator = source.GetEnumerator()
-            let mutable next = true
-            while enumerator.MoveNext() && next do
-                next <- iterf enumerator.Current
+            let bulk = 
+                (fun () ->
+                    use enumerator = source.GetEnumerator()
+                    let mutable next = true
+                    while enumerator.MoveNext() && next do
+                        next <- iterf enumerator.Current)
+            let next = 
+                let enumerator = source.GetEnumerator()
+                let flag = ref true
+                fun () -> 
+                    if not !flag || not <| enumerator.MoveNext()  then
+                        enumerator.Dispose()
+                        false
+                    else
+                        flag := iterf enumerator.Current
+                        true
+            (bulk, next)
         Stream iter
 
     /// <summary>Transforms each element of the input stream.</summary>
@@ -63,7 +107,7 @@ module Stream =
         let iter iterf =
             streamf (fun value -> 
                         let (Stream streamf') = f value;
-                        streamf' iterf; true)
+                        let (bulk, _) = streamf' iterf in bulk (); true)
         Stream iter
 
     /// <summary>Transforms each element of the input stream to a new stream and flattens its elements.</summary>
@@ -132,6 +176,54 @@ module Stream =
                 if !counter > n then iterf value else true)
         Stream iter
 
+
+    /// <summary>Applies a specified function to the corresponding elements of two streams, producing a stream of the results.</summary>
+    /// <param name="f">The combiner function.</param>
+    /// <param name="first">The first input stream.</param>
+    /// <param name="second">The second input stream.</param>
+    /// <returns>The result stream.</returns>
+    let zipWith (f : 'T -> 'S -> 'R) (first : Stream<'T>) (second : Stream<'S>) : Stream<'R> =
+        let firstCurrent = ref Unchecked.defaultof<'T>
+        let firstFlag = ref false
+        let (Stream firstf) = first
+        let (_, firstNext) = firstf (fun v -> firstCurrent := v; firstFlag := true; true)
+        let secondCurrent = ref Unchecked.defaultof<'S>
+        let secondFlag = ref false
+        let (Stream secondf) = second
+        let (_, secondNext) = secondf (fun v -> secondCurrent := v; secondFlag := true; true)
+        let iter iterf =
+            let bulk = 
+                (fun () ->
+                    let mutable next = true
+                    while next do
+                        while firstNext () && not !firstFlag do ()
+                        while secondNext () && not !secondFlag do ()
+
+                        if !firstFlag && !secondFlag then
+                            firstFlag := false
+                            secondFlag := false
+                            next <- iterf (f !firstCurrent !secondCurrent)
+                        else
+                            next <- false
+                        ())
+            let next = 
+                let flag = ref true
+                (fun () ->
+                    if not !flag then
+                        false
+                    else
+                        while firstNext () && not !firstFlag do ()
+                        while secondNext () && not !secondFlag do ()
+                        if !firstFlag && !secondFlag then
+                            firstFlag := false
+                            secondFlag := false
+                            flag := iterf (f !firstCurrent !secondCurrent)
+                            true
+                        else
+                            false)
+            (bulk, next)
+        Stream iter
+
     // terminal functions
 
     /// <summary>Applies a function to each element of the stream, threading an accumulator argument through the computation. If the input function is f and the elements are i0...iN, then this function computes f (... (f s i0)...) iN.</summary>
@@ -142,7 +234,8 @@ module Stream =
     let inline fold (folder : 'State -> 'T -> 'State) (state : 'State) (stream : Stream<'T>) : 'State =
         let (Stream streamf) = stream 
         let accRef = ref state
-        streamf (fun value -> accRef := folder !accRef value ; true) 
+        let (bulk, _) = streamf (fun value -> accRef := folder !accRef value ; true) 
+        bulk ()
         !accRef
 
     /// <summary>Returns the sum of the elements.</summary>
@@ -164,7 +257,23 @@ module Stream =
     /// <param name="stream">The input stream.</param>    
     let inline iter (f : 'T -> unit) (stream : Stream<'T>) : unit = 
         let (Stream streamf) = stream
-        streamf (fun value -> f value; true) 
+        let (bulk, _) = streamf (fun value -> f value; true) 
+        bulk ()
+
+    /// <summary>Creates an Seq from the given stream.</summary>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The result Seq.</returns>    
+    let inline toSeq (stream : Stream<'T>) : seq<'T> =
+        seq  {
+                let (Stream streamf) = stream
+                let current = ref Unchecked.defaultof<'T>
+                let flag = ref false
+                let (_, next) = streamf (fun v -> current := v; flag := true; true)
+                while next () do
+                    if !flag then
+                        flag := false
+                        yield !current
+        }
 
     /// <summary>Creates an ResizeArray from the given stream.</summary>
     /// <param name="stream">The input stream.</param>
@@ -190,27 +299,101 @@ module Stream =
         let (Stream streamf) = stream
         let values = new List<'T>()
         let keys = new List<'Key>()
-        streamf (fun value -> keys.Add(projection value); values.Add(value); true)
+        let (bulk, _) = streamf (fun value -> keys.Add(projection value); values.Add(value); true)
+        bulk ()
         let array = values.ToArray()
         Array.Sort(keys.ToArray(), array)
         array |> ofArray
 
+    /// <summary>Locates the maximum element of the stream by given key.</summary>
+    /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+    /// <param name="source">The input stream.</param>
+    /// <returns>The maximum item.</returns>  
+    let inline maxBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : Stream<'T>) : 'T =
+        let result =
+            fold (fun state t -> 
+                let key = projection t 
+                match state with 
+                | None -> Some (ref t, ref key)
+                | Some (refValue, refKey) when !refKey < key -> 
+                    refValue := t
+                    refKey := key
+                    state
+                | _ -> state) None source
+
+        match result with
+        | None -> invalidArg "source" "The input sequence was empty."
+        | Some (refValue, _) -> !refValue
+
+    /// <summary>Locates the minimum element of the stream by given key.</summary>
+    /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+    /// <param name="source">The input stream.</param>
+    /// <returns>The maximum item.</returns>  
+    let inline minBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : Stream<'T>) : 'T =
+        let result = 
+            fold (fun state t ->
+                let key = projection t 
+                match state with 
+                | None -> Some (ref t, ref key)
+                | Some (refValue, refKey) when !refKey > key -> 
+                    refValue := t
+                    refKey := key
+                    state
+                | _ -> state) None source
+
+        match result with
+        | None -> invalidArg "source" "The input sequence was empty."
+        | Some (refValue, _) -> !refValue
+
+    /// <summary>Applies a state-updating function to a stream of inputs, grouped by key projection.</summary>
+    /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+    /// <param name="folder">Folding function.</param>
+    /// <param name="init">State initializing function.</param>
+    /// <param name="source">The input stream.</param>
+    /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
+    let inline foldBy (projection : 'T -> 'Key) (folder : 'State -> 'T -> 'State) 
+                        (init : unit -> 'State) (source : Stream<'T>) : Stream<'Key * 'State> =
+
+        let dict = new Dictionary<'Key, 'State ref>()
+
+        let inline body (t : 'T) =
+            let key = projection t
+            let mutable container = Unchecked.defaultof<'State ref>
+            if not <| dict.TryGetValue(key, &container) then
+                container <- ref <| init ()
+                dict.Add(key, container)
+
+            container := folder container.Value t
+            true
+
+        let (Stream iter) = source in let (bulk, _) = iter body in bulk ()
+        dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value.Value))
+
     /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and a sequence of all elements that have each key.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
-    /// <param name="stream">The input stream.</param>
+    /// <param name="source">The input stream.</param>
     /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
-    let inline groupBy (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'Key * seq<'T>>  =
-        let array = toArray stream
+    let inline groupBy (projection : 'T -> 'Key) (source : Stream<'T>) : Stream<'Key * seq<'T>>  =
         let dict = new Dictionary<'Key, List<'T>>()
-        let mutable grouping = Unchecked.defaultof<List<'T>>
-
-        for i = 0 to array.Length - 1 do
-            let key = projection array.[i]
+        
+        let inline body (t : 'T) = 
+            let mutable grouping = Unchecked.defaultof<List<'T>>
+            let key = projection t
             if not <| dict.TryGetValue(key, &grouping) then
                 grouping <- new List<'T>()
                 dict.Add(key, grouping)
-            grouping.Add(array.[i])
+            grouping.Add(t)
+            true
+
+        let (Stream iterf) = source in let (bulk, _) = iterf body in bulk ()
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))
+
+    /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and their frequency.</summary>
+    /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
+    let inline countBy (project : 'T -> 'Key) (stream : Stream<'T>) : Stream<'Key * int> =
+        foldBy project (fun c _ -> c + 1) (fun () -> 0) stream
 
     /// <summary>Returns the first element for which the given function returns true. Returns None if no such element exists.</summary>
     /// <param name="predicate">A function to test each source element for a condition.</param>
@@ -219,7 +402,8 @@ module Stream =
     let inline tryFind (predicate : 'T -> bool) (stream : Stream<'T>) : 'T option = 
         let (Stream streamf) = stream
         let resultRef = ref Unchecked.defaultof<'T option>
-        streamf (fun value -> if predicate value then resultRef := Some value; false; else true) 
+        let (bulk, _) = streamf (fun value -> if predicate value then resultRef := Some value; false; else true) 
+        bulk ()
         !resultRef
 
     /// <summary>Returns the first element for which the given function returns true. Raises KeyNotFoundException if no such element exists.</summary>
@@ -239,7 +423,8 @@ module Stream =
     let inline tryPick (chooser : 'T -> 'R option) (stream : Stream<'T>) : 'R option = 
         let (Stream streamf) = stream
         let resultRef = ref Unchecked.defaultof<'R option>
-        streamf (fun value -> match chooser value with | Some value' -> resultRef := Some value'; false; | None -> true) 
+        let (bulk, _) = streamf (fun value -> match chooser value with | Some value' -> resultRef := Some value'; false; | None -> true) 
+        bulk ()
         !resultRef
 
     /// <summary>Applies the given function to successive elements, returning the first result where the function returns a Some value.

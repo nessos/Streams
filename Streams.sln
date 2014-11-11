@@ -66,12 +66,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "img", "img", "{A9BADA98-176
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{7E8195EC-5B5E-478C-B8D5-52F474AA6377}"
 	ProjectSection(SolutionItems) = preProject
+		nuget\Streams.Cloud.CSharp.nuspec = nuget\Streams.Cloud.CSharp.nuspec
 		nuget\Streams.Cloud.nuspec = nuget\Streams.Cloud.nuspec
 		nuget\Streams.CSharp.nuspec = nuget\Streams.CSharp.nuspec
 		nuget\Streams.nuspec = nuget\Streams.nuspec
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Streams", "src\Streams\Streams.fsproj", "{F3482666-F39C-4F49-8D0B-3583328D2C42}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Streams.Core", "src\Streams.Core\Streams.Core.fsproj", "{F3482666-F39C-4F49-8D0B-3583328D2C42}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streams.CSharp", "src\Streams.CSharp\Streams.CSharp.csproj", "{E6852495-8012-4694-BC0F-A5376CD84B1F}"
 EndProject

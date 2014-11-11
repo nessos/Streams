@@ -38,13 +38,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\FsCheck.1.0.1\lib\net45\FsCheck.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Core, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Core, Version=0.5.13.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Core.0.5.9-alpha\lib\net45\MBrace.Core.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.13-alpha\lib\net45\MBrace.Core.dll</HintPath>
     </Reference>
-    <Reference Include="MBrace.Lib, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MBrace.Lib, Version=0.5.13.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MBrace.Core.0.5.9-alpha\lib\net45\MBrace.Lib.dll</HintPath>
+      <HintPath>..\..\packages\MBrace.Core.0.5.13-alpha\lib\net45\MBrace.Lib.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=3.0.5378.31154, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -81,9 +81,9 @@
       <Project>{e6852495-8012-4694-bc0f-a5376cd84b1f}</Project>
       <Name>Streams.CSharp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\Streams\Streams.fsproj">
+    <ProjectReference Include="..\..\src\Streams.Core\Streams.Core.fsproj">
       <Project>{f3482666-f39c-4f49-8d0b-3583328d2c42}</Project>
-      <Name>Streams</Name>
+      <Name>Streams.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

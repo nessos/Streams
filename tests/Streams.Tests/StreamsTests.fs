@@ -31,6 +31,13 @@
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``toSeq`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.filter (fun x -> x % 2 = 0) |> Stream.map ((+)1) |> Stream.toSeq |> Seq.length
+                let y = xs |> Seq.filter (fun x -> x % 2 = 0) |> Seq.map ((+)1) |> Seq.length 
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
         member __.``map`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> Stream.ofArray |> Stream.map (fun n -> 2 * n) |> Stream.toArray
@@ -84,6 +91,49 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> Stream.ofArray |> Stream.map ((+) 1) |> Stream.sortBy id |> Stream.toArray
                 let y = xs |> Seq.map ((+) 1) |> Seq.sortBy id |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``minBy`` () =
+            Spec.ForAny<int[]>(fun xs -> 
+                if Array.isEmpty xs then
+                    try let _ = xs |> Stream.ofArray |> Stream.minBy (fun i -> i + 1) in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x = xs |> Stream.ofArray |> Stream.minBy (fun i -> i + 1)
+                    let y = xs |> Seq.minBy (fun i -> i + 1)
+                    x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``maxBy`` () =
+            Spec.ForAny<int[]>(fun xs -> 
+                if Array.isEmpty xs then 
+                    try let _ = xs |> Stream.ofArray |> Stream.maxBy (fun i -> i + 1) in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x = xs |> Stream.ofArray |> Stream.maxBy (fun i -> i + 1)
+                    let y = xs |> Seq.maxBy (fun i -> i + 1)
+                    x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``countBy`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.countBy (fun i -> i % 5) |> Stream.toArray
+                let y = xs |> Seq.countBy (fun i -> i % 5) |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``foldBy`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs 
+                        |> Stream.ofArray 
+                        |> Stream.foldBy id (fun ts t -> t :: ts) (fun () -> []) // groupBy implementation
+                        |> Stream.map (fun (key, values) -> (key, values |> Seq.length))
+                        |> Stream.toArray
+                let y = xs  
+                        |> Seq.groupBy id 
+                        |> Seq.map (fun (key, values) -> (key, values |> Seq.length))
+                        |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
@@ -173,3 +223,14 @@
                 let x = xs |> Stream.ofArray |> Stream.forall (fun n -> n % 2 = 0) 
                 let y = xs |> Seq.forall (fun n -> n % 2 = 0) 
                 x = y).QuickCheckThrowOnFailure()
+
+
+
+        [<Test>]
+        member __.``zipWith`` () =
+            Spec.ForAny<(int[] * int[])>(fun (xs, ys) ->
+                let x = xs |> Stream.ofArray |> Stream.filter (fun x -> x % 2 = 0) |> Stream.zipWith (fun x y -> x + y) (ys |> Stream.ofArray) |> Stream.toArray
+                let y = xs |> Seq.filter (fun x -> x % 2 = 0) |> Seq.zip ys |> Seq.map (fun (x, y) -> x + y) |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+

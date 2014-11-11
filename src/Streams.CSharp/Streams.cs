@@ -150,6 +150,14 @@ namespace Nessos.Streams.CSharp
             return Stream.toArray(stream);
         }
 
+        /// <summary>Creates an IEnumerable from the given stream.</summary>
+        /// <param name="stream">The input stream.</param>
+        /// <returns>The result IEnumerable.</returns>    
+        public static IEnumerable<TSource> ToEnumerable<TSource>(this Stream<TSource> stream)
+        {
+            return Stream.toSeq(stream);
+        }
+
         /// <summary>Creates an ResizeArray from the given stream.</summary>
         /// <param name="stream">The input stream.</param>
         /// <returns>The result ResizeArray.</returns>    
@@ -202,6 +210,55 @@ namespace Nessos.Streams.CSharp
         public static Stream<TSource> Skip<TSource>(this Stream<TSource> stream, int n)
         {
             return Stream.skip(n, stream);
+        }
+
+        /// <summary>Locates the maximum element of the stream by given key.</summary>
+        /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+        /// <param name="source">The input stream.</param>
+        /// <returns>The maximum item.</returns>  
+        public static TSource MaxBy<TSource, TKey>(this Stream<TSource> source, Func<TSource, TKey> projection)
+        {
+            return CSharpProxy.MaxBy(source, projection);
+        }
+
+        /// <summary>Locates the minimum element of the stream by given key.</summary>
+        /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+        /// <param name="source">The input stream.</param>
+        /// <returns>The maximum item.</returns>  
+        public static TSource MinBy<TSource, TKey>(this Stream<TSource> source, Func<TSource, TKey> projection)
+        {
+            return CSharpProxy.MinBy(source, projection);
+        }
+
+        /// <summary>Applies a state-updating function to a stream of inputs, grouped by key projection.</summary>
+        /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+        /// <param name="folder">Folding function.</param>
+        /// <param name="init">State initializing function.</param>
+        /// <param name="source">The input stream.</param>
+        /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
+        public static Stream<Tuple<TKey, TState>> AggregateBy<TSource, TKey, TState>(this Stream<TSource> source, Func<TSource,TKey> projection, Func<TState, TSource, TState> folder, Func<TState> init)
+        {
+            return CSharpProxy.AggregateBy(source, projection, folder, init);
+        }
+
+        /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and their frequency.</summary>
+        /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
+        /// <param name="stream">The input stream.</param>
+        /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
+        public static Stream<Tuple<TKey, int>> CountBy<TSource, TKey>(this Stream<TSource> stream, Func<TSource, TKey> projection)
+        {
+            return CSharpProxy.CountBy(stream, projection);
+        }
+
+
+        /// <summary>Applies a specified function to the corresponding elements of two streams, producing a stream of the results.</summary>
+        /// <param name="resultSelector">The combiner function.</param>
+        /// <param name="first">The first input stream.</param>
+        /// <param name="second">The second input stream.</param>
+        /// <returns>The result stream.</returns>
+        public static Stream<TResult> Zip<TFirst, TSecond, TResult>(this Stream<TFirst> first, Stream<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector)
+        {
+            return CSharpProxy.Zip(first, second, resultSelector);
         }
     }
 }

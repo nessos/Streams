@@ -16,6 +16,7 @@ type Collector<'T, 'R> =
 
 /// Represents a parallel Stream of values.
 type ParStream<'T> =
+    abstract PreserveOrdering : bool
     /// Applies the given collector to the parallel Stream.
     abstract Apply<'R> : Collector<'T, 'R> -> unit
 
@@ -38,6 +39,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let ofArray (source : 'T []) : ParStream<'T> =
         { new ParStream<'T> with
+            member self.PreserveOrdering = false
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
                 if not (source.Length = 0) then 
                     let partitions = getPartitions source.Length
@@ -61,6 +63,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let ofResizeArray (source : ResizeArray<'T>) : ParStream<'T> =
         { new ParStream<'T> with
+            member self.PreserveOrdering = false
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
                 if not (source.Count = 0) then 
                     let partitions = getPartitions source.Count
@@ -84,6 +87,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let ofSeq (source : seq<'T>) : ParStream<'T> =
         { new ParStream<'T> with
+            member self.PreserveOrdering = false
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
                 
                 let partitioner = Partitioner.Create(source)
@@ -110,6 +114,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let inline map (f : 'T -> 'R) (stream : ParStream<'T>) : ParStream<'R> =
         { new ParStream<'R> with
+            member self.PreserveOrdering = stream.PreserveOrdering
             member self.Apply<'S> (collector : Collector<'R, 'S>) =
                 let collector = 
                     { new Collector<'T, 'S> with
@@ -125,6 +130,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let inline flatMap (f : 'T -> Stream<'R>) (stream : ParStream<'T>) : ParStream<'R> =
         { new ParStream<'R> with
+            member self.PreserveOrdering = stream.PreserveOrdering
             member self.Apply<'S> (collector : Collector<'R, 'S>) =
                 let collector = 
                     { new Collector<'T, 'S> with
@@ -132,7 +138,7 @@ module ParStream =
                             let iter = collector.Iterator()
                             (fun value -> 
                                 let (Stream streamf) = f value
-                                streamf iter; true)
+                                let (bulk, _) = streamf iter in bulk (); true)
                         member self.Result = collector.Result  }
                 stream.Apply collector }
 
@@ -149,6 +155,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let inline filter (predicate : 'T -> bool) (stream : ParStream<'T>) : ParStream<'T> =
         { new ParStream<'T> with
+            member self.PreserveOrdering = stream.PreserveOrdering
             member self.Apply<'S> (collector : Collector<'T, 'S>) =
                 let collector = 
                     { new Collector<'T, 'S> with
@@ -164,6 +171,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let inline choose (chooser : 'T -> 'R option) (stream : ParStream<'T>) : ParStream<'R> =
         { new ParStream<'R> with
+            member self.PreserveOrdering = stream.PreserveOrdering
             member self.Apply<'S> (collector : Collector<'R, 'S>) =
                 let collector = 
                     { new Collector<'T, 'S> with
@@ -172,6 +180,36 @@ module ParStream =
                             (fun value -> match chooser value with Some value' -> iter value' | None -> true)
                         member self.Result = collector.Result }
                 stream.Apply collector }
+
+    /// <summary>Returns a parallel stream that preserves ordering.</summary>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result parallel stream as ordered.</returns>
+    let inline ordered (stream : ParStream<'T>) : ParStream<'T> = 
+        { new ParStream<'T> with
+                member self.PreserveOrdering = true
+                member self.Apply<'S> (collector : Collector<'T, 'S>) =
+                    let collector = 
+                        { new Collector<'T, 'S> with
+                            member self.Iterator() = 
+                                let iter = collector.Iterator()
+                                (fun value -> iter value)
+                            member self.Result = collector.Result }
+                    stream.Apply collector }
+
+    /// <summary>Returns a parallel stream that is unordered.</summary>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result parallel stream as unordered.</returns>
+    let inline unordered (stream : ParStream<'T>) : ParStream<'T> = 
+        { new ParStream<'T> with
+                member self.PreserveOrdering = false
+                member self.Apply<'S> (collector : Collector<'T, 'S>) =
+                    let collector = 
+                        { new Collector<'T, 'S> with
+                            member self.Iterator() = 
+                                let iter = collector.Iterator()
+                                (fun value -> iter value)
+                            member self.Result = collector.Result }
+                    stream.Apply collector }
 
     // terminal functions
 
@@ -241,6 +279,58 @@ module ParStream =
     let inline toResizeArray (stream : ParStream<'T>) : ResizeArray<'T> =
         new ResizeArray<'T>(toArray stream)
 
+
+    /// <summary>Locates the maximum element of the parallel stream by given key.</summary>
+    /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
+    /// <param name="source">The input parallel stream.</param>
+    /// <returns>The maximum item.</returns>  
+    let inline maxBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : ParStream<'T>) : 'T =
+        let result =
+            fold (fun state t -> 
+                let key = projection t 
+                match state with 
+                | None -> Some (ref t, ref key)
+                | Some (refValue, refKey) when !refKey < key -> 
+                    refValue := t
+                    refKey := key
+                    state
+                | _ -> state) (fun left right -> 
+                                    match left, right with
+                                    | Some (_, key), Some (_, key') ->
+                                        if !key' > !key then right else left
+                                    | None, _ -> right
+                                    | _, None -> left) (fun () -> None) source
+
+        match result with
+        | None -> invalidArg "source" "The input sequence was empty."
+        | Some (refValue,_) -> !refValue
+
+    /// <summary>Locates the minimum element of the parallel stream by given key.</summary>
+    /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
+    /// <param name="source">The input parallel stream.</param>
+    /// <returns>The maximum item.</returns>  
+    let inline minBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : ParStream<'T>) : 'T =
+        let result = 
+            fold (fun state t ->
+                let key = projection t 
+                match state with 
+                | None -> Some (ref t, ref key)
+                | Some (refValue, refKey) when !refKey > key -> 
+                    refValue := t
+                    refKey := key
+                    state 
+                | _ -> state) (fun left right -> 
+                                    match left, right with
+                                    | Some (_, key), Some (_, key') ->
+                                        if !key' > !key then left else right
+                                    | None, _ -> right
+                                    | _, None -> left) (fun () -> None) source
+
+        match result with
+        | None -> invalidArg "source" "The input sequence was empty."
+        | Some (refValue,_) -> !refValue
+
+
     /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream ordered by keys.</summary>
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
     /// <param name="stream">The input parallel stream.</param>
@@ -264,7 +354,60 @@ module ParStream =
         let keyArray' = keyArray.ToArray()
         let valueArray' = valueArray.ToArray()
         Sort.parallelSort keyArray' valueArray'
-        valueArray' |> ofArray
+        valueArray' |> ofArray |> ordered
+
+    /// <summary>Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and the result of the threading an accumulator.</summary>
+    /// <param name="projection">A function to transform items from the input ParStream to keys.</param>
+    /// <param name="folder">A function that updates the state with each element from the ParStream.</param>
+    /// <param name="combiner">A function that combines partial states into a new state.</param>
+    /// <param name="state">A function that produces the initial state.</param>
+    /// <param name="stream">The input ParStream.</param>
+    /// <returns>The final result.</returns>
+    let inline foldBy (projection : 'T -> 'Key) 
+                      (folder : 'State -> 'T -> 'State) 
+                      (combiner : 'State -> 'State -> 'State) 
+                      (state : unit -> 'State) (stream : ParStream<'T>) : ParStream<'Key * 'State> =
+        let results = new List<Dictionary<'Key, 'State ref>>()
+        let collector = 
+            { new Collector<'T,  Object> with
+                member self.Iterator() = 
+                    let dict = new Dictionary<'Key, 'State ref>()
+                    results.Add(dict)
+                    (fun value -> 
+                            let key = projection value
+                            let mutable stateRef = Unchecked.defaultof<'State ref>
+                            if dict.TryGetValue(key, &stateRef) then
+                                stateRef := folder !stateRef value
+                            else
+                                stateRef <- ref <| state ()
+                                stateRef := folder !stateRef value
+                                dict.Add(key, stateRef)
+                            true)
+                member self.Result = 
+                    raise <| System.InvalidOperationException() }
+        stream.Apply collector
+        let dict = 
+            let dict = new Dictionary<'Key, 'State ref>()
+            for result in results do
+                for keyValue in result do
+                    let mutable stateRef = Unchecked.defaultof<'State ref>
+                    if dict.TryGetValue(keyValue.Key, &stateRef) then
+                        stateRef := combiner !stateRef !keyValue.Value
+                    else
+                        stateRef <- ref <| state ()
+                        stateRef := combiner !stateRef !keyValue.Value
+                        dict.Add(keyValue.Key, stateRef)
+            dict
+        dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, !keyValue.Value))
+        
+
+    /// <summary>
+    /// Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and their number of occurrences in the original sequence.
+    /// </summary>
+    /// <param name="projection">A function that maps items from the input ParStream to keys.</param>
+    /// <param name="stream">The input ParStream.</param>
+    let inline countBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * int> =
+        foldBy projection (fun state _ -> state + 1) (+) (fun () -> 0) stream
 
     /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream of unique keys and a sequence of all elements that have each key.</summary>
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
@@ -274,7 +417,7 @@ module ParStream =
         let dict = new ConcurrentDictionary<'Key, Tuple<int ref, 'T [] ref>>()
         
         let collector = 
-            { new Collector<'T, int> with
+            { new Collector<'T, Object> with
                 member self.Iterator() = 
                     // A (mostly) lock-free ConcurrentList.Add
                     let rec groupingAdd (value : 'T) (grouping : Tuple<int ref, 'T [] ref>) = 
@@ -393,6 +536,52 @@ module ParStream =
     /// <returns>true if all of the elements satisfies the predicate. Otherwise, returns false.</returns>
     let inline forall (predicate : 'T -> bool) (stream : ParStream<'T>) : bool = 
         not <| exists (fun x -> not <| predicate x) stream
+
+
+
+    /// <summary>Returns the elements of the parallel stream up to a specified count.</summary>
+    /// <param name="n">The number of items to take.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result prallel stream.</returns>
+    let inline take (n : int) (stream : ParStream<'T>) : ParStream<'T> =
+        if n < 0 then
+            raise <| new System.ArgumentException("The input must be non-negative.")
+        if stream.PreserveOrdering then
+            let array = stream |> toArray 
+            array.Take(n).ToArray() |> ofArray
+        else
+            { new ParStream<'T> with
+                member self.PreserveOrdering = stream.PreserveOrdering
+                member self.Apply<'S> (collector : Collector<'T, 'S>) =
+                    let collector = 
+                        let count = ref 0
+                        { new Collector<'T, 'S> with
+                            member self.Iterator() = 
+                                let iter = collector.Iterator()
+                                (fun value -> if Interlocked.Increment count <= n then iter value else false)
+                            member self.Result = collector.Result }
+                    stream.Apply collector }
+
+    /// <summary>Returns a parallel stream that skips N elements of the input parallel stream and then yields the remaining elements of the stream.</summary>
+    /// <param name="n">The number of items to skip.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result parallel stream.</returns>
+    let inline skip (n : int) (stream : ParStream<'T>) : ParStream<'T> =
+        if stream.PreserveOrdering then
+            let array = stream |> toArray 
+            array.Skip(n).ToArray() |> ofArray
+        else
+            { new ParStream<'T> with
+                member self.PreserveOrdering = stream.PreserveOrdering
+                member self.Apply<'S> (collector : Collector<'T, 'S>) =
+                    let collector = 
+                        let count = ref 0
+                        { new Collector<'T, 'S> with
+                            member self.Iterator() = 
+                                let iter = collector.Iterator()
+                                (fun value -> if Interlocked.Increment count > n then iter value else true)
+                            member self.Result = collector.Result }
+                    stream.Apply collector }
 
 
 

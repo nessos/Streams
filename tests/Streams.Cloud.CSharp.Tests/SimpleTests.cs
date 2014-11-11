@@ -20,9 +20,17 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
     [Category("CloudStreams.CSharp.RunLocal")]
     public class RunLocal : CloudStreamsTests
     {
+        Configuration c = new Configuration();
+
         internal override T Eval<T>(Nessos.MBrace.Cloud<T> c)
         {
             return MBrace.MBrace.RunLocal(c);
+        }
+
+
+        internal override Configuration config
+        {
+            get { return c; }
         }
     }
 
@@ -30,6 +38,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
     public class Cluster : CloudStreamsTests
     {
         Runtime rt;
+        Configuration c = new Configuration() { MaxNbOfTest = 5 };
 
         public Cluster() {  }
 
@@ -55,12 +64,17 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
         {
             return rt.Run(c);
         }
+        internal override Configuration config
+        {
+            get { return c; }
+        }
     }
 
     [TestFixture]
     abstract public class CloudStreamsTests
     {
         abstract internal T Eval<T>(Nessos.MBrace.Cloud<T> c);
+        abstract internal Configuration config { get; }
 
         [Test]
         public void OfArray()
@@ -70,7 +84,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var x = xs.AsCloudStream().Select(i => i + 1).ToArray();
                 var y = xs.Select(i => i + 1).ToArray();
                 return this.Eval(x).SequenceEqual(y);
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
 
 
@@ -82,7 +96,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var x = xs.AsCloudStream().Select(i => i + 1).ToArray();
                 var y = xs.AsParallel().Select(i => i + 1).ToArray();
                 return this.Eval(x).SequenceEqual(y);
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
 
         [Test]
@@ -93,7 +107,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var x = xs.AsCloudStream().Where(i => i % 2 == 0).ToArray();
                 var y = xs.AsParallel().Where(i => i % 2 == 0).ToArray();
                 return this.Eval(x).SequenceEqual(y);
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
 
         [Test]
@@ -104,7 +118,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var x = xs.AsCloudStream().SelectMany<int,int>(i => xs.AsStream()).ToArray();
                 var y = xs.AsParallel().SelectMany(i => xs).ToArray();
                 return this.Eval(x).SequenceEqual(y);
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
 
 
@@ -116,7 +130,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var x = xs.AsCloudStream().Select(i => i + 1).Aggregate(() => 0, (acc, i) => acc + i, (left, right) => left + right);
                 var y = xs.AsParallel().Select(i => i + 1).Aggregate(() => 0, (acc, i) => acc + i, (left, right) => left + right, i => i);
                 return this.Eval(x) == y;
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
 
 
@@ -128,7 +142,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var x = xs.AsCloudStream().Select(i => i + 1).Sum();
                 var y = xs.AsParallel().Select(i => i + 1).Sum();
                 return this.Eval(x) == y;
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
 
         [Test]
@@ -139,7 +153,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var x = xs.AsCloudStream().Select(i => i + 1).Count();
                 var y = xs.AsParallel().Select(i => i + 1).Count();
                 return this.Eval(x) == y;
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
 
         [Test]
@@ -150,7 +164,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var x = xs.AsCloudStream().Select(i => i + 1).OrderBy(i => i,10).ToArray();
                 var y = xs.AsParallel().Select(i => i + 1).OrderBy(i => i).Take(10).ToArray();
                 return this.Eval(x).SequenceEqual(y);
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
 
         [Test]
@@ -161,7 +175,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var x = xs.AsCloudStream().Select(i => new Custom1 { Name = i.ToString(), Age = i }).ToArray();
                 var y = xs.AsParallel().Select(i => new Custom1 { Name = i.ToString(), Age = i }).ToArray();
                 return this.Eval(x).Zip(y, (l, r) => l.Name == r.Name && l.Age == r.Age).All(b => b == true);
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
 
         [Test]
@@ -172,7 +186,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var x = xs.AsCloudStream().Select(i => new Custom2 { Name = i.ToString(), Age = i }).ToArray();
                 var y = xs.AsParallel().Select(i => new Custom2 { Name = i.ToString(), Age = i }).ToArray();
                 return this.Eval(x).Zip(y, (l, r) => l.Name == r.Name && l.Age == r.Age).All(b => b == true);
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
 
         [Test]
@@ -183,7 +197,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var x = xs.AsCloudStream().Select(i => new { Value = i }).ToArray();
                 var y = xs.AsParallel().Select(i => new { Value = i }).ToArray();
                 return this.Eval(x).SequenceEqual(y);
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
 
         [Test]
@@ -195,7 +209,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var x = xs.AsCloudStream().SelectMany<int,int>(_ => ys.AsStream()).ToArray();
                 var y = xs.AsParallel().SelectMany<int,int>(_ => ys).ToArray();
                 return this.Eval(x).SequenceEqual(y);
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
 
         [Test]
@@ -208,7 +222,7 @@ namespace Nessos.Streams.Cloud.CSharp.Tests
                 var y = (from x2 in xs.AsParallel()
                          select x2 * x2).ToArray();
                 return this.Eval(x).SequenceEqual(y);
-            }).QuickCheckThrowOnFailure();
+            }).Check(config);
         }
     }
 }

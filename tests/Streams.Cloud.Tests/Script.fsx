@@ -1,5 +1,5 @@
-﻿#load "../../packages/MBrace.Runtime.0.5.9-alpha/bootstrap.fsx" 
-#r "../../bin/Streams.dll"
+﻿#load "../../packages/MBrace.Runtime.0.5.13-alpha/bootstrap.fsx" 
+#r "../../bin/Streams.Core.dll"
 #r "../../bin/Streams.Cloud.dll"
 
 open Nessos.Streams.Cloud
@@ -91,7 +91,7 @@ let path = @"C:\dev\github-repositories\MBrace.Demos\data\Shakespeare"
 
 let cfs = runtime.GetStoreClient().UploadFiles(System.IO.Directory.GetFiles path)
 
-open Nessos.Streams.Core
+open Nessos.Streams
 
 let r = 
     cfs
@@ -99,7 +99,7 @@ let r =
     |> CloudStream.collect (fun lines -> Stream.ofSeq lines)
     |> CloudStream.map id
     |> CloudStream.length
-    |> run
+    |> runtime.Run
 
 let cas = System.IO.Directory.GetFiles path
           |> Array.map (fun file -> let vs = System.IO.File.ReadLines(file) in runtime.GetStoreClient().CreateCloudArray("tmp", vs))
@@ -110,12 +110,14 @@ let r' =
     |> CloudStream.ofCloudArray 
     |> CloudStream.map id
     |> CloudStream.length
-    |> run
+    |> runtime.Run
 
 
 let xs : string [] [] = [|[|null|]|]
+
 open System.IO
-open Nessos.Streams.Core
+open Nessos.Streams
+
 let cfs = 
     xs |> Array.map(fun xs -> 
         StoreClient.Default.CreateCloudFile(System.Guid.NewGuid().ToString(),

@@ -21,6 +21,6 @@
     </metadata>
     <files>
         <file src="..\bin\Streams.Cloud.dll" target="lib\Streams.Cloud.dll" />
-        <!--<file src="..\src\Streams.Cloud\bin\Release\Streams.Cloud.XML" target="lib\Streams.Core.XML" />-->
+        <file src="..\bin\Streams.Cloud.XML" target="lib\Streams.Cloud.XML" />
     </files>
 </package>
