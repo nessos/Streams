@@ -212,11 +212,8 @@ module Stream =
                 fun () ->
                     for stream in streams do
                         let (Stream streamF) = stream
-                        let (_, nextF) = streamF (fun v -> current := v; true)
-                        let mutable next = true
-                        while next do
-                            if nextF() then next <- iterf !current
-                            else next <- false
+                        let (bulk, _) = streamF iterf
+                        bulk ()
 
             let next =
                 let flag = ref true
