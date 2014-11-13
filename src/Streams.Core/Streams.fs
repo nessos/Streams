@@ -129,7 +129,9 @@ module Stream =
                 let flag = ref true
                 fun () -> 
                     if not !flag || not <| enumerator.MoveNext()  then
-                        // enumerator.Dispose()  Not implemented
+                        match enumerator with 
+                        | :? System.IDisposable as disposable -> disposable.Dispose()
+                        | _ -> ()
                         false
                     else
                         flag := iterf (enumerator.Current :?> 'T)
