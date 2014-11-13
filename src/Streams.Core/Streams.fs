@@ -123,7 +123,10 @@ module Stream =
                     let enumerator = source.GetEnumerator() // not disposable
                     let mutable next = true
                     while enumerator.MoveNext() && next do
-                        next <- iterf (enumerator.Current :?> 'T))
+                        next <- iterf (enumerator.Current :?> 'T)
+                    match enumerator with 
+                    | :? System.IDisposable as disposable -> disposable.Dispose()
+                    | _ -> ())
             let next = 
                 let enumerator = source.GetEnumerator()
                 let flag = ref true
