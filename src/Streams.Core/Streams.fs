@@ -87,6 +87,30 @@ module Stream =
                         true
             (bulk, next)
         Stream iter
+        
+    /// <summary>Wraps an IEnumerable as a stream.</summary>
+    /// <param name="source">The input seq.</param>
+    /// <returns>The result stream.</returns>
+    let inline cast<'T> (source : System.Collections.IEnumerable) : Stream<'T> =
+        let iter iterf = 
+            let bulk = 
+                (fun () ->
+                    let enumerator = source.GetEnumerator() // not disposable
+                    let mutable next = true
+                    while enumerator.MoveNext() && next do
+                        next <- iterf (enumerator.Current :?> 'T))
+            let next = 
+                let enumerator = source.GetEnumerator()
+                let flag = ref true
+                fun () -> 
+                    if not !flag || not <| enumerator.MoveNext()  then
+                        // enumerator.Dispose()  Not implemented
+                        false
+                    else
+                        flag := iterf (enumerator.Current :?> 'T)
+                        true
+            (bulk, next)
+        Stream iter
 
     /// <summary>Transforms each element of the input stream.</summary>
     /// <param name="f">A function to transform items from the input stream.</param>
