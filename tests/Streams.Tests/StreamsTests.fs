@@ -243,8 +243,24 @@
         [<Test>]
         member __.``concat`` () =
             Spec.ForAny<int[][]>(fun xs ->
-                let x = xs |> Seq.map Stream.ofArray |> Stream.concat |> Stream.toArray
-                let y = xs |> Seq.concat |> Seq.toArray
-                x = y).QuickCheckThrowOnFailure()
+                let x = xs |> Seq.map (fun xs' -> xs' |> Stream.ofArray |> Stream.filter (fun x -> x % 2 = 0)) |> Stream.concat |> Stream.toArray
+                let y = xs |> Seq.map (fun xs' -> xs' |> Seq.filter (fun x -> x % 2 = 0)) |> Seq.concat |> Seq.toArray
+                Assert.AreEqual(x, y)
+                let x = xs |> Seq.map (fun xs' -> xs' |> Stream.ofArray |> Stream.filter (fun x -> x % 2 = 0)) |> Stream.concat |> Stream.toSeq |> Seq.toArray
+                let y = xs |> Seq.map (fun xs' -> xs' |> Seq.filter (fun x -> x % 2 = 0)) |> Seq.concat |> Seq.toArray
+                Assert.AreEqual(x, y)
+                ).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
+        member __.``cast`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |>  Stream.cast |> Stream.toArray
+                let y = xs |> Seq.cast |> Seq.toArray
+                Assert.AreEqual(x, y)
+                let x = xs |>  Stream.cast |> Stream.toSeq |> Seq.length
+                let y = xs |> Seq.cast |> Seq.length
+                Assert.AreEqual(x, y)
+                ).QuickCheckThrowOnFailure()
 
 

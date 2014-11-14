@@ -246,18 +246,17 @@ module Stream =
 
             let next =
                 let flag = ref true
-                if Seq.length streams = 0 then fun () -> false
-                else
-                    fun () ->
-                        if not !flag then false
-                        else
-                            let stream = Seq.head streams
-                            let (Stream streamF) = stream
-                            let (_, nextF) = streamF (fun v -> current := v; true)
+                let streams = ref streams
+                fun () ->
+                    if Seq.length !streams = 0 || not !flag then false
+                    else
+                        let stream = Seq.head !streams
+                        let (Stream streamF) = stream
+                        let (_, nextF) = streamF (fun v -> current := v; true)
 
-                            let hasNext = nextF()
-                            if hasNext then flag := iterf !current
-                            hasNext
+                        let hasNext = nextF()
+                        if hasNext then flag := iterf !current
+                        hasNext
 
             (bulk, next)
 
