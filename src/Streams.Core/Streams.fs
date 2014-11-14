@@ -236,7 +236,6 @@ module Stream =
     /// <returns>The concatenated stream.</returns>
     let inline concat (streams: #seq<Stream<'T>>): Stream<'T> =
         let iter iterf =
-            let current = ref Unchecked.defaultof<'T>
             let bulk =
                 fun () ->
                     for stream in streams do
@@ -245,18 +244,32 @@ module Stream =
                         bulk ()
 
             let next =
-                let flag = ref true
-                let streams = ref streams
-                fun () ->
-                    if Seq.length !streams = 0 || not !flag then false
-                    else
-                        let stream = Seq.head !streams
-                        let (Stream streamF) = stream
-                        let (_, nextF) = streamF (fun v -> current := v; true)
+                if Seq.isEmpty streams then fun () -> false
+                else                    
+                    let current = ref Unchecked.defaultof<'T>
+                    let gotNewCurrent = ref false
+                    let nextFs =
+                        streams
+                        |> Seq.map (fun (Stream streamF) -> streamF (fun v -> current := v; gotNewCurrent := true; true))
+                        |> Seq.map snd
+                        |> Seq.toArray
+                    let i = ref 0
+                    let shouldStop = ref false
+                    
+                    fun () ->
+                        if !shouldStop then false
+                        else
+                            let nextF = nextFs.[!i]
 
-                        let hasNext = nextF()
-                        if hasNext then flag := iterf !current
-                        hasNext
+                            let pulled = nextF()
+                            if pulled && !gotNewCurrent then
+                                gotNewCurrent := false
+                                shouldStop := not <| iterf !current
+                                true
+                            else if not pulled then
+                                incr i
+                                not (!i = nextFs.Length)
+                            else true
 
             (bulk, next)
 
