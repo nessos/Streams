@@ -263,4 +263,35 @@
                 Assert.AreEqual(x, y)
                 ).QuickCheckThrowOnFailure()
 
+        [<Test>]
+        member __.``cache``() =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.cache |> Stream.toArray
+                let y = xs |> Seq.cache |> Seq.toArray
+                Assert.AreEqual(x, y)
+                let cached = xs |> Stream.ofArray |> Stream.filter(fun x -> x % 2 = 0) |> Stream.cache
+                let cachedSeq = xs |> Seq.filter(fun x -> x % 2 = 0) |> Seq.cache
+                let x' = cached |> Stream.map (fun x -> x + 1) |> Stream.toArray
+                let x'' = cached |> Stream.map (fun x -> x + 1) |> Stream.toArray
+                Assert.AreEqual(x', x'')
+                let y' = cachedSeq |> Seq.map (fun x -> x + 1) |> Seq.toArray
+                Assert.AreEqual(x', y')
+
+                let cached' = xs |> Stream.ofArray |> Stream.filter(fun x -> x % 2 = 0) |> Stream.cache
+                let cachedSeq' = xs |> Seq.filter(fun x -> x % 2 = 0) |> Seq.cache
+
+                let count = ref 0
+                try cached' |> Stream.map (fun v -> (if !count = 1 then failwith "OOPS"); incr count; v) |> ignore with _ -> ()
+                try cachedSeq' |> Seq.map (fun v -> (if !count = 1 then failwith "OOPS"); incr count; v) |> ignore with _ -> ()
+                let x''' = cached' |> Stream.map (fun x -> x + 1) |> Stream.toArray
+                let y''' = cachedSeq' |> Seq.map (fun x -> x + 1) |> Seq.toArray
+                Assert.AreEqual(x''', y''')
+                Assert.AreEqual(x''', x'')
+
+                let cached'' = xs |> Stream.ofArray |> Stream.filter(fun x -> x % 2 = 0) |> Stream.cache
+                let x4 = cached'' |> Stream.map (fun v -> v + 1) |> Stream.toSeq |> Seq.toArray
+                let x5 = cached'' |> Stream.map (fun v -> v + 1) |> Stream.toArray
+                Assert.AreEqual(x4, x5)
+                ).QuickCheckThrowOnFailure()
+
 

@@ -164,6 +164,33 @@ module Stream =
                         let (bulk, _) = streamf' iterf in bulk (); true)
         Stream iter
 
+    // <summary>Creates a cached version of the input stream.</summary>
+    // <param name="source">The input stream.</param>
+    // <returns>The cached stream.</returns>
+    let inline cache (source: Stream<'T>): Stream<'T> =
+        let cache = new ResizeArray<'T>()
+        //if !cached = None && cache.Count = 0 then the stream is not cached
+        //if !cached = None && cache.Count > 0 then the stream is partially cached
+        //if !cached = Some then the stream is fully cached
+        let cached = ref None : Stream<'T> option ref
+        let iter iterf =  
+            if Option.isSome !cached then
+                //fully cached case
+                let (Stream streamf) = (!cached).Value in streamf iterf
+            else //partially cached or not cached at all case
+                let (Stream streamf) = source
+                let count = ref 0
+                let (bulk, next) = streamf (fun v -> (if cache.Count - !count = 0 then cache.Add(v)); incr count; iterf v)
+                let bulk' () = lock cache (fun () -> bulk(); cached := Some (ofResizeArray cache))
+//                let bulk' () = bulk(); cached := Some (Stream.ofResizeArray cache)
+                //locking each next() seem's overkill
+                let next' () = lock cache (fun () -> if next() then true else cached := Some (ofResizeArray cache); false)
+//                let next' () = if next() then true else cached := Some (Stream.ofResizeArray cache); false
+
+                (bulk', next')
+        
+        Stream iter
+
     /// <summary>Transforms each element of the input stream to a new stream and flattens its elements.</summary>
     /// <param name="f">A function to transform items from the input stream.</param>
     /// <param name="stream">The input stream.</param>
