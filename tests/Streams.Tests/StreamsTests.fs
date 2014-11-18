@@ -294,4 +294,9 @@
                 Assert.AreEqual(x4, x5)
                 ).QuickCheckThrowOnFailure()
 
-
+        [<Test>]
+        member __.``groupUntil``() =
+            Spec.ForAny<int []>(fun xs ->
+                let ys = xs |> Stream.ofArray |> Stream.groupUntil true (fun i -> i % 7 <> 0) |> Stream.toArray |> Array.concat
+                Assert.AreEqual(xs, ys)
+            ).QuickCheckThrowOnFailure()

@@ -44,13 +44,12 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline ofArray (source : 'T []) : Stream<'T> =
         let iter iterf =
-            let bulk = 
-                (fun () ->
-                    let mutable i = 0
-                    let mutable next = true
-                    while i < source.Length && next do
-                        next <- iterf source.[i]
-                        i <- i + 1)
+            let bulk () =
+                let mutable i = 0
+                let mutable next = true
+                while i < source.Length && next do
+                    next <- iterf source.[i]
+                    i <- i + 1
             let next = 
                 let i = ref 0
                 let flag = ref true
@@ -69,13 +68,12 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline ofResizeArray (source : ResizeArray<'T>) : Stream<'T> =
         let iter iterf =
-            let bulk = 
-                (fun () ->
-                    let mutable i = 0
-                    let mutable next = true
-                    while i < source.Count && next do
-                        next <- iterf source.[i]
-                        i <- i + 1)
+            let bulk () =
+                let mutable i = 0
+                let mutable next = true
+                while i < source.Count && next do
+                    next <- iterf source.[i]
+                    i <- i + 1
             let next = 
                 let i = ref 0
                 let flag = ref true
@@ -94,12 +92,12 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline ofSeq (source : seq<'T>) : Stream<'T> =
         let iter iterf = 
-            let bulk = 
-                (fun () ->
-                    use enumerator = source.GetEnumerator()
-                    let mutable next = true
-                    while enumerator.MoveNext() && next do
-                        next <- iterf enumerator.Current)
+            let bulk () =
+                use enumerator = source.GetEnumerator()
+                let mutable next = true
+                while enumerator.MoveNext() && next do
+                    next <- iterf enumerator.Current
+
             let next = 
                 let enumerator = source.GetEnumerator()
                 let flag = ref true
@@ -118,15 +116,14 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline cast<'T> (source : System.Collections.IEnumerable) : Stream<'T> =
         let iter iterf = 
-            let bulk = 
-                (fun () ->
-                    let enumerator = source.GetEnumerator() // not disposable
-                    let mutable next = true
-                    while enumerator.MoveNext() && next do
-                        next <- iterf (enumerator.Current :?> 'T)
-                    match enumerator with 
-                    | :? System.IDisposable as disposable -> disposable.Dispose()
-                    | _ -> ())
+            let bulk () =
+                let enumerator = source.GetEnumerator() // not disposable
+                let mutable next = true
+                while enumerator.MoveNext() && next do
+                    next <- iterf (enumerator.Current :?> 'T)
+                match enumerator with 
+                | :? System.IDisposable as disposable -> disposable.Dispose()
+                | _ -> ()
             let next = 
                 let enumerator = source.GetEnumerator()
                 let flag = ref true
@@ -263,12 +260,11 @@ module Stream =
     /// <returns>The concatenated stream.</returns>
     let inline concat (streams: #seq<Stream<'T>>): Stream<'T> =
         let iter iterf =
-            let bulk =
-                fun () ->
-                    for stream in streams do
-                        let (Stream streamF) = stream
-                        let (bulk, _) = streamF iterf
-                        bulk ()
+            let bulk () =
+                for stream in streams do
+                    let (Stream streamF) = stream
+                    let (bulk, _) = streamF iterf
+                    bulk ()
 
             let next =
                 if Seq.isEmpty streams then fun () -> false
@@ -318,20 +314,19 @@ module Stream =
         let (Stream secondf) = second
         let (_, secondNext) = secondf (fun v -> secondCurrent := v; secondFlag := true; true)
         let iter iterf =
-            let bulk = 
-                (fun () ->
-                    let mutable next = true
-                    while next do
-                        while firstNext () && not !firstFlag do ()
-                        while secondNext () && not !secondFlag do ()
+            let bulk () =
+                let mutable next = true
+                while next do
+                    while firstNext () && not !firstFlag do ()
+                    while secondNext () && not !secondFlag do ()
 
-                        if !firstFlag && !secondFlag then
-                            firstFlag := false
-                            secondFlag := false
-                            next <- iterf (f !firstCurrent !secondCurrent)
-                        else
-                            next <- false
-                        ())
+                    if !firstFlag && !secondFlag then
+                        firstFlag := false
+                        secondFlag := false
+                        next <- iterf (f !firstCurrent !secondCurrent)
+                    else
+                        next <- false
+                    ()
             let next = 
                 let flag = ref true
                 (fun () ->
@@ -579,3 +574,31 @@ module Stream =
     /// <returns>true if all of the elements satisfies the predicate. Otherwise, returns false.</returns>
     let inline forall (predicate : 'T -> bool) (stream : Stream<'T>) : bool = 
         not <| exists (fun value -> not <| predicate value) stream
+
+    /// <summary>
+    ///     Separates stream elements into groups until predicate is satisfied.
+    ///     Elements not satisfying the predicate are included as final element in grouping
+    ///     or discarded depending on the 'inclusive' parameter.
+    /// </summary>
+    /// <param name="inclusive">Include elements not satisfying the predicate to the last grouping. Discarded otherwise.</param>
+    /// <param name="predicate">Grouping predicate.</param>
+    /// <param name="source">Source stream.</param>
+    let inline groupUntil inclusive (predicate : 'T -> bool) (source : Stream<'T>) : Stream<'T []> =
+        let iter (k : 'T [] -> bool) =
+            let (Stream f) = source
+            let ra = new ResizeArray<'T> ()
+            let k' (t : 'T) =
+                if predicate t then
+                    ra.Add t
+                    true
+                else
+                    if inclusive then ra.Add t
+                    let hasNext = k <| ra.ToArray()
+                    ra.Clear()
+                    hasNext
+
+            let bulk () = let bulk',_ = f k' in bulk' ()
+            let next () = let _,next' = f k' in next' ()
+            bulk, next
+
+        Stream iter
