@@ -381,19 +381,42 @@ module Stream =
         let (bulk, _) = streamf (fun value -> f value; true) 
         bulk ()
 
+
+    type private StreamEnumerator<'T> (stream : Stream<'T>) =
+        let current = ref Unchecked.defaultof<'T>
+        let isEvaluatedCallback = ref false
+        let (Stream f) = stream
+        let (_, next) = f (fun v -> current := v; isEvaluatedCallback := true; true)
+
+        interface System.Collections.IEnumerator with
+            member __.Current = box current.Value
+            member __.MoveNext () =
+                let rec awaitNext () =
+                    if next () then
+                        if !isEvaluatedCallback then
+                            isEvaluatedCallback := false
+                            true
+                        else
+                            awaitNext ()
+                    else
+                        false
+
+                awaitNext ()
+
+            member __.Reset () = raise <| new NotSupportedException()
+
+        interface IEnumerator<'T> with
+            member __.Current = current.Value
+            member __.Dispose () = ()
+
     /// <summary>Creates an Seq from the given stream.</summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>The result Seq.</returns>    
-    let inline toSeq (stream : Stream<'T>) : seq<'T> =
-        seq  {
-                let (Stream streamf) = stream
-                let current = ref Unchecked.defaultof<'T>
-                let flag = ref false
-                let (_, next) = streamf (fun v -> current := v; flag := true; true)
-                while next () do
-                    if !flag then
-                        flag := false
-                        yield !current
+    let toSeq (stream : Stream<'T>) : seq<'T> =
+        {
+            new IEnumerable<'T> with
+                member __.GetEnumerator () = new StreamEnumerator<'T>(stream) :> IEnumerator<'T>
+                member __.GetEnumerator () = new StreamEnumerator<'T>(stream) :> System.Collections.IEnumerator
         }
 
     /// <summary>Creates an ResizeArray from the given stream.</summary>
@@ -575,30 +598,42 @@ module Stream =
     let inline forall (predicate : 'T -> bool) (stream : Stream<'T>) : bool = 
         not <| exists (fun value -> not <| predicate value) stream
 
-    /// <summary>
-    ///     Separates stream elements into groups until predicate is satisfied.
-    ///     Elements not satisfying the predicate are included as final element in grouping
-    ///     or discarded depending on the 'inclusive' parameter.
-    /// </summary>
-    /// <param name="inclusive">Include elements not satisfying the predicate to the last grouping. Discarded otherwise.</param>
-    /// <param name="predicate">Grouping predicate.</param>
-    /// <param name="source">Source stream.</param>
-    let inline groupUntil inclusive (predicate : 'T -> bool) (source : Stream<'T>) : Stream<'T []> =
-        let iter (k : 'T [] -> bool) =
-            let (Stream f) = source
-            let ra = new ResizeArray<'T> ()
-            let k' (t : 'T) =
-                if predicate t then
-                    ra.Add t
-                    true
-                else
-                    if inclusive then ra.Add t
-                    let hasNext = k <| ra.ToArray()
-                    ra.Clear()
-                    hasNext
-
-            let bulk () = let bulk',_ = f k' in bulk' ()
-            let next () = let _,next' = f k' in next' ()
-            bulk, next
-
-        Stream iter
+//    /// <summary>
+//    ///     Separates stream elements into groups until predicate is satisfied.
+//    ///     Elements not satisfying the predicate are included as final element in grouping
+//    ///     or discarded depending on the 'inclusive' parameter.
+//    /// </summary>
+//    /// <param name="inclusive">Include elements not satisfying the predicate to the last grouping. Discarded otherwise.</param>
+//    /// <param name="predicate">Grouping predicate.</param>
+//    /// <param name="source">Source stream.</param>
+//    let inline groupUntil inclusive (predicate : 'T -> bool) (source : Stream<'T>) : Stream<'T []> =
+//        let iter (k : 'T [] -> bool) =
+//            let ra = new ResizeArray<'T> ()
+//            let k' (t : 'T) =
+//                if predicate t then
+//                    ra.Add t
+//                    true
+//                else
+//                    if inclusive then ra.Add t
+//                    let rNext = k <| ra.ToArray()
+//                    ra.Clear()
+//                    rNext
+//
+//            let (Stream f) = source
+//            let _,next = f k'
+//
+//            let bulk () =
+//                while next () do ()
+//                if ra.Count > 0 then 
+//                    let _ = k <| ra.ToArray() in ()
+//
+//            let next () =
+//                if next () then true
+//                else
+//                    if ra.Count > 0 then 
+//                        let _ = k <| ra.ToArray() in ()
+//                    false
+//
+//            bulk, next
+//
+//        Stream iter
