@@ -6,6 +6,7 @@
 #r "packages/FAKE/tools/FakeLib.dll"
 //#load "packages/SourceLink.Fake/tools/SourceLink.fsx"
 open System
+open System.IO
 open Fake 
 open Fake.Git
 open Fake.ReleaseNotesHelper
@@ -29,14 +30,15 @@ let tags = "F#/C# Streams"
 let gitHome = "https://github.com/nessos"
 let gitName = "Streams"
 let gitRaw = environVarOrDefault "gitRaw" "https://raw.github.com/nessos"
-
+let ignoreCloudTests = hasBuildParam "IgnoreCloudTests"
 
 let testAssemblies = 
     [
-        "bin/Streams.Tests.exe"
-        "bin/Streams.Tests.CSharp.exe"
-        "bin/Streams.Cloud.Tests.exe"
-        "bin/Streams.Cloud.CSharp.Tests.exe"
+        yield "bin/Streams.Tests.exe"
+        yield "bin/Streams.Tests.CSharp.exe"
+        if not ignoreCloudTests then
+            yield "bin/Streams.Cloud.Tests.exe"
+            yield "bin/Streams.Cloud.CSharp.Tests.exe"
     ]
 
 //
@@ -132,6 +134,24 @@ FinalTarget "CloseTestRunner" (fun _ ->
 //// --------------------------------------------------------------------------------------
 //// Build a NuGet package
 
+let addFile (target : string) (file : string) =
+    if File.Exists (Path.Combine("nuget", file)) then (file, Some target, None)
+    else raise <| new FileNotFoundException(file)
+
+let addAssembly (target : string) assembly =
+    let includeFile force file =
+        let file = file
+        if File.Exists (Path.Combine("nuget", file)) then [(file, Some target, None)]
+        elif force then raise <| new FileNotFoundException(file)
+        else []
+
+    seq {
+        yield! includeFile true assembly
+        yield! includeFile false <| Path.ChangeExtension(assembly, "pdb")
+        yield! includeFile false <| Path.ChangeExtension(assembly, "xml")
+        yield! includeFile false <| assembly + ".config"
+    }
+
 Target "NuGet" (fun _ ->
     let nugetPath = ".nuget/NuGet.exe"
 
@@ -146,9 +166,13 @@ Target "NuGet" (fun _ ->
             Version = Streams.nugetVersion
             ReleaseNotes = String.concat " " Streams.release.Notes
             Tags = tags
-            OutputPath = "nuget"
+            OutputPath = "bin"
             ToolPath = nugetPath
             AccessKey = getBuildParamOrDefault "nugetkey" ""
+            Files =
+                [
+                    yield! addAssembly @"lib\net45" @"..\bin\Streams.Core.dll"
+                ]
             Publish = hasBuildParam "nugetkey" })
         ("nuget/Streams.nuspec")
 
@@ -161,12 +185,16 @@ Target "NuGet" (fun _ ->
             Version = Streams.nugetVersion
             ReleaseNotes = String.concat " " Streams.release.Notes
             Tags = tags
-            OutputPath = "nuget"
+            OutputPath = "bin"
             Dependencies = [ "Streams", RequireExactly Streams.nugetVersion ]
             ToolPath = nugetPath
+            Files =
+                [
+                    yield! addAssembly @"lib\net45" @"..\bin\Streams.CSharp.dll"
+                ]
             AccessKey = getBuildParamOrDefault "nugetkey" ""
             Publish = hasBuildParam "nugetkey" })
-        ("nuget/Streams.CSharp.nuspec")
+        ("nuget/Streams.nuspec")
 
     NuGet (fun p -> 
         { p with   
@@ -177,16 +205,20 @@ Target "NuGet" (fun _ ->
             Version = CloudStreams.nugetVersion
             ReleaseNotes = String.concat " " CloudStreams.release.Notes
             Tags = tags
-            OutputPath = "nuget"
+            OutputPath = "bin"
             Dependencies = 
                 [
                     "Streams",      RequireExactly Streams.nugetVersion
                     "MBrace.Core",  RequireExactly "0.5.13-alpha"
                 ]
             ToolPath = nugetPath
+            Files =
+                [
+                    yield! addAssembly @"lib\net45" @"..\bin\Streams.Cloud.dll"
+                ]
             AccessKey = getBuildParamOrDefault "nugetkey" ""
             Publish = hasBuildParam "nugetkey" })
-        ("nuget/Streams.Cloud.nuspec")
+        ("nuget/Streams.nuspec")
 
     NuGet (fun p -> 
         { p with   
@@ -197,7 +229,7 @@ Target "NuGet" (fun _ ->
             Version = CloudStreams.nugetVersion
             ReleaseNotes = String.concat " " CloudStreams.release.Notes
             Tags = tags
-            OutputPath = "nuget"
+            OutputPath = "bin"
             Dependencies = 
                 [
                     "Streams",          RequireExactly Streams.nugetVersion
@@ -206,9 +238,13 @@ Target "NuGet" (fun _ ->
                     "FSharp.Core.Microsoft.Signed", "3.1.1.1"
                 ]
             ToolPath = nugetPath
+            Files =
+                [
+                    yield! addAssembly @"lib\net45" @"..\bin\Streams.Cloud.CSharp.dll"
+                ]
             AccessKey = getBuildParamOrDefault "nugetkey" ""
             Publish = hasBuildParam "nugetkey" })
-        ("nuget/Streams.Cloud.CSharp.nuspec")
+        ("nuget/Streams.nuspec")
 )
 
 Target "GenerateDocs" (fun _ ->
@@ -235,8 +271,8 @@ Target "Release" DoNothing
 
 Target "Prepare" DoNothing
 Target "PrepareRelease" DoNothing
-Target "All" DoNothing
-Target "Help" (fun _ -> PrintTargets() )
+Target "Default" DoNothing
+Target "Help" (fun _ -> PrintTargets())
 
 "Clean"
   ==> "RestorePackages"
@@ -244,14 +280,13 @@ Target "Help" (fun _ -> PrintTargets() )
   ==> "Prepare"
   ==> "Build"
   ==> "RunTests"
-  ==> "All"
+  ==> "Default"
 
-"All"
+"Build"
   ==> "PrepareRelease" 
   ==> "NuGet"
   ==> "GenerateDocs"
   ==> "ReleaseDocs"
   ==> "Release"
 
-RunTargetOrDefault "Release"
-//RunTargetOrDefault "All"
+RunTargetOrDefault "Default"

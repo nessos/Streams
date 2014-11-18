@@ -19,8 +19,8 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsStream().Select(i => i + 1).ToArray();
-                var y = xs.Select(i => i + 1).ToArray();
+                var x = xs.AsParStream().Select(i => i + 1).ToArray();
+                var y = xs.AsParallel().Select(i => i + 1).ToArray();
                 return x.SequenceEqual(y);
             }).QuickCheckThrowOnFailure();
         }
