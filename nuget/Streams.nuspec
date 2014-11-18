@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+      <id>@project@</id>
+      <version>@build.number@</version>
+      <authors>@authors@</authors>
+      <owners>@authors@</owners>
+      <licenseUrl>https://github.com/nessos/Streams/blob/master/LICENSE.md</licenseUrl>
+      <projectUrl>https://github.com/nessos/Streams</projectUrl>
+      <iconUrl>https://avatars1.githubusercontent.com/u/5538081</iconUrl>
+      <requireLicenseAcceptance>false</requireLicenseAcceptance>
+      <summary>@summary@</summary>
+      <description>@description@</description>
+      <releaseNotes>@releaseNotes@</releaseNotes>
+      <copyright>Copyright 2014</copyright>
+      <tags>@tags@</tags>
+		@dependencies@
+		<references>
+			<reference file="Streams.Core.dll" />
+		</references>
+    </metadata>
+    <files>
+        <file src="..\bin\Streams.Core.dll" target="lib\Streams.Core.dll" />
+        <file src="..\bin\Streams.Core.XML" target="lib\Streams.Core.XML" />
+    </files>
+</package>

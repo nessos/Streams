@@ -381,7 +381,6 @@ module Stream =
         let (bulk, _) = streamf (fun value -> f value; true) 
         bulk ()
 
-
     type private StreamEnumerator<'T> (stream : Stream<'T>) =
         let current = ref Unchecked.defaultof<'T>
         let isEvaluatedCallback = ref false
@@ -598,42 +597,58 @@ module Stream =
     let inline forall (predicate : 'T -> bool) (stream : Stream<'T>) : bool = 
         not <| exists (fun value -> not <| predicate value) stream
 
-//    /// <summary>
-//    ///     Separates stream elements into groups until predicate is satisfied.
-//    ///     Elements not satisfying the predicate are included as final element in grouping
-//    ///     or discarded depending on the 'inclusive' parameter.
-//    /// </summary>
-//    /// <param name="inclusive">Include elements not satisfying the predicate to the last grouping. Discarded otherwise.</param>
-//    /// <param name="predicate">Grouping predicate.</param>
-//    /// <param name="source">Source stream.</param>
-//    let inline groupUntil inclusive (predicate : 'T -> bool) (source : Stream<'T>) : Stream<'T []> =
-//        let iter (k : 'T [] -> bool) =
-//            let ra = new ResizeArray<'T> ()
-//            let k' (t : 'T) =
-//                if predicate t then
-//                    ra.Add t
-//                    true
-//                else
-//                    if inclusive then ra.Add t
-//                    let rNext = k <| ra.ToArray()
-//                    ra.Clear()
-//                    rNext
-//
-//            let (Stream f) = source
-//            let _,next = f k'
-//
-//            let bulk () =
-//                while next () do ()
-//                if ra.Count > 0 then 
-//                    let _ = k <| ra.ToArray() in ()
-//
-//            let next () =
-//                if next () then true
-//                else
-//                    if ra.Count > 0 then 
-//                        let _ = k <| ra.ToArray() in ()
-//                    false
-//
-//            bulk, next
-//
-//        Stream iter
+
+    /// <summary>
+    ///     Separates stream elements into groups until predicate is satisfied.
+    ///     Elements not satisfying the predicate are included as final element in grouping
+    ///     or discarded depending on the 'inclusive' parameter.
+    /// </summary>
+    /// <param name="inclusive">Include elements not satisfying the predicate to the last grouping. Discarded otherwise.</param>
+    /// <param name="predicate">Grouping predicate.</param>
+    /// <param name="source">Source stream.</param>
+    let groupUntil inclusive (predicate : 'T -> bool) (source : Stream<'T>) : Stream<'T []> =
+        let iter (k : 'T [] -> bool) =
+            let ra = new ResizeArray<'T> ()
+            let isEvaluatedCallback = ref false
+            let isPullComplete = ref false
+            let k' (t : 'T) =
+                isEvaluatedCallback := true
+                if predicate t then
+                    ra.Add t
+                    true
+                else
+                    if inclusive then ra.Add t
+                    let rNext = k <| ra.ToArray()
+                    ra.Clear()
+                    rNext
+
+            let (Stream f) = source
+            let _,next = f k'
+
+            let bulk () =
+                while next () do ()
+                if ra.Count > 0 then 
+                    ra.ToArray() |> k |> ignore
+
+            let next () =
+                let rec awaitNext () =
+                    if !isPullComplete then false
+                    elif next () then
+                        if !isEvaluatedCallback then
+                            isEvaluatedCallback := false
+                            true
+                        else
+                            awaitNext ()
+                    else
+                        if ra.Count > 0 then 
+                            ra.ToArray() |> k |> ignore
+                            isPullComplete := true
+                            true
+                        else
+                            false
+
+                awaitNext()
+
+            bulk, next
+
+        Stream iter

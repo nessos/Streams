@@ -294,11 +294,19 @@
                 Assert.AreEqual(x4, x5)
                 ).QuickCheckThrowOnFailure()
 
-//        [<Test>]
-//        member __.``groupUntil``() =
-//            Spec.ForAny<int []>(fun xs ->
-//                let ys = xs |> Stream.ofArray |> Stream.groupUntil true (fun i -> i % 7 <> 0) |> Stream.toArray |> Array.concat
-//                Assert.AreEqual(xs, ys)
-//                let ys = xs |> Stream.ofArray |> Stream.groupUntil true (fun i -> i % 7 <> 0) |> Stream.toSeq |> Array.concat
-//                Assert.AreEqual(xs, ys)
-//            ).QuickCheckThrowOnFailure()
+        [<Test>]
+        member __.``groupUntil``() =
+            Spec.ForAny<int []>(fun xs ->
+                // push-based tests
+                let ys = xs |> Stream.ofArray |> Stream.groupUntil true (fun i -> i % 7 <> 0) |> Stream.toArray |> Array.concat
+                Assert.AreEqual(xs, ys)
+                let failedPredicates = ref 0
+                let ys = xs |> Stream.ofArray |> Stream.groupUntil false (fun i -> if i % 7 <> 0 then true else incr failedPredicates ; false) |> Stream.toArray |> Seq.concat |> Seq.length
+                Assert.AreEqual(xs.Length, ys + !failedPredicates)
+                // pull-based tests
+                let ys = xs |> Stream.ofArray |> Stream.groupUntil true (fun i -> i % 7 <> 0) |> Stream.toSeq |> Array.concat
+                Assert.AreEqual(xs, ys)
+                let failedPredicates = ref 0
+                let ys = xs |> Stream.ofArray |> Stream.groupUntil false (fun i -> if i % 7 <> 0 then true else incr failedPredicates ; false) |> Stream.toSeq |> Seq.concat |> Seq.length
+                Assert.AreEqual(xs.Length, ys + !failedPredicates)
+            ).QuickCheckThrowOnFailure()
