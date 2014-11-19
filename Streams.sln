@@ -24,9 +24,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{3C97
 		build.fsx = build.fsx
 		build.sh = build.sh
 		LICENSE.md = LICENSE.md
+		nuget-push.sh = nuget-push.sh
 		README.md = README.md
 		RELEASE_NOTES.md = RELEASE_NOTES.md
 		RELEASE_NOTES_CLOUDSTREAM.md = RELEASE_NOTES_CLOUDSTREAM.md
+		nuget\Streams.nuspec = nuget\Streams.nuspec
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streams.Tests.CSharp", "tests\Streams.Tests.CSharp\Streams.Tests.CSharp.csproj", "{6234FB0D-8ED6-4EA6-9B32-649EE9ED9FD1}"
