@@ -52,12 +52,12 @@ module Stream =
                     i <- i + 1
             let next = 
                 let i = ref 0
-                let flag = ref true
+                let valueReady = ref true
                 fun () -> 
-                    if not !flag || !i >= source.Length then
+                    if not !valueReady || !i >= source.Length then
                         false
                     else
-                        flag := iterf source.[!i] 
+                        valueReady := iterf source.[!i] 
                         incr i
                         true
             (bulk, next)
@@ -76,12 +76,12 @@ module Stream =
                     i <- i + 1
             let next = 
                 let i = ref 0
-                let flag = ref true
+                let valueReady = ref true
                 fun () -> 
-                    if not !flag || !i >= source.Count then
+                    if not !valueReady || !i >= source.Count then
                         false
                     else
-                        flag := iterf source.[!i] 
+                        valueReady := iterf source.[!i] 
                         incr i
                         true
             (bulk, next)
@@ -100,13 +100,13 @@ module Stream =
 
             let next = 
                 let enumerator = source.GetEnumerator()
-                let flag = ref true
+                let valueReady = ref true
                 fun () -> 
-                    if not !flag || not <| enumerator.MoveNext()  then
+                    if not !valueReady || not <| enumerator.MoveNext()  then
                         enumerator.Dispose()
                         false
                     else
-                        flag := iterf enumerator.Current
+                        valueReady := iterf enumerator.Current
                         true
             (bulk, next)
         Stream iter
@@ -126,15 +126,15 @@ module Stream =
                 | _ -> ()
             let next = 
                 let enumerator = source.GetEnumerator()
-                let flag = ref true
+                let valueReady = ref true
                 fun () -> 
-                    if not !flag || not <| enumerator.MoveNext()  then
+                    if not !valueReady || not <| enumerator.MoveNext()  then
                         match enumerator with 
                         | :? System.IDisposable as disposable -> disposable.Dispose()
                         | _ -> ()
                         false
                     else
-                        flag := iterf (enumerator.Current :?> 'T)
+                        valueReady := iterf (enumerator.Current :?> 'T)
                         true
             (bulk, next)
         Stream iter
@@ -306,39 +306,39 @@ module Stream =
     /// <returns>The result stream.</returns>
     let zipWith (f : 'T -> 'S -> 'R) (first : Stream<'T>) (second : Stream<'S>) : Stream<'R> =
         let firstCurrent = ref Unchecked.defaultof<'T>
-        let firstFlag = ref false
+        let firstValueReady = ref false
         let (Stream firstf) = first
-        let (_, firstNext) = firstf (fun v -> firstCurrent := v; firstFlag := true; true)
+        let (_, firstNext) = firstf (fun v -> firstCurrent := v; firstValueReady := true; true)
         let secondCurrent = ref Unchecked.defaultof<'S>
-        let secondFlag = ref false
+        let secondValueReady = ref false
         let (Stream secondf) = second
-        let (_, secondNext) = secondf (fun v -> secondCurrent := v; secondFlag := true; true)
+        let (_, secondNext) = secondf (fun v -> secondCurrent := v; secondValueReady := true; true)
         let iter iterf =
             let bulk () =
                 let mutable next = true
                 while next do
-                    while firstNext () && not !firstFlag do ()
-                    while secondNext () && not !secondFlag do ()
+                    while firstNext () && not !firstValueReady do ()
+                    while secondNext () && not !secondValueReady do ()
 
-                    if !firstFlag && !secondFlag then
-                        firstFlag := false
-                        secondFlag := false
+                    if !firstValueReady && !secondValueReady then
+                        firstValueReady := false
+                        secondValueReady := false
                         next <- iterf (f !firstCurrent !secondCurrent)
                     else
                         next <- false
                     ()
             let next = 
-                let flag = ref true
+                let valueReady = ref true
                 (fun () ->
-                    if not !flag then
+                    if not !valueReady then
                         false
                     else
-                        while firstNext () && not !firstFlag do ()
-                        while secondNext () && not !secondFlag do ()
-                        if !firstFlag && !secondFlag then
-                            firstFlag := false
-                            secondFlag := false
-                            flag := iterf (f !firstCurrent !secondCurrent)
+                        while firstNext () && not !firstValueReady do ()
+                        while secondNext () && not !secondValueReady do ()
+                        if !firstValueReady && !secondValueReady then
+                            firstValueReady := false
+                            secondValueReady := false
+                            valueReady := iterf (f !firstCurrent !secondCurrent)
                             true
                         else
                             false)
