@@ -52,12 +52,12 @@ module Stream =
                     i <- i + 1
             let next = 
                 let i = ref 0
-                let valueReady = ref true
+                let continueFlag = ref true
                 fun () -> 
-                    if not !valueReady || !i >= source.Length then
+                    if not !continueFlag || !i >= source.Length then
                         false
                     else
-                        valueReady := iterf source.[!i] 
+                        continueFlag := iterf source.[!i] 
                         incr i
                         true
             (bulk, next)
@@ -76,12 +76,12 @@ module Stream =
                     i <- i + 1
             let next = 
                 let i = ref 0
-                let valueReady = ref true
+                let continueFlag = ref true
                 fun () -> 
-                    if not !valueReady || !i >= source.Count then
+                    if not !continueFlag || !i >= source.Count then
                         false
                     else
-                        valueReady := iterf source.[!i] 
+                        continueFlag := iterf source.[!i] 
                         incr i
                         true
             (bulk, next)
@@ -100,13 +100,13 @@ module Stream =
 
             let next = 
                 let enumerator = source.GetEnumerator()
-                let valueReady = ref true
+                let continueFlag = ref true
                 fun () -> 
-                    if not !valueReady || not <| enumerator.MoveNext()  then
+                    if not !continueFlag || not <| enumerator.MoveNext()  then
                         enumerator.Dispose()
                         false
                     else
-                        valueReady := iterf enumerator.Current
+                        continueFlag := iterf enumerator.Current
                         true
             (bulk, next)
         Stream iter
@@ -126,15 +126,15 @@ module Stream =
                 | _ -> ()
             let next = 
                 let enumerator = source.GetEnumerator()
-                let valueReady = ref true
+                let continueFlag = ref true
                 fun () -> 
-                    if not !valueReady || not <| enumerator.MoveNext()  then
+                    if not !continueFlag || not <| enumerator.MoveNext()  then
                         match enumerator with 
                         | :? System.IDisposable as disposable -> disposable.Dispose()
                         | _ -> ()
                         false
                     else
-                        valueReady := iterf (enumerator.Current :?> 'T)
+                        continueFlag := iterf (enumerator.Current :?> 'T)
                         true
             (bulk, next)
         Stream iter
@@ -328,9 +328,9 @@ module Stream =
                         next <- false
                     ()
             let next = 
-                let valueReady = ref true
+                let continueFlag = ref true
                 (fun () ->
-                    if not !valueReady then
+                    if not !continueFlag then
                         false
                     else
                         while firstNext () && not !firstValueReady do ()
@@ -338,7 +338,7 @@ module Stream =
                         if !firstValueReady && !secondValueReady then
                             firstValueReady := false
                             secondValueReady := false
-                            valueReady := iterf (f !firstCurrent !secondCurrent)
+                            continueFlag := iterf (f !firstCurrent !secondCurrent)
                             true
                         else
                             false)
