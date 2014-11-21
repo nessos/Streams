@@ -37,6 +37,7 @@ The main design behind Streams is inspired by Java 8 Streams and is based on the
 The main difference between LINQ/Seq and Streams is that LINQ is about composing external iterators (Enumerable/Enumerator) and  Streams is based on the continuation-passing-style composition of internal iterators.
 
 For simple pipelines we have observed performance improvements of a factor of four and for more complex pipelines the performance gains are even greater.
+Important performance tip: Make sure that FSI is running with 64-bit option set to true and fsproj option prefer 32-bit is unchecked.
 *)
 
 open Nessos.Streams
