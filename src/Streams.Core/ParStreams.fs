@@ -414,60 +414,29 @@ module ParStream =
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>A parallel stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
     let inline groupBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * seq<'T>> =
-        let dict = new ConcurrentDictionary<'Key, Tuple<int ref, 'T [] ref>>()
+        let dict = new ConcurrentDictionary<'Key, List<'T>>()
         
         let collector = 
             { new Collector<'T, Object> with
                 member self.Iterator() = 
-                    // A (mostly) lock-free ConcurrentList.Add
-                    let rec groupingAdd (value : 'T) (grouping : Tuple<int ref, 'T [] ref>) = 
-                        let indexRef = grouping.Item1
-                        let arrayRef = grouping.Item2
-                        let array = !arrayRef
-                        if Object.ReferenceEquals(array, null) then
-                            groupingAdd value grouping
-                        else 
-                            let index = Interlocked.Increment(indexRef)
-                            if index < array.Length then
-                                array.[index] <- value
-                                let mutable array' = array
-                                while not <| Object.ReferenceEquals(array', !arrayRef) || Object.ReferenceEquals(array', null) do
-                                    array' <- !arrayRef
-                                    if not <| Object.ReferenceEquals(array', null) then
-                                        array'.[index] <- value
-                            else
-                                lock grouping (fun () ->
-                                    if Object.ReferenceEquals(array, !arrayRef) then
-                                        arrayRef := null
-                                        let index = array.Length
-                                        let newArray = Array.zeroCreate<'T> (array.Length * 2)
-                                        Array.Copy(array, newArray, index)
-                                        indexRef := index - 1
-                                        arrayRef := newArray
-                                )
-                                groupingAdd value grouping
-                        
                     (fun value -> 
-                        let mutable grouping = Unchecked.defaultof<Tuple<int ref, 'T [] ref>>
+                        let mutable grouping = Unchecked.defaultof<List<'T>>
                         let key = projection value
                         if dict.TryGetValue(key, &grouping) then
-                            groupingAdd value grouping
+                            let list = grouping
+                            lock grouping (fun () -> list.Add(value))
                         else
-                            let array = Array.zeroCreate 16
-                            array.[0] <- value
-                            grouping <- new Tuple<_, _>(ref 0, ref array)
+                            grouping <- new List<'T>()
                             if not <| dict.TryAdd(key, grouping) then
                                 dict.TryGetValue(key, &grouping) |> ignore
-                                groupingAdd value grouping
+                            let list = grouping
+                            lock grouping (fun () -> list.Add(value))     
                         true)
                 member self.Result = 
                     raise <| System.InvalidOperationException() }
         stream.Apply collector
 
-        dict |> ofSeq |> map (fun keyValue -> 
-                                    let length = keyValue.Value.Item1.Value + 1 
-                                    let values = keyValue.Value.Item2.Value |> Seq.take length 
-                                    (keyValue.Key, values))
+        dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> _))
 
     /// <summary>Returns the first element for which the given function returns true. Returns None if no such element exists.</summary>
     /// <param name="predicate">A function to test each source element for a condition.</param>
