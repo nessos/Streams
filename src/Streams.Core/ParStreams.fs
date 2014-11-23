@@ -367,37 +367,26 @@ module ParStream =
                       (folder : 'State -> 'T -> 'State) 
                       (combiner : 'State -> 'State -> 'State) 
                       (state : unit -> 'State) (stream : ParStream<'T>) : ParStream<'Key * 'State> =
-        let results = new List<Dictionary<'Key, 'State ref>>()
+        let dict = new ConcurrentDictionary<'Key, 'State ref>()
         let collector = 
             { new Collector<'T,  Object> with
                 member self.Iterator() = 
-                    let dict = new Dictionary<'Key, 'State ref>()
-                    results.Add(dict)
                     (fun value -> 
+                            let mutable grouping = Unchecked.defaultof<_>
                             let key = projection value
-                            let mutable stateRef = Unchecked.defaultof<'State ref>
-                            if dict.TryGetValue(key, &stateRef) then
-                                stateRef := folder !stateRef value
+                            if dict.TryGetValue(key, &grouping) then
+                                let acc = grouping
+                                lock grouping (fun () -> acc := folder !acc value) 
                             else
-                                stateRef <- ref <| state ()
-                                stateRef := folder !stateRef value
-                                dict.Add(key, stateRef)
+                                grouping <- ref <| state ()
+                                if not <| dict.TryAdd(key, grouping) then
+                                    dict.TryGetValue(key, &grouping) |> ignore
+                                let acc = grouping
+                                lock grouping (fun () -> acc := folder !acc value) 
                             true)
                 member self.Result = 
                     raise <| System.InvalidOperationException() }
         stream.Apply collector
-        let dict = 
-            let dict = new Dictionary<'Key, 'State ref>()
-            for result in results do
-                for keyValue in result do
-                    let mutable stateRef = Unchecked.defaultof<'State ref>
-                    if dict.TryGetValue(keyValue.Key, &stateRef) then
-                        stateRef := combiner !stateRef !keyValue.Value
-                    else
-                        stateRef <- ref <| state ()
-                        stateRef := combiner !stateRef !keyValue.Value
-                        dict.Add(keyValue.Key, stateRef)
-            dict
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, !keyValue.Value))
         
 
