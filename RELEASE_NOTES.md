@@ -1,3 +1,7 @@
+#### 0.2.6
+* New Stream functions (empty, singleton, cast, concat, cache, groupUntil)
+* Performance and memory improvements for ParStream functions (groupBy, foldBy)
+
 #### 0.2.5
 * Support for pull-based operators, implemented ofSeq and zip methods.
 
