@@ -71,7 +71,8 @@ PM> Install-Package Streams.Cloud.CSharp -Pre</pre>
 
 <p>The main difference between LINQ/Seq and Streams is that LINQ is about composing external iterators (Enumerable/Enumerator) and  Streams is based on the continuation-passing-style composition of internal iterators.</p>
 
-<p>For simple pipelines we have observed performance improvements of a factor of four and for more complex pipelines the performance gains are even greater.</p>
+<p>For simple pipelines we have observed performance improvements of a factor of four and for more complex pipelines the performance gains are even greater.
+Important performance tip: Make sure that FSI is running with 64-bit option set to true and fsproj option prefer 32-bit is unchecked.</p>
 
 <table class="pre"><tr><td class="lines"><pre class="fssnip">
 <span class="l"> 1: </span>
