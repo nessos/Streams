@@ -161,9 +161,9 @@ module Stream =
                         let (bulk, _) = streamf' iterf in bulk (); true)
         Stream iter
 
-    // <summary>Creates a cached version of the input stream.</summary>
-    // <param name="source">The input stream.</param>
-    // <returns>The cached stream.</returns>
+    /// <summary>Creates a cached version of the input stream.</summary>
+    /// <param name="source">The input stream.</param>
+    /// <returns>The cached stream.</returns>
     let inline cache (source: Stream<'T>): Stream<'T> =
         let cache = new ResizeArray<'T>()
         //if !cached = None && cache.Count = 0 then the stream is not cached

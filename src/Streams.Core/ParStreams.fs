@@ -16,6 +16,7 @@ type Collector<'T, 'R> =
 
 /// Represents a parallel Stream of values.
 type ParStream<'T> =
+    /// A flag that indicates that the ordering in the subsequent query operators will be preserved.
     abstract PreserveOrdering : bool
     /// Applies the given collector to the parallel Stream.
     abstract Apply<'R> : Collector<'T, 'R> -> unit
