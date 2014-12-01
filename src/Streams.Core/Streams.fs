@@ -2,13 +2,18 @@
 open System
 open System.Collections.Generic
 
+
+
+/// Provides functions for iteration
+type Iterable = {
+    Bulk : unit -> unit // is a function for bulk processing
+    TryAdvance : unit -> bool // is a function for on-demand processing
+}
+
 // ('T -> bool) is the composed continutation with 'T for the current value 
 // and bool is a flag for early termination
-// (unit -> unit) is a function for bulk processing
-// (unit -> bool) is a function for on-demand processing
-
 /// Represents a Stream of values.
-type Stream<'T> = Stream of (('T -> bool) -> (unit -> unit) * (unit -> bool))
+type Stream<'T> = Stream of (('T -> bool) -> Iterable)
 
 /// Provides basic operations on Streams.
 [<RequireQualifiedAccessAttribute>]
@@ -18,8 +23,8 @@ module Stream =
     /// <returns>An empty stream.</returns>
     let empty<'T> : Stream<'T> =
         let iter iterf =
-            let next () = false
-            (ignore, next)
+            let tryAdvance () = false
+            { Bulk = ignore; TryAdvance = tryAdvance }
         Stream iter
 
     /// <summary>Creates a singleton stream.</summary>
@@ -28,7 +33,7 @@ module Stream =
     let inline singleton (source: 'T) : Stream<'T> =
         let iter iterf =
             let bulk () = iterf source |> ignore
-            let next =
+            let tryAdvance =
                 let pulled = ref false
                 fun () ->
                     if !pulled then false
@@ -36,7 +41,7 @@ module Stream =
                         iterf source |> ignore
                         pulled := true
                         true
-            (bulk, next)
+            { Bulk = bulk; TryAdvance = tryAdvance }
         Stream iter
            
     /// <summary>Wraps array as a stream.</summary>
@@ -50,7 +55,7 @@ module Stream =
                 while i < source.Length && next do
                     next <- iterf source.[i]
                     i <- i + 1
-            let next = 
+            let tryAdvance = 
                 let i = ref 0
                 let continueFlag = ref true
                 fun () -> 
@@ -60,7 +65,7 @@ module Stream =
                         continueFlag := iterf source.[!i] 
                         incr i
                         true
-            (bulk, next)
+            { Bulk = bulk; TryAdvance = tryAdvance }
         Stream iter
 
     /// <summary>Wraps ResizeArray as a stream.</summary>
@@ -74,7 +79,7 @@ module Stream =
                 while i < source.Count && next do
                     next <- iterf source.[i]
                     i <- i + 1
-            let next = 
+            let tryAdvance = 
                 let i = ref 0
                 let continueFlag = ref true
                 fun () -> 
@@ -84,7 +89,7 @@ module Stream =
                         continueFlag := iterf source.[!i] 
                         incr i
                         true
-            (bulk, next)
+            { Bulk = bulk; TryAdvance = tryAdvance }
         Stream iter
 
     /// <summary>Wraps seq as a stream.</summary>
@@ -98,7 +103,7 @@ module Stream =
                 while enumerator.MoveNext() && next do
                     next <- iterf enumerator.Current
 
-            let next = 
+            let tryAdvance = 
                 let enumerator = source.GetEnumerator()
                 let continueFlag = ref true
                 fun () -> 
@@ -108,7 +113,7 @@ module Stream =
                     else
                         continueFlag := iterf enumerator.Current
                         true
-            (bulk, next)
+            { Bulk = bulk; TryAdvance = tryAdvance }
         Stream iter
         
     /// <summary>Wraps an IEnumerable as a stream.</summary>
@@ -124,7 +129,7 @@ module Stream =
                 match enumerator with 
                 | :? System.IDisposable as disposable -> disposable.Dispose()
                 | _ -> ()
-            let next = 
+            let tryAdvance = 
                 let enumerator = source.GetEnumerator()
                 let continueFlag = ref true
                 fun () -> 
@@ -136,7 +141,7 @@ module Stream =
                     else
                         continueFlag := iterf (enumerator.Current :?> 'T)
                         true
-            (bulk, next)
+            { Bulk = bulk; TryAdvance = tryAdvance }
         Stream iter
 
     /// <summary>Transforms each element of the input stream.</summary>
@@ -158,7 +163,7 @@ module Stream =
         let iter iterf =
             streamf (fun value -> 
                         let (Stream streamf') = f value;
-                        let (bulk, _) = streamf' iterf in bulk (); true)
+                        let { Bulk = bulk; TryAdvance = _ } = streamf' iterf in bulk (); true)
         Stream iter
 
     /// <summary>Creates a cached version of the input stream.</summary>
@@ -177,14 +182,14 @@ module Stream =
             else //partially cached or not cached at all case
                 let (Stream streamf) = source
                 let count = ref 0
-                let (bulk, next) = streamf (fun v -> (if cache.Count - !count = 0 then cache.Add(v)); incr count; iterf v)
+                let { Bulk = bulk; TryAdvance = tryAdvance } = streamf (fun v -> (if cache.Count - !count = 0 then cache.Add(v)); incr count; iterf v)
                 let bulk' () = lock cache (fun () -> bulk(); cached := Some (ofResizeArray cache))
 //                let bulk' () = bulk(); cached := Some (Stream.ofResizeArray cache)
                 //locking each next() seem's overkill
-                let next' () = lock cache (fun () -> if next() then true else cached := Some (ofResizeArray cache); false)
+                let tryAdvance' () = lock cache (fun () -> if tryAdvance() then true else cached := Some (ofResizeArray cache); false)
 //                let next' () = if next() then true else cached := Some (Stream.ofResizeArray cache); false
 
-                (bulk', next')
+                { Bulk = bulk'; TryAdvance = tryAdvance' }
         
         Stream iter
 
@@ -263,10 +268,10 @@ module Stream =
             let bulk () =
                 for stream in streams do
                     let (Stream streamF) = stream
-                    let (bulk, _) = streamF iterf
+                    let { Bulk = bulk; TryAdvance = _ } = streamF iterf
                     bulk ()
 
-            let next =
+            let tryAdvance =
                 if Seq.isEmpty streams then fun () -> false
                 else                    
                     let current = ref Unchecked.defaultof<'T>
@@ -274,7 +279,7 @@ module Stream =
                     let nextFs =
                         streams
                         |> Seq.map (fun (Stream streamF) -> streamF (fun v -> current := v; gotNewCurrent := true; true))
-                        |> Seq.map snd
+                        |> Seq.map (fun iterable -> iterable.TryAdvance)
                         |> Seq.toArray
                     let i = ref 0
                     let shouldStop = ref false
@@ -294,7 +299,7 @@ module Stream =
                                 not (!i = nextFs.Length)
                             else true
 
-            (bulk, next)
+            { Bulk = bulk; TryAdvance = tryAdvance }
 
         Stream iter
 
@@ -308,11 +313,11 @@ module Stream =
         let firstCurrent = ref Unchecked.defaultof<'T>
         let firstValueReady = ref false
         let (Stream firstf) = first
-        let (_, firstNext) = firstf (fun v -> firstCurrent := v; firstValueReady := true; true)
+        let { Bulk = _; TryAdvance = firstNext } = firstf (fun v -> firstCurrent := v; firstValueReady := true; true)
         let secondCurrent = ref Unchecked.defaultof<'S>
         let secondValueReady = ref false
         let (Stream secondf) = second
-        let (_, secondNext) = secondf (fun v -> secondCurrent := v; secondValueReady := true; true)
+        let { Bulk = _; TryAdvance = secondNext } = secondf (fun v -> secondCurrent := v; secondValueReady := true; true)
         let iter iterf =
             let bulk () =
                 let mutable next = true
@@ -342,7 +347,7 @@ module Stream =
                             true
                         else
                             false)
-            (bulk, next)
+            { Bulk = bulk; TryAdvance = next }
         Stream iter
 
     // terminal functions
@@ -355,7 +360,7 @@ module Stream =
     let inline fold (folder : 'State -> 'T -> 'State) (state : 'State) (stream : Stream<'T>) : 'State =
         let (Stream streamf) = stream 
         let accRef = ref state
-        let (bulk, _) = streamf (fun value -> accRef := folder !accRef value ; true) 
+        let { Bulk = bulk; TryAdvance = _ } = streamf (fun value -> accRef := folder !accRef value ; true) 
         bulk ()
         !accRef
 
@@ -378,20 +383,20 @@ module Stream =
     /// <param name="stream">The input stream.</param>    
     let inline iter (f : 'T -> unit) (stream : Stream<'T>) : unit = 
         let (Stream streamf) = stream
-        let (bulk, _) = streamf (fun value -> f value; true) 
+        let { Bulk = bulk; TryAdvance = _ } = streamf (fun value -> f value; true) 
         bulk ()
 
     type private StreamEnumerator<'T> (stream : Stream<'T>) =
         let current = ref Unchecked.defaultof<'T>
         let isEvaluatedCallback = ref false
         let (Stream f) = stream
-        let (_, next) = f (fun v -> current := v; isEvaluatedCallback := true; true)
+        let { Bulk = _; TryAdvance = tryAdvance } = f (fun v -> current := v; isEvaluatedCallback := true; true)
 
         interface System.Collections.IEnumerator with
             member __.Current = box current.Value
             member __.MoveNext () =
                 let rec awaitNext () =
-                    if next () then
+                    if tryAdvance () then
                         if !isEvaluatedCallback then
                             isEvaluatedCallback := false
                             true
@@ -442,7 +447,7 @@ module Stream =
         let (Stream streamf) = stream
         let values = new List<'T>()
         let keys = new List<'Key>()
-        let (bulk, _) = streamf (fun value -> keys.Add(projection value); values.Add(value); true)
+        let { Bulk = bulk; TryAdvance = _ } = streamf (fun value -> keys.Add(projection value); values.Add(value); true)
         bulk ()
         let array = values.ToArray()
         Array.Sort(keys.ToArray(), array)
@@ -509,7 +514,7 @@ module Stream =
             container := folder container.Value t
             true
 
-        let (Stream iter) = source in let (bulk, _) = iter body in bulk ()
+        let (Stream iter) = source in let { Bulk = bulk; TryAdvance = _ } = iter body in bulk ()
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value.Value))
 
     /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and a sequence of all elements that have each key.</summary>
@@ -528,7 +533,7 @@ module Stream =
             grouping.Add(t)
             true
 
-        let (Stream iterf) = source in let (bulk, _) = iterf body in bulk ()
+        let (Stream iterf) = source in let { Bulk = bulk; TryAdvance = _ } = iterf body in bulk ()
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))
 
     /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and their frequency.</summary>
@@ -545,7 +550,7 @@ module Stream =
     let inline tryFind (predicate : 'T -> bool) (stream : Stream<'T>) : 'T option = 
         let (Stream streamf) = stream
         let resultRef = ref Unchecked.defaultof<'T option>
-        let (bulk, _) = streamf (fun value -> if predicate value then resultRef := Some value; false; else true) 
+        let { Bulk = bulk; TryAdvance = _ } = streamf (fun value -> if predicate value then resultRef := Some value; false; else true) 
         bulk ()
         !resultRef
 
@@ -566,7 +571,7 @@ module Stream =
     let inline tryPick (chooser : 'T -> 'R option) (stream : Stream<'T>) : 'R option = 
         let (Stream streamf) = stream
         let resultRef = ref Unchecked.defaultof<'R option>
-        let (bulk, _) = streamf (fun value -> match chooser value with | Some value' -> resultRef := Some value'; false; | None -> true) 
+        let { Bulk = bulk; TryAdvance = _ } = streamf (fun value -> match chooser value with | Some value' -> resultRef := Some value'; false; | None -> true) 
         bulk ()
         !resultRef
 
@@ -623,17 +628,17 @@ module Stream =
                     rNext
 
             let (Stream f) = source
-            let _,next = f k'
+            let { Bulk = _; TryAdvance = tryAdvance } = f k'
 
             let bulk () =
-                while next () do ()
+                while tryAdvance () do ()
                 if ra.Count > 0 then 
                     ra.ToArray() |> k |> ignore
 
-            let next () =
+            let tryAdvance () =
                 let rec awaitNext () =
                     if !isPullComplete then false
-                    elif next () then
+                    elif tryAdvance () then
                         if !isEvaluatedCallback then
                             isEvaluatedCallback := false
                             true
@@ -649,6 +654,6 @@ module Stream =
 
                 awaitNext()
 
-            bulk, next
+            { Bulk = bulk; TryAdvance = tryAdvance }
 
         Stream iter
