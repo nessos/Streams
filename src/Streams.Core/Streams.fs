@@ -103,7 +103,7 @@ module Stream =
                 while enumerator.MoveNext() && next do
                     next <- iterf enumerator.Current
 
-            let tryAdvance = 
+            let tryAdvance () = 
                 let enumerator = source.GetEnumerator()
                 let continueFlag = ref true
                 fun () -> 
@@ -113,8 +113,11 @@ module Stream =
                     else
                         continueFlag := iterf enumerator.Current
                         true
-            { Bulk = bulk; TryAdvance = tryAdvance }
-        Stream iter
+            { Bulk = bulk; TryAdvance = tryAdvance () }
+        match source with
+        | :? ('T[]) as array -> ofArray array
+        | :? ResizeArray<'T> as list -> ofResizeArray list
+        | _ -> Stream iter
         
     /// <summary>Wraps an IEnumerable as a stream.</summary>
     /// <param name="source">The input seq.</param>

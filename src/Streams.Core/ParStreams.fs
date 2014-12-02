@@ -87,24 +87,28 @@ module ParStream =
     /// <param name="source">The input seq.</param>
     /// <returns>The result parallel stream.</returns>
     let ofSeq (source : seq<'T>) : ParStream<'T> =
-        { new ParStream<'T> with
-            member self.PreserveOrdering = false
-            member self.Apply<'R> (collector : Collector<'T, 'R>) =
+        match source with
+        | :? ('T[]) as array -> ofArray array
+        | :? ResizeArray<'T> as list -> ofResizeArray list
+        | _ ->
+            { new ParStream<'T> with
+                member self.PreserveOrdering = false
+                member self.Apply<'R> (collector : Collector<'T, 'R>) =
                 
-                let partitioner = Partitioner.Create(source)
-                let partitions = partitioner.GetPartitions(totalWorkers).ToArray()
-                let nextRef = ref true
-                let createTask (partition : IEnumerator<'T>) iter = 
-                    Task.Factory.StartNew(fun () ->
-                                            while partition.MoveNext() && !nextRef do
-                                                if not <| iter partition.Current then
-                                                    nextRef := false
-                                            ())
-                let tasks = partitions |> Array.map (fun partition -> 
-                                                        let iter = collector.Iterator()
-                                                        createTask partition iter)
+                    let partitioner = Partitioner.Create(source)
+                    let partitions = partitioner.GetPartitions(totalWorkers).ToArray()
+                    let nextRef = ref true
+                    let createTask (partition : IEnumerator<'T>) iter = 
+                        Task.Factory.StartNew(fun () ->
+                                                while partition.MoveNext() && !nextRef do
+                                                    if not <| iter partition.Current then
+                                                        nextRef := false
+                                                ())
+                    let tasks = partitions |> Array.map (fun partition -> 
+                                                            let iter = collector.Iterator()
+                                                            createTask partition iter)
 
-                Task.WaitAll(tasks) }
+                    Task.WaitAll(tasks) }
 
 
     // intermediate functions
