@@ -157,6 +157,18 @@ module Stream =
             streamf (fun value -> iterf (f value))
         Stream iter
 
+
+    /// <summary>Transforms each element of the input stream. The integer index passed to the function indicates the index (from 0) of element being transformed.</summary>
+    /// <param name="f">A function to transform items and also supplies the current index.</param>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The result stream.</returns>
+    let inline mapi (f : int -> 'T -> 'R) (stream : Stream<'T>) : Stream<'R> =
+        let (Stream streamf) = stream
+        let iter iterf =
+            let counter = ref -1
+            streamf (fun value -> incr counter; iterf (f !counter value))
+        Stream iter
+
     /// <summary>Transforms each element of the input stream to a new stream and flattens its elements.</summary>
     /// <param name="f">A function to transform items from the input stream.</param>
     /// <param name="stream">The input stream.</param>

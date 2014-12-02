@@ -45,6 +45,13 @@
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``mapi`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.mapi (fun i n -> i * n) |> Stream.toArray
+                let y = xs |> Seq.mapi (fun i n -> i * n) |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
         member __.``filter`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> Stream.ofArray |> Stream.filter (fun n -> n % 2 = 0) |> Stream.toArray
