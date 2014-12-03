@@ -278,6 +278,19 @@ module ParStream =
                 (fun () -> new ArrayCollector<'T>()) stream 
         arrayCollector.ToArray()
 
+    /// <summary>Creates an Seq from the given parallel stream.</summary>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result Seq.</returns>    
+    let inline toSeq (stream : ParStream<'T>) : seq<'T> =
+        if stream.PreserveOrdering then
+            toArray stream :> _
+        else
+            let concurrentBag = new ConcurrentBag<'T>()
+            fold (fun _ value -> concurrentBag.Add(value))
+                 (fun left right -> ()) 
+                 (fun () -> ()) stream |> ignore
+            concurrentBag :> _
+
     /// <summary>Creates an ResizeArray from the given parallel stream.</summary>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result ResizeArray.</returns>    
