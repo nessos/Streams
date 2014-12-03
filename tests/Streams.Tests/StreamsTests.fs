@@ -317,3 +317,30 @@
                 let ys = xs |> Stream.ofArray |> Stream.groupUntil false (fun i -> if i % 7 <> 0 then true else incr failedPredicates ; false) |> Stream.toSeq |> Seq.concat |> Seq.length
                 Assert.AreEqual(xs.Length, ys + !failedPredicates)
             ).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
+        member __.``seq/dispose``() =
+            let disposed = ref false
+            let testEnumerator (array : int []) = 
+                disposed := false
+                let index = ref -1
+                {   new IEnumerator<int> with
+                        member self.Current = array.[!index]
+                    interface System.Collections.IEnumerator with  
+                        member self.Current = box array.[!index]
+                        member self.MoveNext() = 
+                            incr index
+                            if !index >= array.Length then false else true
+                        member self.Reset() = index := -1 
+                    interface System.IDisposable with  
+                        member self.Dispose() = disposed := true }
+            let testEnumerable (array : int []) = 
+                {   new IEnumerable<int> with
+                        member self.GetEnumerator() = testEnumerator array
+                    interface System.Collections.IEnumerable with
+                        member self.GetEnumerator() = testEnumerator array :> _ }
+            Spec.ForAny<int []>(fun xs -> 
+                let x = xs |> testEnumerable |> Stream.ofSeq |> Stream.filter (fun x -> x % 2 = 0) |> Stream.map ((+)1) |> Stream.toSeq |> Seq.length
+                let y = xs |> Seq.filter (fun x -> x % 2 = 0) |> Seq.map ((+)1) |> Seq.length 
+                x = y && !disposed = true).QuickCheckThrowOnFailure()
