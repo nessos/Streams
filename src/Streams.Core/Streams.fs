@@ -15,6 +15,38 @@ type Iterable = {
 /// Represents a Stream of values.
 type Stream<'T> = Stream of (('T -> bool) -> Iterable)
 
+// Wraps stream as a IEnumerable
+type private StreamEnumerator<'T> (stream : Stream<'T>) =
+    let results = new ResizeArray<'T>()
+    let index = ref -1
+    let (Stream f) = stream
+    let { Bulk = _; TryAdvance = tryAdvance } = f (fun v -> results.Add(v); true)
+
+    interface System.Collections.IEnumerator with
+        member __.Current = box results.[!index]
+        member __.MoveNext () =
+            let rec awaitNext () =
+                incr index
+                if !index >= results.Count then
+                    results.Clear()
+                    if tryAdvance () then
+                        if results.Count > 0 then 
+                            index := 0
+                            true
+                        else 
+                            awaitNext ()
+                    else
+                        false
+                else
+                    true
+
+            awaitNext ()
+
+        member __.Reset () = raise <| new NotSupportedException()
+
+    interface IEnumerator<'T> with
+        member __.Current = results.[!index]
+        member __.Dispose () = ()
 
 /// Provides basic operations on Streams.
 [<RequireQualifiedAccessAttribute>]
@@ -326,44 +358,31 @@ module Stream =
     /// <param name="second">The second input stream.</param>
     /// <returns>The result stream.</returns>
     let zipWith (f : 'T -> 'S -> 'R) (first : Stream<'T>) (second : Stream<'S>) : Stream<'R> =
-        let firstCurrent = ref Unchecked.defaultof<'T>
-        let firstValueReady = ref false
-        let (Stream firstf) = first
-        let { Bulk = _; TryAdvance = firstNext } = firstf (fun v -> firstCurrent := v; firstValueReady := true; true)
-        let secondCurrent = ref Unchecked.defaultof<'S>
-        let secondValueReady = ref false
-        let (Stream secondf) = second
-        let { Bulk = _; TryAdvance = secondNext } = secondf (fun v -> secondCurrent := v; secondValueReady := true; true)
         let iter iterf =
             let bulk () =
+                let firstEnumerator = new StreamEnumerator<'T>(first) :> IEnumerator<'T>
+                let secondEnumerator = new StreamEnumerator<'S>(second) :> IEnumerator<'S>
                 let mutable next = true
                 while next do
-                    while firstNext () && not !firstValueReady do ()
-                    while secondNext () && not !secondValueReady do ()
-
-                    if !firstValueReady && !secondValueReady then
-                        firstValueReady := false
-                        secondValueReady := false
-                        next <- iterf (f !firstCurrent !secondCurrent)
+                    if firstEnumerator.MoveNext() && secondEnumerator.MoveNext() then
+                        next <- iterf (f firstEnumerator.Current secondEnumerator.Current)
                     else
                         next <- false
                     ()
-            let next = 
+            let tryAdvance = 
                 let continueFlag = ref true
+                let firstEnumerator = new StreamEnumerator<'T>(first) :> IEnumerator<'T>
+                let secondEnumerator = new StreamEnumerator<'S>(second) :> IEnumerator<'S>
                 (fun () ->
                     if not !continueFlag then
                         false
                     else
-                        while firstNext () && not !firstValueReady do ()
-                        while secondNext () && not !secondValueReady do ()
-                        if !firstValueReady && !secondValueReady then
-                            firstValueReady := false
-                            secondValueReady := false
-                            continueFlag := iterf (f !firstCurrent !secondCurrent)
+                        if firstEnumerator.MoveNext() && secondEnumerator.MoveNext() then
+                            continueFlag := iterf (f firstEnumerator.Current secondEnumerator.Current)
                             true
                         else
                             false)
-            { Bulk = bulk; TryAdvance = next }
+            { Bulk = bulk; TryAdvance = tryAdvance }
         Stream iter
 
     // terminal functions
@@ -401,38 +420,6 @@ module Stream =
         let (Stream streamf) = stream
         let { Bulk = bulk; TryAdvance = _ } = streamf (fun value -> f value; true) 
         bulk ()
-
-    type private StreamEnumerator<'T> (stream : Stream<'T>) =
-        let results = new ResizeArray<'T>()
-        let index = ref -1
-        let (Stream f) = stream
-        let { Bulk = _; TryAdvance = tryAdvance } = f (fun v -> results.Add(v); true)
-
-        interface System.Collections.IEnumerator with
-            member __.Current = box results.[!index]
-            member __.MoveNext () =
-                let rec awaitNext () =
-                    incr index
-                    if !index >= results.Count then
-                        results.Clear()
-                        if tryAdvance () then
-                            if results.Count > 0 then 
-                                index := 0
-                                true
-                            else 
-                                awaitNext ()
-                        else
-                            false
-                    else
-                        true
-
-                awaitNext ()
-
-            member __.Reset () = raise <| new NotSupportedException()
-
-        interface IEnumerator<'T> with
-            member __.Current = results.[!index]
-            member __.Dispose () = ()
 
     /// <summary>Creates an Seq from the given stream.</summary>
     /// <param name="stream">The input stream.</param>
