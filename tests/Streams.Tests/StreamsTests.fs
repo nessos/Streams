@@ -38,6 +38,13 @@
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``flatMap/toSeq`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.flatMap (fun x -> [|1..10|] |> Stream.ofArray) |> Stream.map ((+)1) |> Stream.toSeq |> Seq.toArray
+                let y = xs |> Seq.collect (fun x -> [|1..10|]) |> Seq.map ((+)1) |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
         member __.``map`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> Stream.ofArray |> Stream.map (fun n -> 2 * n) |> Stream.toArray

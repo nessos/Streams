@@ -143,4 +143,19 @@ data
 
 
 
+let test = 
+    [|0|]
+    |> Stream.ofArray
+    |> Stream.flatMap (fun x -> [|1..3|] |> Stream.ofArray)
+    |> Stream.toArray
 
+
+let test' = 
+    [|0|]
+    |> Stream.ofArray
+    |> Stream.flatMap (fun x -> [|1..3|] |> Stream.ofArray)
+    |> Stream.toSeq
+    |> Seq.toArray
+
+
+test = test'

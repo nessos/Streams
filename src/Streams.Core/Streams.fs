@@ -15,6 +15,7 @@ type Iterable = {
 /// Represents a Stream of values.
 type Stream<'T> = Stream of (('T -> bool) -> Iterable)
 
+
 /// Provides basic operations on Streams.
 [<RequireQualifiedAccessAttribute>]
 module Stream =
@@ -402,30 +403,35 @@ module Stream =
         bulk ()
 
     type private StreamEnumerator<'T> (stream : Stream<'T>) =
-        let current = ref Unchecked.defaultof<'T>
-        let isEvaluatedCallback = ref false
+        let results = new ResizeArray<'T>()
+        let index = ref -1
         let (Stream f) = stream
-        let { Bulk = _; TryAdvance = tryAdvance } = f (fun v -> current := v; isEvaluatedCallback := true; true)
+        let { Bulk = _; TryAdvance = tryAdvance } = f (fun v -> results.Add(v); true)
 
         interface System.Collections.IEnumerator with
-            member __.Current = box current.Value
+            member __.Current = box results.[!index]
             member __.MoveNext () =
                 let rec awaitNext () =
-                    if tryAdvance () then
-                        if !isEvaluatedCallback then
-                            isEvaluatedCallback := false
-                            true
+                    incr index
+                    if !index >= results.Count then
+                        results.Clear()
+                        if tryAdvance () then
+                            if results.Count > 0 then 
+                                index := 0
+                                true
+                            else 
+                                awaitNext ()
                         else
-                            awaitNext ()
+                            false
                     else
-                        false
+                        true
 
                 awaitNext ()
 
             member __.Reset () = raise <| new NotSupportedException()
 
         interface IEnumerator<'T> with
-            member __.Current = current.Value
+            member __.Current = results.[!index]
             member __.Dispose () = ()
 
     /// <summary>Creates an Seq from the given stream.</summary>
