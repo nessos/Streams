@@ -311,7 +311,7 @@ module Stream =
     /// <summary>Concatenates a collection of streams.</summary>
     /// <param name="streams">The sequence of streams to concatenate.</param>
     /// <returns>The concatenated stream.</returns>
-    let inline concat (streams: #seq<Stream<'T>>): Stream<'T> =
+    let concat (streams: #seq<Stream<'T>>): Stream<'T> =
         let iter iterf =
             let bulk () =
                 for stream in streams do
@@ -322,30 +322,22 @@ module Stream =
             let tryAdvance =
                 if Seq.isEmpty streams then fun () -> false
                 else                    
-                    let current = ref Unchecked.defaultof<'T>
-                    let gotNewCurrent = ref false
-                    let nextFs =
-                        streams
-                        |> Seq.map (fun (Stream streamF) -> streamF (fun v -> current := v; gotNewCurrent := true; true))
-                        |> Seq.map (fun iterable -> iterable.TryAdvance)
-                        |> Seq.toArray
-                    let i = ref 0
-                    let shouldStop = ref false
+                    let enumerator =
+                        let streams = 
+                            streams
+                            |> Seq.collect (fun stream ->         
+                                             { new IEnumerable<'T> with
+                                                member __.GetEnumerator () = new StreamEnumerator<'T>(stream) :> IEnumerator<'T>
+                                                member __.GetEnumerator () = new StreamEnumerator<'T>(stream) :> System.Collections.IEnumerator })
+                        streams.GetEnumerator()
                     
                     fun () ->
-                        if !shouldStop then false
-                        else
-                            let nextF = nextFs.[!i]
-
-                            let pulled = nextF()
-                            if pulled && !gotNewCurrent then
-                                gotNewCurrent := false
-                                shouldStop := not <| iterf !current
-                                true
-                            else if not pulled then
-                                incr i
-                                not (!i = nextFs.Length)
-                            else true
+                        if enumerator.MoveNext() then
+                            iterf enumerator.Current |> ignore
+                            true
+                        else 
+                            false
+                                
 
             { Bulk = bulk; TryAdvance = tryAdvance }
 
