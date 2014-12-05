@@ -8,12 +8,9 @@ open System.Linq
 open Nessos.Streams
 open Nessos.Streams.CSharp
 
-let xs = [| [| 0 |] |]
 
-xs |> Seq.map (fun xs' -> xs' |> Stream.ofArray) |> Stream.concat |> Stream.toSeq |> Seq.iter (fun v -> printfn "%d" v)
+[|1|] |> Stream.ofArray |> Stream.groupUntil true (fun i -> i % 7 <> 0) |> Stream.toSeq |> Array.concat
 
-let y = xs |> Seq.map (fun xs' -> xs' |> Seq.filter (fun x -> x % 2 = 0)) |> Seq.concat |> Seq.toArray
-let x = xs |> Seq.map (fun xs' -> xs' |> Stream.ofArray |> Stream.filter (fun x -> x % 2 = 0)) |> Stream.concat |> Stream.toSeq |> Seq.toArray
 
 let data = [|1..100000000|] |> Array.map (fun i -> int64 <| (i % 1000000))
 
@@ -142,20 +139,3 @@ data
 
 
 
-
-let test = 
-    [|0|]
-    |> Stream.ofArray
-    |> Stream.flatMap (fun x -> [|1..3|] |> Stream.ofArray)
-    |> Stream.toArray
-
-
-let test' = 
-    [|0|]
-    |> Stream.ofArray
-    |> Stream.flatMap (fun x -> [|1..3|] |> Stream.ofArray)
-    |> Stream.toSeq
-    |> Seq.toArray
-
-
-test = test'

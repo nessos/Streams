@@ -143,7 +143,7 @@ module ParStream =
                             let iter = collector.Iterator()
                             (fun value -> 
                                 let (Stream streamf) = f value
-                                let { Bulk = bulk; TryAdvance = _ } = streamf iter in bulk (); true)
+                                let { Bulk = bulk; Iterator = _ } = streamf (fun () -> ()) iter in bulk (); true)
                         member self.Result = collector.Result  }
                 stream.Apply collector }
 
