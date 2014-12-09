@@ -203,8 +203,8 @@ module CloudStream =
                     let collector = collectorf ()
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
-                            let iter = collector.Iterator()
-                            (fun value -> iter (f value))
+                            let { Index = index; Func = iter } = collector.Iterator()
+                            { Index = index; Func = (fun value -> iter (f value)) }
                         member self.Result = collector.Result  }
                 stream.Apply collectorf' projection combiner }
 
@@ -219,10 +219,11 @@ module CloudStream =
                     let collector = collectorf ()
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
-                            let iter = collector.Iterator()
-                            (fun value -> 
-                                let (Stream streamf) = f value
-                                let { Bulk = bulk; Iterator = _ } = streamf (fun () -> ()) iter in bulk (); true)
+                            let { Index = index; Func = iter } = collector.Iterator()
+                            { Index = index; Func = 
+                                (fun value -> 
+                                    let (Stream streamf) = f value
+                                    let { Bulk = bulk; Iterator = _ } = streamf (fun () -> ()) iter in bulk (); true) }
                         member self.Result = collector.Result  }
                 stream.Apply collectorf' projection combiner }
 
@@ -244,8 +245,8 @@ module CloudStream =
                     let collector = collectorf ()
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
-                            let iter = collector.Iterator()
-                            (fun value -> if predicate value then iter value else true)
+                            let { Index = index; Func = iter } = collector.Iterator()
+                            { Index = index; Func = (fun value -> if predicate value then iter value else true) }
                         member self.Result = collector.Result }
                 stream.Apply collectorf' projection combiner }
 
@@ -266,7 +267,7 @@ module CloudStream =
                     member self.Iterator() = 
                         let accRef = ref <| state ()
                         results.Add(accRef)
-                        (fun value -> accRef := folder !accRef value; true)
+                        { Index = ref -1; Func = (fun value -> accRef := folder !accRef value; true) }
                     member self.Result = 
                         let mutable acc = state ()
                         for result in results do
@@ -291,16 +292,17 @@ module CloudStream =
                     member self.Iterator() = 
                         let dict = new Dictionary<'Key, 'State ref>()
                         results.Add(dict)
-                        (fun value -> 
-                                let key = projection value
-                                let mutable stateRef = Unchecked.defaultof<'State ref>
-                                if dict.TryGetValue(key, &stateRef) then
-                                    stateRef := folder !stateRef value
-                                else
-                                    stateRef <- ref <| state ()
-                                    stateRef := folder !stateRef value
-                                    dict.Add(key, stateRef)
-                                true)
+                        { Index = ref -1; Func =
+                            (fun value -> 
+                                    let key = projection value
+                                    let mutable stateRef = Unchecked.defaultof<'State ref>
+                                    if dict.TryGetValue(key, &stateRef) then
+                                        stateRef := folder !stateRef value
+                                    else
+                                        stateRef <- ref <| state ()
+                                        stateRef := folder !stateRef value
+                                        dict.Add(key, stateRef)
+                                    true) }
                     member self.Result = 
                         let dict = new Dictionary<'Key, 'State ref>()
                         for result in results do
@@ -382,7 +384,7 @@ module CloudStream =
                 member self.Iterator() = 
                     let list = new List<'T>()
                     results.Add(list)
-                    (fun value -> list.Add(value); true)
+                    { Index = ref -1; Func = (fun value -> list.Add(value); true) }
                 member self.Result = 
                     let count = results |> Seq.sumBy (fun list -> list.Count)
                     let values = Array.zeroCreate<'T> count
@@ -410,7 +412,7 @@ module CloudStream =
                 member self.Iterator() = 
                     let list = new List<'T>()
                     results.Add(list)
-                    (fun value -> list.Add(value); true)
+                    { Index = ref -1; Func = (fun value -> list.Add(value); true) }
                 member self.Result = 
                     let count = results |> Seq.sumBy (fun list -> list.Count)
                     let keys = Array.zeroCreate<'Key> count

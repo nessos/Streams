@@ -2,15 +2,19 @@
 open System
 open System.Collections.Generic
 
-// Provides on-demand iteration 
+/// Provides on-demand iteration 
 type Iterator = {
-    TryAdvance : unit -> bool // is a function for on-demand processing
-    Dispose : unit -> unit // Cleanup
+    /// Function for on-demand processing
+    TryAdvance : unit -> bool 
+    /// Cleanup function
+    Dispose : unit -> unit 
 }
 
 /// Provides functions for iteration
 type Iterable = {
-    Bulk : unit -> unit // is a function for bulk processing
+    /// Function for bulk processing
+    Bulk : unit -> unit 
+    /// Iterator for on-demand processing
     Iterator : Iterator
 }
 

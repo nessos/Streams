@@ -137,5 +137,58 @@ data
 |> ParStream.length
 
 
+open System.Linq
+
+(Seq.initInfinite (fun i -> i))
+    .AsParallel()
+    .Select(fun x i -> (x, i))
+    .Skip(10)
+    .Take(10000000)
+    .Select(fun x i -> (x, i))
+    .ToArray()
 
 
+
+|> Seq.toArray
+|> ParStream.ofSeq
+|> ParStream.mapi (fun i v -> (i, v))
+|> ParStream.toArray
+
+
+
+(Seq.initInfinite (fun i -> i))
+|> Seq.mapi (fun i v -> (v, i))
+|> Seq.skip 10
+|> Seq.take 10000000
+|> Seq.mapi (fun i v -> (v, i))
+|> Seq.length
+
+
+(Seq.initInfinite (fun i -> i))
+|> Stream.ofSeq
+|> Stream.mapi (fun i v -> (v, i))
+|> Stream.skip 10
+|> Stream.take 10000000
+|> Stream.mapi (fun i v -> (v, i))
+|> Stream.toArray
+
+(Seq.initInfinite (fun i -> i))
+|> ParStream.ofSeq
+|> ParStream.mapi (fun i v -> (v, i))
+|> ParStream.skip 10
+|> ParStream.take 10000000
+|> ParStream.mapi (fun i v -> (v, i))
+|> ParStream.toArray
+
+#time
+
+open System.Collections.Generic
+
+let queue = new Queue<KeyValuePair<int, int>>()
+
+for i = 1 to 10000000 do
+    queue.Enqueue (new KeyValuePair<int, int>(i, i))
+
+
+
+queue.Count
