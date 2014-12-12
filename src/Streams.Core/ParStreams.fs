@@ -8,17 +8,21 @@ open System.Threading.Tasks
 open Nessos.Streams.Internals
 
 /// Represents the iteration function
-type IterFunc<'T> = {
-    /// The index of the current element
+type ParIterator<'T> = {
+    /// Global index used for order-preserving semantics
+    OrderIndex : int ref
+    /// The index of the current element from the parallel source
     Index : int ref 
     /// The composed continutation with 'T for the current value and bool is a flag for early termination
     Func : ('T -> bool)
+    /// The completed continuation
+    Complete : (unit -> unit)
 }
 
 /// Collects elements into a mutable result container.
 type Collector<'T, 'R> = 
     /// Gets an iterator over the elements.
-    abstract Iterator : unit -> IterFunc<'T>
+    abstract Iterator : unit -> ParIterator<'T>
     /// The result of the collector.
     abstract Result : 'R
 
@@ -53,7 +57,7 @@ module ParStream =
                 if not (source.Length = 0) then 
                     let partitions = getPartitions source.Length
                     let nextRef = ref true
-                    let createTask s e (iter : IterFunc<'T>) = 
+                    let createTask s e (iter : ParIterator<'T>) = 
                         Task.Factory.StartNew(fun () ->
                                                 let mutable i = s
                                                 while i < e && !nextRef do
@@ -78,7 +82,7 @@ module ParStream =
                 if not (source.Count = 0) then 
                     let partitions = getPartitions source.Count
                     let nextRef = ref true
-                    let createTask s e (iter : IterFunc<'T>) = 
+                    let createTask s e (iter : ParIterator<'T>) = 
                         Task.Factory.StartNew(fun () ->
                                                 let mutable i = s
                                                 while i < e && !nextRef do
@@ -108,7 +112,7 @@ module ParStream =
                     let partitioner = Partitioner.Create(source)
                     let partitions = partitioner.GetOrderablePartitions(totalWorkers).ToArray()
                     let nextRef = ref true
-                    let createTask (partition : IEnumerator<KeyValuePair<int64, 'T>>) (iter : IterFunc<'T>) = 
+                    let createTask (partition : IEnumerator<KeyValuePair<int64, 'T>>) (iter : ParIterator<'T>) = 
                         Task.Factory.StartNew(fun () ->
                                                 while partition.MoveNext() && !nextRef do
                                                     iter.Index := int partition.Current.Key
@@ -135,9 +139,11 @@ module ParStream =
                 let collector = 
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
-                            let { Index = index; Func = iter } = collector.Iterator()
-                            { Index = index; Func = (fun value -> iter (f value)) }
-                        member self.Result = collector.Result  }
+                            let { Func = iter } as iterator = collector.Iterator()
+                            {   OrderIndex = iterator.OrderIndex; Index = iterator.Index; 
+                                Complete = iterator.Complete; 
+                                Func = (fun value -> iter (f value)) }
+                        member self.Result = collector.Result }
                 stream.Apply collector }
 
     /// <summary>Transforms each element of the input parallel stream. The integer index passed to the function indicates the index of element being transformed.</summary>
@@ -151,8 +157,10 @@ module ParStream =
                 let collector = 
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
-                            let { Index = index; Func = iter } = collector.Iterator()
-                            { Index = index; Func = (fun value -> iter (f !index value)) }
+                            let { Index = index; Func = iter } as iterator = collector.Iterator()
+                            {   OrderIndex = iterator.OrderIndex; Index = index; 
+                                Complete = iterator.Complete; 
+                                Func = (fun value -> iter (f !index value)) }
                         member self.Result = collector.Result  }
                 stream.Apply collector }
 
@@ -167,9 +175,10 @@ module ParStream =
                 let collector = 
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
-                            let { Index = index; Func = iter } = collector.Iterator()
-                            { Index = index;
-                              Func = (fun value -> 
+                            let { Func = iter } as iterator = collector.Iterator()
+                            {   OrderIndex = iterator.OrderIndex; Index = iterator.Index;
+                                Complete = iterator.Complete
+                                Func = (fun value -> 
                                         let (Stream streamf) = f value
                                         let { Bulk = bulk; Iterator = _ } = streamf (fun () -> ()) iter in bulk (); true) }
                         member self.Result = collector.Result  }
@@ -193,8 +202,10 @@ module ParStream =
                 let collector = 
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
-                            let { Index = index; Func = iter } = collector.Iterator()
-                            { Index = index; Func = (fun value -> if predicate value then iter value else true) }
+                            let { Func = iter } as iterator = collector.Iterator()
+                            {   OrderIndex = iterator.OrderIndex; Index = iterator.Index; 
+                                Complete = iterator.Complete;
+                                Func = (fun value -> if predicate value then iter value else true) }
                         member self.Result = collector.Result }
                 stream.Apply collector }
 
@@ -209,8 +220,10 @@ module ParStream =
                 let collector = 
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
-                            let { Index = index; Func = iter } = collector.Iterator()
-                            { Index = index; Func = (fun value -> match chooser value with Some value' -> iter value' | None -> true) }
+                            let { Func = iter } as iterator = collector.Iterator()
+                            {   OrderIndex = iterator.OrderIndex; Index = iterator.Index;
+                                Complete = iterator.Complete; 
+                                Func = (fun value -> match chooser value with Some value' -> iter value' | None -> true) }
                         member self.Result = collector.Result }
                 stream.Apply collector }
 
@@ -224,8 +237,7 @@ module ParStream =
                     let collector = 
                         { new Collector<'T, 'S> with
                             member self.Iterator() = 
-                                let { Index = index; Func = iter } = collector.Iterator()
-                                { Index = index; Func = (fun value -> iter value) }
+                                collector.Iterator()
                             member self.Result = collector.Result }
                     stream.Apply collector }
 
@@ -239,8 +251,7 @@ module ParStream =
                     let collector = 
                         { new Collector<'T, 'S> with
                             member self.Iterator() = 
-                                let { Index = index; Func = iter } = collector.Iterator()
-                                { Index = index; Func = (fun value -> iter value) }
+                                collector.Iterator()
                             member self.Result = collector.Result }
                     stream.Apply collector }
 
@@ -253,7 +264,7 @@ module ParStream =
         let collector = 
             { new Collector<'T, 'State> with
                 member self.Iterator() = 
-                    { Index = ref -1; Func = (fun value -> f value; true) }
+                    { OrderIndex = ref -1; Index = ref -1; Complete = (fun () -> ()); Func = (fun value -> f value; true) }
                 member self.Result = 
                     raise <| System.InvalidOperationException()  }
         stream.Apply collector
@@ -273,7 +284,7 @@ module ParStream =
                 member self.Iterator() = 
                     let accRef = ref <| state ()
                     results.Add(accRef)
-                    { Index = ref -1; Func = (fun value -> accRef := folder !accRef value; true) }
+                    { OrderIndex = ref -1; Index = ref -1; Complete = (fun () -> ()); Func = (fun value -> accRef := folder !accRef value; true) }
                 member self.Result = 
                     let mutable acc = state ()
                     for result in results do
@@ -417,20 +428,22 @@ module ParStream =
         let collector = 
             { new Collector<'T,  Object> with
                 member self.Iterator() = 
-                    { Index = ref -1; Func =
-                        (fun value -> 
-                                let mutable grouping = Unchecked.defaultof<_>
-                                let key = projection value
-                                if dict.TryGetValue(key, &grouping) then
-                                    let acc = grouping
-                                    lock grouping (fun () -> acc := folder !acc value) 
-                                else
-                                    grouping <- ref <| state ()
-                                    if not <| dict.TryAdd(key, grouping) then
-                                        dict.TryGetValue(key, &grouping) |> ignore
-                                    let acc = grouping
-                                    lock grouping (fun () -> acc := folder !acc value) 
-                                true) }
+                    {   OrderIndex = ref -1; Index = ref -1; 
+                        Complete = (fun () -> ());
+                        Func =
+                            (fun value -> 
+                                    let mutable grouping = Unchecked.defaultof<_>
+                                    let key = projection value
+                                    if dict.TryGetValue(key, &grouping) then
+                                        let acc = grouping
+                                        lock grouping (fun () -> acc := folder !acc value) 
+                                    else
+                                        grouping <- ref <| state ()
+                                        if not <| dict.TryAdd(key, grouping) then
+                                            dict.TryGetValue(key, &grouping) |> ignore
+                                        let acc = grouping
+                                        lock grouping (fun () -> acc := folder !acc value) 
+                                    true) }
                 member self.Result = 
                     raise <| System.InvalidOperationException() }
         stream.Apply collector
@@ -455,20 +468,22 @@ module ParStream =
         let collector = 
             { new Collector<'T, Object> with
                 member self.Iterator() = 
-                    { Index = ref -1; Func =
-                        (fun value -> 
-                            let mutable grouping = Unchecked.defaultof<List<'T>>
-                            let key = projection value
-                            if dict.TryGetValue(key, &grouping) then
-                                let list = grouping
-                                lock grouping (fun () -> list.Add(value))
-                            else
-                                grouping <- new List<'T>()
-                                if not <| dict.TryAdd(key, grouping) then
-                                    dict.TryGetValue(key, &grouping) |> ignore
-                                let list = grouping
-                                lock grouping (fun () -> list.Add(value))     
-                            true) }
+                    {   OrderIndex = ref -1; Index = ref -1; 
+                        Complete = (fun () -> ());
+                        Func =
+                            (fun value -> 
+                                let mutable grouping = Unchecked.defaultof<List<'T>>
+                                let key = projection value
+                                if dict.TryGetValue(key, &grouping) then
+                                    let list = grouping
+                                    lock grouping (fun () -> list.Add(value))
+                                else
+                                    grouping <- new List<'T>()
+                                    if not <| dict.TryAdd(key, grouping) then
+                                        dict.TryGetValue(key, &grouping) |> ignore
+                                    let list = grouping
+                                    lock grouping (fun () -> list.Add(value))     
+                                true) }
                 member self.Result = 
                     raise <| System.InvalidOperationException() }
         stream.Apply collector
@@ -484,7 +499,9 @@ module ParStream =
         let collector = 
             { new Collector<'T, 'T option> with
                 member self.Iterator() = 
-                    { Index = ref -1; Func = (fun value -> if predicate value then resultRef := Some value; false else true) }
+                    {   OrderIndex = ref -1; Index = ref -1; 
+                        Complete = (fun () -> ());
+                        Func = (fun value -> if predicate value then resultRef := Some value; false else true) }
                 member self.Result = 
                     !resultRef }
         stream.Apply collector
@@ -509,7 +526,9 @@ module ParStream =
         let collector = 
             { new Collector<'T, 'R option> with
                 member self.Iterator() = 
-                    { Index = ref -1; Func = (fun value -> match chooser value with Some value' -> resultRef := Some value'; false | None -> true) }
+                    {   OrderIndex = ref -1; Index = ref -1; 
+                        Complete = (fun () -> ());
+                        Func = (fun value -> match chooser value with Some value' -> resultRef := Some value'; false | None -> true) }
                 member self.Result = 
                     !resultRef }
         stream.Apply collector
@@ -563,8 +582,10 @@ module ParStream =
                         let count = ref 0
                         { new Collector<'T, 'S> with
                             member self.Iterator() = 
-                                let { Index = index; Func = iter } = collector.Iterator()
-                                { Index = index; Func = (fun value -> if Interlocked.Increment count <= n then iter value else false) }
+                                let { Func = iter } as iterator = collector.Iterator()
+                                {   OrderIndex = iterator.OrderIndex; Index = iterator.Index; 
+                                    Complete = (fun () -> ());
+                                    Func = (fun value -> if Interlocked.Increment count <= n then iter value else false) }
                             member self.Result = collector.Result }
                     stream.Apply collector }
 
@@ -584,8 +605,10 @@ module ParStream =
                         let count = ref 0
                         { new Collector<'T, 'S> with
                             member self.Iterator() = 
-                                let { Index = index; Func = iter } = collector.Iterator()
-                                { Index = index; Func = (fun value -> if Interlocked.Increment count > n then iter value else true) }
+                                let { Func = iter } as iterator = collector.Iterator()
+                                {   OrderIndex = iterator.OrderIndex; Index = iterator.Index; 
+                                    Complete = (fun () -> ());
+                                    Func = (fun value -> if Interlocked.Increment count > n then iter value else true) }
                             member self.Result = collector.Result }
                     stream.Apply collector }
 
