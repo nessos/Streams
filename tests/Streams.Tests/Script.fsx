@@ -207,5 +207,12 @@ open System.Collections.Concurrent
 
 
 
+[|1..10|]
+|> ParStream.ofArray
+|> ParStream.mapi(fun i x -> (i, x))
+|> ParStream.toArray
+
+
+[|0|].AsParallel().Where(fun v -> v % 2 = 0).Select(fun x i -> (i, x)).ToArray()
 
 

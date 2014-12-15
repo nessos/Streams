@@ -29,8 +29,8 @@ module CloudStream =
                     let createTask array (collector : Collector<'T, 'S>) = 
                         cloud {
                             let parStream = ParStream.ofArray array 
-                            do parStream.Apply collector
-                            return! projection collector.Result
+                            let collectorResult = parStream.Apply collector
+                            return! projection collectorResult
                         }
                     if not (source.Length = 0) then 
                         let partitions = Partitions.ofLongRange workerCount (int64 source.Length)
@@ -78,8 +78,8 @@ module CloudStream =
                                         |> ParStream.ofSeq 
                                         |> ParStream.map (fun file -> async { let! s = file.Read() in return! reader s })
                                         |> ParStream.map Async.RunSynchronously
-                                    parStream.Apply collector
-                                    let! partial = projection collector.Result
+                                    let collectorResult = parStream.Apply collector
+                                    let! partial = projection collectorResult
                                     result.Add(partial)
                                 if result.Count = 0 then
                                     return! projection (collectorf ()).Result
@@ -106,8 +106,8 @@ module CloudStream =
                         cloud {
                             let array = source.GetPartition(partitionId) 
                             let parStream = ParStream.ofArray array 
-                            do parStream.Apply collector
-                            return! projection collector.Result
+                            let collectorResult = parStream.Apply collector
+                            return! projection collectorResult
                         }
 
                     let createTaskCached (cached : CachedCloudArray<'T>) (taskId : string) (collectorf : unit -> Collector<'T, 'S>) = 
@@ -118,8 +118,8 @@ module CloudStream =
                                 let array = CloudArrayCache.GetPartition(cached, pid)
                                 let parStream = ParStream.ofArray array
                                 let collector = collectorf()
-                                parStream.Apply collector
-                                let! partial = projection collector.Result
+                                let collectorResult = parStream.Apply collector
+                                let! partial = projection collectorResult
                                 completed.Add(pid, partial)
                             return completed 
                         }
@@ -204,8 +204,7 @@ module CloudStream =
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
-                            {   OrderIndex = iterator.OrderIndex; Index = iterator.Index; 
-                                Complete = iterator.Complete;
+                            {   Index = iterator.Index; 
                                 Func = (fun value -> iter (f value)) }
                         member self.Result = collector.Result  }
                 stream.Apply collectorf' projection combiner }
@@ -222,8 +221,7 @@ module CloudStream =
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
-                            {   OrderIndex = iterator.OrderIndex; Index = iterator.Index; 
-                                Complete = iterator.Complete;
+                            {   Index = iterator.Index; 
                                 Func = 
                                     (fun value -> 
                                         let (Stream streamf) = f value
@@ -250,8 +248,7 @@ module CloudStream =
                     { new Collector<'T, 'S> with
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
-                            {   OrderIndex = iterator.OrderIndex; Index = iterator.Index; 
-                                Complete = iterator.Complete
+                            {   Index = iterator.Index; 
                                 Func = (fun value -> if predicate value then iter value else true) }
                         member self.Result = collector.Result }
                 stream.Apply collectorf' projection combiner }
@@ -273,8 +270,7 @@ module CloudStream =
                     member self.Iterator() = 
                         let accRef = ref <| state ()
                         results.Add(accRef)
-                        {   OrderIndex = ref -1; Index = ref -1;
-                            Complete = (fun () -> ());
+                        {   Index = ref -1;
                             Func = (fun value -> accRef := folder !accRef value; true) }
                     member self.Result = 
                         let mutable acc = state ()
@@ -300,8 +296,7 @@ module CloudStream =
                     member self.Iterator() = 
                         let dict = new Dictionary<'Key, 'State ref>()
                         results.Add(dict)
-                        {   OrderIndex = ref -1; Index = ref -1; 
-                            Complete = (fun () -> ());
+                        {   Index = ref -1; 
                             Func =
                                 (fun value -> 
                                         let key = projection value
@@ -394,8 +389,7 @@ module CloudStream =
                 member self.Iterator() = 
                     let list = new List<'T>()
                     results.Add(list)
-                    {   OrderIndex = ref -1; Index = ref -1; 
-                        Complete = (fun () -> ());
+                    {   Index = ref -1; 
                         Func = (fun value -> list.Add(value); true) }
                 member self.Result = 
                     let count = results |> Seq.sumBy (fun list -> list.Count)
@@ -424,8 +418,7 @@ module CloudStream =
                 member self.Iterator() = 
                     let list = new List<'T>()
                     results.Add(list)
-                    {   OrderIndex = ref -1; Index = ref -1; 
-                        Complete = (fun () -> ());
+                    {   Index = ref -1; 
                         Func = (fun value -> list.Add(value); true) }
                 member self.Result = 
                     let count = results |> Seq.sumBy (fun list -> list.Count)
