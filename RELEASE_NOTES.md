@@ -1,3 +1,10 @@
+
+#### 0.2.7
+* New functions (ParStream/Stream.mapi, ParStream.toSeq)
+* Array/ResizeArray specialization of (ParStream/Stream.ofSeq)
+* Support for disposable iterators
+* Correct order semantics
+
 #### 0.2.6
 * New Stream functions (empty, singleton, cast, concat, cache, groupUntil)
 * Performance and memory improvements for ParStream functions (groupBy, foldBy)
