@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>CloudStream<'T> - Streams</title>
+    <title>ParIterator<'T> - Streams</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content=""/>
     <meta name="author" content="Nick Palladinos, Kostas Rontogiannis"/>
@@ -35,33 +35,51 @@
 
 
 
-<h1>CloudStream<'T></h1>
+<h1>ParIterator<'T></h1>
 <div class="xmldoc">
-<p>Represents a distributed Stream of values.</p>
+<p>Represents the iteration function</p>
 </div>
-  <h3>Instance members</h3>
+  <h3>Record Fields</h3>
   <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Instance member</td><td>Description</td></tr>
+      <tr><td>Record Field</td><td>Description</td></tr>
     </thead>
     <tbody>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '107', 107)" onmouseover="showTip(event, '107', 107)">
-            Apply(arg1 arg2 arg3)
+          <code onmouseout="hideTip(event, '93', 93)" onmouseover="showTip(event, '93', 93)">
+            Func
           </code>
-          <div class="tip" id="107">
-            <strong>Signature:</strong> ((unit -&gt; Collector&lt;&#39;T,&#39;S&gt;)) -&gt; ((&#39;S -&gt; Cloud&lt;&#39;R&gt;)) -&gt; ((&#39;R -&gt; &#39;R -&gt; &#39;R)) -&gt; Cloud&lt;&#39;R&gt;<br />
-              <strong>Modifiers:</strong> abstract<br />
-                          <strong>Type parameters:</strong> 'S, 'R          </div>
+          <div class="tip" id="93">
+            <strong>Signature:</strong> &#39;T -&gt; bool<br />
+                      </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L12-12" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/ParStreams.fs#L15-15" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>Applies the given collector to the CloudStream.</p>
+          <p>The composed continutation with 'T for the current value and bool is a flag for early termination</p>
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '94', 94)" onmouseover="showTip(event, '94', 94)">
+            Index
+          </code>
+          <div class="tip" id="94">
+            <strong>Signature:</strong> int ref<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/ParStreams.fs#L13-13" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>The index of the current element from the parallel source</p>
 
         </td>
       </tr>

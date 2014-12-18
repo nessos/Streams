@@ -48,16 +48,16 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '87', 87)" onmouseover="showTip(event, '87', 87)">
+          <code onmouseout="hideTip(event, '97', 97)" onmouseover="showTip(event, '97', 97)">
             Apply(arg1)
           </code>
-          <div class="tip" id="87">
-            <strong>Signature:</strong> Collector&lt;&#39;T,&#39;R&gt; -&gt; unit<br />
+          <div class="tip" id="97">
+            <strong>Signature:</strong> Collector&lt;&#39;T,&#39;R&gt; -&gt; &#39;R<br />
               <strong>Modifiers:</strong> abstract<br />
                           <strong>Type parameters:</strong> 'R          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/ParStreams.fs#L21-21" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/ParStreams.fs#L37-37" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -68,20 +68,61 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '88', 88)" onmouseover="showTip(event, '88', 88)">
+          <code onmouseout="hideTip(event, '98', 98)" onmouseover="showTip(event, '98', 98)">
             PreserveOrdering
           </code>
-          <div class="tip" id="88">
+          <div class="tip" id="98">
             <strong>Signature:</strong> bool<br />
               <strong>Modifiers:</strong> abstract<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/ParStreams.fs#L19-19" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/ParStreams.fs#L33-33" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>A flag that indicates that the ordering in the subsequent query operators will be preserved.</p>
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '99', 99)" onmouseover="showTip(event, '99', 99)">
+            SourceType
+          </code>
+          <div class="tip" id="99">
+            <strong>Signature:</strong> SourceType<br />
+              <strong>Modifiers:</strong> abstract<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/ParStreams.fs#L31-31" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>The Type of iteration source</p>
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '100', 100)" onmouseover="showTip(event, '100', 100)">
+            Stream()
+          </code>
+          <div class="tip" id="100">
+            <strong>Signature:</strong> unit -&gt; Stream&lt;&#39;T&gt;<br />
+              <strong>Modifiers:</strong> abstract<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Core/ParStreams.fs#L35-35" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Returns the sequential Stream</p>
+
         </td>
       </tr>
     </tbody>

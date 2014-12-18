@@ -51,10 +51,10 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '39', 39)" onmouseover="showTip(event, '39', 39)">
+          <code onmouseout="hideTip(event, '1', 1)" onmouseover="showTip(event, '1', 1)">
             cache(source)
           </code>
-          <div class="tip" id="39">
+          <div class="tip" id="1">
             <strong>Signature:</strong> source:ICloudArray&lt;&#39;T&gt; -&gt; Cloud&lt;ICloudArray&lt;&#39;T&gt;&gt;<br />
                           <strong>Type parameters:</strong> 'T          </div>
         </td>
@@ -70,15 +70,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '69', 69)" onmouseover="showTip(event, '69', 69)">
+          <code onmouseout="hideTip(event, '30', 30)" onmouseover="showTip(event, '30', 30)">
             collect(f stream)
           </code>
-          <div class="tip" id="69">
+          <div class="tip" id="30">
             <strong>Signature:</strong> f:(&#39;T -&gt; Stream&lt;&#39;R&gt;) -&gt; stream:CloudStream&lt;&#39;T&gt; -&gt; CloudStream&lt;&#39;R&gt;<br />
                           <strong>Type parameters:</strong> 'T, 'R          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L233-233" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L236-236" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -89,15 +89,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '70', 70)" onmouseover="showTip(event, '70', 70)">
+          <code onmouseout="hideTip(event, '33', 33)" onmouseover="showTip(event, '33', 33)">
             countBy(projection stream)
           </code>
-          <div class="tip" id="70">
+          <div class="tip" id="33">
             <strong>Signature:</strong> projection:(&#39;T -&gt; &#39;Key) -&gt; stream:CloudStream&lt;&#39;T&gt; -&gt; CloudStream&lt;&#39;Key * int64&gt;<br />
                           <strong>Type parameters:</strong> 'T, 'Key          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L346-346" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L353-353" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -108,15 +108,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '71', 71)" onmouseover="showTip(event, '71', 71)">
+          <code onmouseout="hideTip(event, '35', 35)" onmouseover="showTip(event, '35', 35)">
             filter(predicate stream)
           </code>
-          <div class="tip" id="71">
+          <div class="tip" id="35">
             <strong>Signature:</strong> predicate:(&#39;T -&gt; bool) -&gt; stream:CloudStream&lt;&#39;T&gt; -&gt; CloudStream&lt;&#39;T&gt;<br />
                           <strong>Type parameters:</strong> 'T          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L240-240" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L243-243" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -127,15 +127,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '72', 72)" onmouseover="showTip(event, '72', 72)">
+          <code onmouseout="hideTip(event, '37', 37)" onmouseover="showTip(event, '37', 37)">
             flatMap(f stream)
           </code>
-          <div class="tip" id="72">
+          <div class="tip" id="37">
             <strong>Signature:</strong> f:(&#39;T -&gt; Stream&lt;&#39;R&gt;) -&gt; stream:CloudStream&lt;&#39;T&gt; -&gt; CloudStream&lt;&#39;R&gt;<br />
                           <strong>Type parameters:</strong> 'T, 'R          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L215-215" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L216-216" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -146,15 +146,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '73', 73)" onmouseover="showTip(event, '73', 73)">
+          <code onmouseout="hideTip(event, '40', 40)" onmouseover="showTip(event, '40', 40)">
             fold(folder combiner state stream)
           </code>
-          <div class="tip" id="73">
+          <div class="tip" id="40">
             <strong>Signature:</strong> folder:(&#39;State -&gt; &#39;T -&gt; &#39;State) -&gt; combiner:(&#39;State -&gt; &#39;State -&gt; &#39;State) -&gt; state:(unit -&gt; &#39;State) -&gt; stream:CloudStream&lt;&#39;T&gt; -&gt; Cloud&lt;&#39;State&gt;<br />
                           <strong>Type parameters:</strong> 'State, 'T          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L261-261" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L265-265" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -165,15 +165,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '74', 74)" onmouseover="showTip(event, '74', 74)">
+          <code onmouseout="hideTip(event, '42', 42)" onmouseover="showTip(event, '42', 42)">
             foldBy(...)
           </code>
-          <div class="tip" id="74">
+          <div class="tip" id="42">
             <strong>Signature:</strong> projection:(&#39;T -&gt; &#39;Key) -&gt; folder:(&#39;State -&gt; &#39;T -&gt; &#39;State) -&gt; combiner:(&#39;State -&gt; &#39;State -&gt; &#39;State) -&gt; state:(unit -&gt; &#39;State) -&gt; stream:CloudStream&lt;&#39;T&gt; -&gt; CloudStream&lt;&#39;Key * &#39;State&gt;<br />
                           <strong>Type parameters:</strong> 'T, 'Key, 'State          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L284-284" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L289-289" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -184,15 +184,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '75', 75)" onmouseover="showTip(event, '75', 75)">
+          <code onmouseout="hideTip(event, '44', 44)" onmouseover="showTip(event, '44', 44)">
             length(stream)
           </code>
-          <div class="tip" id="75">
+          <div class="tip" id="44">
             <strong>Signature:</strong> stream:CloudStream&lt;&#39;T&gt; -&gt; Cloud&lt;int64&gt;<br />
                           <strong>Type parameters:</strong> 'T          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L360-360" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L367-367" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -203,10 +203,10 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '76', 76)" onmouseover="showTip(event, '76', 76)">
+          <code onmouseout="hideTip(event, '46', 46)" onmouseover="showTip(event, '46', 46)">
             map(f stream)
           </code>
-          <div class="tip" id="76">
+          <div class="tip" id="46">
             <strong>Signature:</strong> f:(&#39;T -&gt; &#39;R) -&gt; stream:CloudStream&lt;&#39;T&gt; -&gt; CloudStream&lt;&#39;R&gt;<br />
                           <strong>Type parameters:</strong> 'T, 'R          </div>
         </td>
@@ -222,10 +222,10 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '77', 77)" onmouseover="showTip(event, '77', 77)">
+          <code onmouseout="hideTip(event, '48', 48)" onmouseover="showTip(event, '48', 48)">
             ofArray(source)
           </code>
-          <div class="tip" id="77">
+          <div class="tip" id="48">
             <strong>Signature:</strong> source:&#39;T [] -&gt; CloudStream&lt;&#39;T&gt;<br />
                           <strong>Type parameters:</strong> 'T          </div>
         </td>
@@ -241,10 +241,10 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '78', 78)" onmouseover="showTip(event, '78', 78)">
+          <code onmouseout="hideTip(event, '49', 49)" onmouseover="showTip(event, '49', 49)">
             ofCloudArray(source)
           </code>
-          <div class="tip" id="78">
+          <div class="tip" id="49">
             <strong>Signature:</strong> source:ICloudArray&lt;&#39;T&gt; -&gt; CloudStream&lt;&#39;T&gt;<br />
                           <strong>Type parameters:</strong> 'T          </div>
         </td>
@@ -260,10 +260,10 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '79', 79)" onmouseover="showTip(event, '79', 79)">
+          <code onmouseout="hideTip(event, '50', 50)" onmouseover="showTip(event, '50', 50)">
             ofCloudFiles(reader sources)
           </code>
-          <div class="tip" id="79">
+          <div class="tip" id="50">
             <strong>Signature:</strong> reader:(Stream -&gt; Async&lt;&#39;T&gt;) -&gt; sources:seq&lt;ICloudFile&gt; -&gt; CloudStream&lt;&#39;T&gt;<br />
                           <strong>Type parameters:</strong> 'T          </div>
         </td>
@@ -279,15 +279,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '80', 80)" onmouseover="showTip(event, '80', 80)">
+          <code onmouseout="hideTip(event, '51', 51)" onmouseover="showTip(event, '51', 51)">
             sortBy(projection takeCount stream)
           </code>
-          <div class="tip" id="80">
+          <div class="tip" id="51">
             <strong>Signature:</strong> projection:(&#39;T -&gt; &#39;Key) -&gt; takeCount:int -&gt; stream:CloudStream&lt;&#39;T&gt; -&gt; CloudStream&lt;&#39;T&gt;<br />
                           <strong>Type parameters:</strong> 'T, 'Key          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L406-406" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L414-414" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -298,15 +298,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '81', 81)" onmouseover="showTip(event, '81', 81)">
+          <code onmouseout="hideTip(event, '52', 52)" onmouseover="showTip(event, '52', 52)">
             sum(stream)
           </code>
-          <div class="tip" id="81">
+          <div class="tip" id="52">
             <strong>Signature:</strong> stream:CloudStream&lt;^T&gt; -&gt; Cloud&lt;^T&gt;<br />
                           <strong>Type parameters:</strong> ^T          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L352-352" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L359-359" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -317,15 +317,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '82', 82)" onmouseover="showTip(event, '82', 82)">
+          <code onmouseout="hideTip(event, '53', 53)" onmouseover="showTip(event, '53', 53)">
             toArray(stream)
           </code>
-          <div class="tip" id="82">
+          <div class="tip" id="53">
             <strong>Signature:</strong> stream:CloudStream&lt;&#39;T&gt; -&gt; Cloud&lt;&#39;T []&gt;<br />
                           <strong>Type parameters:</strong> 'T          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L366-366" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L373-373" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -336,15 +336,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '83', 83)" onmouseover="showTip(event, '83', 83)">
+          <code onmouseout="hideTip(event, '54', 54)" onmouseover="showTip(event, '54', 54)">
             toCloudArray(stream)
           </code>
-          <div class="tip" id="83">
+          <div class="tip" id="54">
             <strong>Signature:</strong> stream:CloudStream&lt;&#39;T&gt; -&gt; Cloud&lt;ICloudArray&lt;&#39;T&gt;&gt;<br />
                           <strong>Type parameters:</strong> 'T          </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L378-378" class="github-link">
+            <a href="http://github.com/nessos/Streams/tree/master/src/Streams.Cloud/CloudStreams.fs#L385-385" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
