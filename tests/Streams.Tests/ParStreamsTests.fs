@@ -92,6 +92,12 @@
                 let y = xs |> PSeq.map (fun n -> 2 * n) |> PSeq.sum
                 x = y).QuickCheckThrowOnFailure()
 
+        [<Test>]
+        member __.``sum/ordered`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> ParStream.ofArray |> ParStream.filter (fun x -> x % 2 = 0) |> ParStream.mapi (fun i x -> i + x) |> ParStream.sum
+                let y = xs |> PSeq.filter (fun x -> x % 2 = 0) |> PSeq.mapi (fun i x -> i + x) |> PSeq.sum
+                x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``length`` () =

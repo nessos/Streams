@@ -22,8 +22,13 @@ type Collector<'T, 'R> =
     /// The result of the collector.
     abstract Result : 'R
 
+/// The Type of iteration source
+type SourceType = Array | ResizeArray | Seq
+
 /// Represents a parallel Stream of values.
 type ParStream<'T> =
+    /// The Type of iteration source
+    abstract SourceType : SourceType
     /// A flag that indicates that the ordering in the subsequent query operators will be preserved.
     abstract PreserveOrdering : bool
     /// Returns the sequential Stream
@@ -50,6 +55,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let ofArray (source : 'T []) : ParStream<'T> =
         { new ParStream<'T> with
+            member self.SourceType = SourceType.Array
             member self.PreserveOrdering = false
             member self.Stream () = Stream.ofArray source
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
@@ -77,6 +83,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let ofResizeArray (source : ResizeArray<'T>) : ParStream<'T> =
         { new ParStream<'T> with
+            member self.SourceType = SourceType.ResizeArray
             member self.PreserveOrdering = false
             member self.Stream () = Stream.ofResizeArray source
             member self.Apply<'R> (collector : Collector<'T, 'R>) =
@@ -108,6 +115,7 @@ module ParStream =
         | :? ResizeArray<'T> as list -> ofResizeArray list
         | _ ->
             { new ParStream<'T> with
+                member self.SourceType = SourceType.Seq
                 member self.PreserveOrdering = false
                 member self.Stream () = Stream.ofSeq source
                 member self.Apply<'R> (collector : Collector<'T, 'R>) =
@@ -137,6 +145,7 @@ module ParStream =
     /// <returns>The result parallel stream as ordered.</returns>
     let inline ordered (stream : ParStream<'T>) : ParStream<'T> = 
         { new ParStream<'T> with
+                member self.SourceType = stream.SourceType
                 member self.PreserveOrdering = true
                 member self.Stream () = stream.Stream() 
                 member self.Apply<'S> (collector : Collector<'T, 'S>) =
@@ -151,16 +160,10 @@ module ParStream =
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result parallel stream as unordered.</returns>
     let inline unordered (stream : ParStream<'T>) : ParStream<'T> = 
-        { new ParStream<'T> with
-                member self.PreserveOrdering = false
-                member self.Stream () = stream.Stream() 
-                member self.Apply<'S> (collector : Collector<'T, 'S>) =
-                    let collector = 
-                        { new Collector<'T, 'S> with
-                            member self.Iterator() = 
-                                collector.Iterator()
-                            member self.Result = collector.Result }
-                    stream.Apply collector }
+        if stream.PreserveOrdering then
+            stream.Stream() |> Stream.toSeq |> ofSeq
+        else
+            stream
 
     /// <summary>Transforms each element of the input parallel stream.</summary>
     /// <param name="f">A function to transform items from the input parallel stream.</param>
@@ -168,6 +171,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let inline map (f : 'T -> 'R) (stream : ParStream<'T>) : ParStream<'R> =
         { new ParStream<'R> with
+            member self.SourceType = stream.SourceType
             member self.PreserveOrdering = stream.PreserveOrdering
             member self.Stream () = stream.Stream() |> Stream.map f 
             member self.Apply<'S> (collector : Collector<'R, 'S>) =
@@ -185,7 +189,19 @@ module ParStream =
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result parallel stream.</returns>
     let inline mapi (f : int -> 'T -> 'R) (stream : ParStream<'T>) : ParStream<'R> =
-        stream.Stream() |> Stream.mapi f |> Stream.toSeq |> ofSeq |> ordered
+        { new ParStream<'R> with
+            member self.SourceType = stream.SourceType
+            member self.PreserveOrdering = true
+            member self.Stream () = stream.Stream() |> Stream.mapi f 
+            member self.Apply<'S> (collector : Collector<'R, 'S>) =
+                let collector = 
+                    { new Collector<'T, 'S> with
+                        member self.Iterator() =
+                            let { Index = index; Func = iter } as iterator = collector.Iterator()
+                            {   Index = iterator.Index; 
+                                Func = (fun value -> iter (f !index value)) }
+                        member self.Result = collector.Result }
+                stream.Apply collector }
 
     /// <summary>Transforms each element of the input parallel stream to a new stream and flattens its elements.</summary>
     /// <param name="f">A function to transform items from the input parallel stream.</param>
@@ -193,6 +209,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let inline flatMap (f : 'T -> Stream<'R>) (stream : ParStream<'T>) : ParStream<'R> =
         { new ParStream<'R> with
+            member self.SourceType = stream.SourceType
             member self.PreserveOrdering = stream.PreserveOrdering
             member self.Stream () = stream.Stream() |> Stream.flatMap f
             member self.Apply<'S> (collector : Collector<'R, 'S>) =
@@ -220,6 +237,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let inline filter (predicate : 'T -> bool) (stream : ParStream<'T>) : ParStream<'T> =
         { new ParStream<'T> with
+            member self.SourceType = stream.SourceType
             member self.PreserveOrdering = stream.PreserveOrdering
             member self.Stream () = stream.Stream() |> Stream.filter predicate
             member self.Apply<'S> (collector : Collector<'T, 'S>) =
@@ -238,6 +256,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let inline choose (chooser : 'T -> 'R option) (stream : ParStream<'T>) : ParStream<'R> =
         { new ParStream<'R> with
+            member self.SourceType = stream.SourceType
             member self.PreserveOrdering = stream.PreserveOrdering
             member self.Stream () = stream.Stream() |> Stream.choose chooser
             member self.Apply<'S> (collector : Collector<'R, 'S>) =
@@ -258,6 +277,7 @@ module ParStream =
         if n < 0 then
             raise <| new System.ArgumentException("The input must be non-negative.")
         { new ParStream<'T> with
+            member self.SourceType = stream.SourceType
             member self.PreserveOrdering = stream.PreserveOrdering
             member self.Stream() = stream.Stream() |> Stream.take n
             member self.Apply<'S> (collector : Collector<'T, 'S>) =
@@ -277,6 +297,7 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let inline skip (n : int) (stream : ParStream<'T>) : ParStream<'T> =
         { new ParStream<'T> with
+            member self.SourceType = stream.SourceType
             member self.PreserveOrdering = stream.PreserveOrdering
             member self.Stream() = stream.Stream() |> Stream.skip n
             member self.Apply<'S> (collector : Collector<'T, 'S>) =
@@ -327,7 +348,12 @@ module ParStream =
                          acc <- combiner acc !result 
                     acc }
 
-        stream.Apply collector
+        if stream.PreserveOrdering then 
+            match stream.SourceType with
+            | Array | ResizeArray -> stream.Stream() |> Stream.fold folder (state())
+            | Seq -> let stream = stream.Stream() |> Stream.toSeq |> ofSeq in stream.Apply collector
+        else 
+            stream.Apply collector
 
     /// <summary>Returns the sum of the elements.</summary>
     /// <param name="stream">The input parallel stream.</param>
@@ -356,25 +382,23 @@ module ParStream =
                     (fun () -> new ArrayCollector<'T>()) stream 
             arrayCollector.ToArray()
 
-    /// <summary>Creates an Seq from the given parallel stream.</summary>
-    /// <param name="stream">The input parallel stream.</param>
-    /// <returns>The result Seq.</returns>    
-    let inline toSeq (stream : ParStream<'T>) : seq<'T> =
-        if stream.PreserveOrdering then
-            stream.Stream() |> Stream.toSeq 
-        else
-            let concurrentBag = new ConcurrentBag<'T>()
-            fold (fun _ value -> concurrentBag.Add(value))
-                 (fun left right -> ()) 
-                 (fun () -> ()) stream |> ignore
-            concurrentBag :> _
-
     /// <summary>Creates an ResizeArray from the given parallel stream.</summary>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result ResizeArray.</returns>    
     let inline toResizeArray (stream : ParStream<'T>) : ResizeArray<'T> =
         new ResizeArray<'T>(toArray stream)
 
+    /// <summary>Creates an Seq from the given parallel stream.</summary>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result Seq.</returns>    
+    let inline toSeq (stream : ParStream<'T>) : seq<'T> =
+        match stream.SourceType, stream.PreserveOrdering with
+        | Array, false -> toArray stream :> _
+        | ResizeArray, false -> toResizeArray stream :> _
+        | Array, true -> stream.Stream() |> Stream.toArray :> _
+        | ResizeArray, true -> stream.Stream() |> Stream.toResizeArray :> _
+        | Seq, _ -> stream.Stream() |> Stream.toSeq
+        
 
     /// <summary>Locates the maximum element of the parallel stream by given key.</summary>
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
@@ -485,6 +509,7 @@ module ParStream =
                 member self.Result = 
                     dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, !keyValue.Value)) }
 
+        let stream = if stream.PreserveOrdering then stream.Stream() |> Stream.toSeq |> ofSeq else stream
         stream.Apply collector
         
         
@@ -525,6 +550,7 @@ module ParStream =
                 member self.Result = 
                     dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> _)) }
 
+        let stream = if stream.PreserveOrdering then stream.Stream() |> Stream.toSeq |> ofSeq else stream
         stream.Apply collector
         
 
@@ -541,7 +567,8 @@ module ParStream =
                         Func = (fun value -> if predicate value then resultRef := Some value; false else true) }
                 member self.Result = 
                     !resultRef }
-
+        
+        let stream = if stream.PreserveOrdering then stream.Stream() |> Stream.toSeq |> ofSeq else stream
         stream.Apply collector
 
     /// <summary>Returns the first element for which the given function returns true. Raises KeyNotFoundException if no such element exists.</summary>
@@ -568,6 +595,7 @@ module ParStream =
                 member self.Result = 
                     !resultRef }
 
+        let stream = if stream.PreserveOrdering then stream.Stream() |> Stream.toSeq |> ofSeq else stream
         stream.Apply collector
 
 

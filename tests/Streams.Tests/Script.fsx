@@ -205,10 +205,39 @@ open System.Collections.Concurrent
 
 #time
 
+let data = Enumerable.Range(1, 100000000).Select(fun x -> int64 x).ToArray()
+
+data
+|> ParStream.ofSeq
+|> ParStream.filter (fun x -> true)
+|> ParStream.map(fun  x -> int64 1 + x)
+|> ParStream.ordered
+|> ParStream.sum
+
+data
+|> Stream.ofSeq
+//|> Stream.filter (fun x -> x % 2L = 0L)
+//|> Stream.mapi(fun i x -> int64 i + x)
+|> Stream.toSeq
+|> ParStream.ofSeq
+|> ParStream.toSeq
+|> Seq.length
+
+
+for d in data do
+    ()
+
 
 
 data
-|> ParStream.ofArray
-|> ParStream.map(fun x -> int64 1 + x)
+|> ParStream.ofSeq
+|> ParStream.filter (fun x -> x % 2L = 0L)
+|> ParStream.map (fun x -> int64 1 + x)
 |> ParStream.sum
 
+
+
+data.AsParallel()
+    .Where(fun x -> true)
+    .Select(fun x i -> int64 i + x)
+    .Sum()
