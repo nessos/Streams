@@ -30,15 +30,11 @@ let tags = "F#/C# Streams"
 let gitHome = "https://github.com/nessos"
 let gitName = "Streams"
 let gitRaw = environVarOrDefault "gitRaw" "https://raw.github.com/nessos"
-let ignoreCloudTests = hasBuildParam "IgnoreCloudTests"
 
 let testAssemblies = 
     [
         yield "bin/Streams.Tests.exe"
         yield "bin/Streams.Tests.CSharp.exe"
-        if not ignoreCloudTests then
-            yield "bin/Streams.Cloud.Tests.exe"
-            yield "bin/Streams.Cloud.CSharp.Tests.exe"
     ]
 
 //
@@ -51,10 +47,6 @@ Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
 
 module Streams =
     let release = parseReleaseNotes (IO.File.ReadAllLines "RELEASE_NOTES.md")
-    let nugetVersion = release.NugetVersion
-
-module CloudStreams =
-    let release = parseReleaseNotes (IO.File.ReadAllLines "RELEASE_NOTES_CLOUDSTREAM.md")
     let nugetVersion = release.NugetVersion
 
 Target "BuildVersion" (fun _ ->
@@ -74,8 +66,6 @@ Target "AssemblyInfo" (fun _ ->
 
     CreateFSharpAssemblyInfo "src/Streams.Core/AssemblyInfo.fs" <| attributes Streams.release.AssemblyVersion
     CreateCSharpAssemblyInfo "src/Streams.CSharp/Properties/AssemblyInfo.cs" <| attributes Streams.release.AssemblyVersion
-    CreateFSharpAssemblyInfo "src/Streams.Cloud/AssemblyInfo.fs" <| attributes CloudStreams.release.AssemblyVersion
-    CreateCSharpAssemblyInfo "src/Streams.Cloud.CSharp/Properties/AssemblyInfo.cs" <| attributes CloudStreams.release.AssemblyVersion
 )
 
 
@@ -195,56 +185,6 @@ Target "NuGet" (fun _ ->
             AccessKey = getBuildParamOrDefault "nugetkey" ""
             Publish = hasBuildParam "nugetkey" })
         ("nuget/Streams.nuspec")
-
-    NuGet (fun p -> 
-        { p with   
-            Authors = authors
-            Project = "Streams.Cloud"
-            Summary = summary
-            Description = description
-            Version = CloudStreams.nugetVersion
-            ReleaseNotes = String.concat " " CloudStreams.release.Notes
-            Tags = tags
-            OutputPath = "bin"
-            Dependencies = 
-                [
-                    "Streams",      RequireExactly Streams.nugetVersion
-                    "MBrace.Core",  RequireExactly "0.5.13-alpha"
-                ]
-            ToolPath = nugetPath
-            Files =
-                [
-                    yield! addAssembly @"lib\net45" @"..\bin\Streams.Cloud.dll"
-                ]
-            AccessKey = getBuildParamOrDefault "nugetkey" ""
-            Publish = hasBuildParam "nugetkey" })
-        ("nuget/Streams.nuspec")
-
-    NuGet (fun p -> 
-        { p with   
-            Authors = authors
-            Project = "Streams.Cloud.CSharp"
-            Summary = summary
-            Description = description
-            Version = CloudStreams.nugetVersion
-            ReleaseNotes = String.concat " " CloudStreams.release.Notes
-            Tags = tags
-            OutputPath = "bin"
-            Dependencies = 
-                [
-                    "Streams",          RequireExactly Streams.nugetVersion
-                    "Streams.Cloud",    RequireExactly CloudStreams.nugetVersion
-                    "MBrace.Client",    RequireExactly "0.5.13-alpha"
-                    "FSharp.Core.Microsoft.Signed", "3.1.1.1"
-                ]
-            ToolPath = nugetPath
-            Files =
-                [
-                    yield! addAssembly @"lib\net45" @"..\bin\Streams.Cloud.CSharp.dll"
-                ]
-            AccessKey = getBuildParamOrDefault "nugetkey" ""
-            Publish = hasBuildParam "nugetkey" })
-        ("nuget/Streams.nuspec")
 )
 
 Target "GenerateDocs" (fun _ ->
@@ -259,7 +199,7 @@ Target "ReleaseDocs" (fun _ ->
     fullclean tempDocsDir
     CopyRecursive "docs/output" tempDocsDir true |> tracefn "%A"
     StageAll tempDocsDir
-    Commit tempDocsDir (sprintf "Update generated documentation for Streams %s, CloudStream %s" Streams.release.NugetVersion CloudStreams.release.NugetVersion)
+    Commit tempDocsDir (sprintf "Update generated documentation for Streams %s" Streams.release.NugetVersion)
     Branches.push tempDocsDir
 )
 
