@@ -28,18 +28,28 @@ type Stream<'T> = Stream of ((unit -> unit) -> ('T -> bool) -> Iterable)
 type private StreamEnumerator<'T> (stream : Stream<'T>) =
     let results = new ResizeArray<'T>()
     let index = ref -1
+    let count = ref 0
     let (Stream f) = stream
-    let { Bulk = _; Iterator = { TryAdvance = tryAdvance; Dispose = dispose } } = f (fun () -> ()) (fun v -> results.Add(v); true)
+    let { Bulk = _; Iterator = { TryAdvance = tryAdvance; Dispose = dispose } } = 
+        f (fun () -> ()) 
+          (fun v -> 
+                let currentIndex = !count
+                incr count
+                if !count <= results.Count then
+                    results.[currentIndex] <- v
+                else
+                    results.Add(v); 
+                true)
 
     interface System.Collections.IEnumerator with
         member __.Current = box results.[!index]
         member __.MoveNext () =
             let rec awaitNext () =
                 incr index
-                if !index >= results.Count then
-                    results.Clear()
+                if !index >= !count then
+                    count := 0
                     if tryAdvance () then
-                        if results.Count > 0 then 
+                        if !count > 0 then 
                             index := 0
                             true
                         else 

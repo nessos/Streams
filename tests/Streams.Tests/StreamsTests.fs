@@ -33,8 +33,8 @@
         [<Test>]
         member __.``toSeq`` () =
             Spec.ForAny<int[]>(fun xs ->
-                let x = xs |> Stream.ofArray |> Stream.filter (fun x -> x % 2 = 0) |> Stream.map ((+)1) |> Stream.toSeq |> Seq.length
-                let y = xs |> Seq.filter (fun x -> x % 2 = 0) |> Seq.map ((+)1) |> Seq.length 
+                let x = xs |> Stream.ofArray |> Stream.flatMap (fun _ -> Stream.ofArray xs) |> Stream.filter (fun x -> x % 2 = 0) |> Stream.map ((+)1) |> Stream.toSeq |> Seq.toArray
+                let y = xs |> Seq.collect (fun _ -> xs) |> Seq.filter (fun x -> x % 2 = 0) |> Seq.map ((+)1) |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
