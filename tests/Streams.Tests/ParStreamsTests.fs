@@ -54,7 +54,7 @@
         member __.``mapi`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> ParStream.ofArray |> ParStream.filter (fun x -> x % 2 = 0) |> ParStream.flatMap (fun _ -> Stream.ofArray xs) |> ParStream.mapi (fun i n -> (i, n)) |> ParStream.toArray
-                let y = xs |> PSeq.filter (fun x -> x % 2 = 0) |> PSeq.collect (fun _ -> xs) |> PSeq.mapi (fun i n -> (i, n)) |> PSeq.toArray
+                let y = xs |> Seq.filter (fun x -> x % 2 = 0) |> Seq.collect (fun _ -> xs) |> Seq.mapi (fun i n -> (i, n)) |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
