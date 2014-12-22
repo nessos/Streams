@@ -1,5 +1,6 @@
 ﻿namespace Nessos.Streams.Tests
     open System.Linq
+    open System.Threading
     open System.Collections.Generic
     open FsCheck
     open FsCheck.Fluent
@@ -250,5 +251,20 @@
                     let x = xs |> ParStream.ofArray |> ParStream.maxBy (fun i -> i + 1)
                     let y = xs |> Seq.maxBy (fun i -> i + 1)
                     x = y).QuickCheckThrowOnFailure()
+
+
+
+        [<Test>]
+        member __.``withDegreeOfParallelism`` () =
+            Spec.ForAny<int[]>(fun xs -> 
+                let x = xs 
+                        |> ParStream.ofArray
+                        |> ParStream.map (fun _ -> Thread.CurrentThread.ManagedThreadId) 
+                        |> ParStream.withDegreeOfParallelism 1
+                        |> ParStream.toArray
+                        |> Set.ofArray
+                        |> Seq.length
+                if xs.Length = 0 then x = 0
+                else x = 1 ).QuickCheckThrowOnFailure()
 
        

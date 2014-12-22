@@ -9,7 +9,7 @@ type private MergeArrayType = FromArrayType | ToArrayType
 /// Helpers for parallel sorting.
 module Sort = 
     let parallelSort<'Key, 'Value when 'Key :> IComparable<'Key>>
-        (keys : 'Key[]) (array : 'Value[]) = 
+        (totalWorkers : int) (keys : 'Key[]) (array : 'Value[]) = 
             // Taken from Carl Nolan's parallel inplace merge
             // The merge of the two array
             let merge (toArray: 'Value [], toKeys : 'Key[]) (fromArray: 'Value [], fromKeys : 'Key[]) (low1: int) (low2: int) (high1: int) (high2: int) =
@@ -40,7 +40,6 @@ module Sort =
             let parallelSort () =
  
                 // control flow parameters
-                let totalWorkers = int (2.0 ** float (int (Math.Log(float Environment.ProcessorCount, 2.0))))
                 let auxArray : 'Value array = Array.zeroCreate array.Length
                 let auxKeys : 'Key array = Array.zeroCreate array.Length
                 let workers : Task array = Array.zeroCreate (totalWorkers - 1)

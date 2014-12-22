@@ -205,7 +205,7 @@ open System.Collections.Concurrent
 
 #time
 
-let data = Enumerable.Range(1, 100000000)//.Select(fun x -> int64 x).ToArray()
+let data = Enumerable.Range(1, 100000000).Select(fun x -> int64 x).ToArray()
 
 data
 |> ParStream.ofSeq
@@ -215,11 +215,13 @@ data
 |> ParStream.length
 
 data
-|> Stream.ofSeq
-|> Stream.filter (fun x -> true)
-|> Stream.mapi(fun i x ->  i + x)
-|> Stream.toSeq
-|> Seq.length
+|> ParStream.ofSeq
+|> ParStream.map (fun x -> 
+                    while true do 
+                        ()
+                    x)
+|> ParStream.withDegreeOfParallelism 4
+|> ParStream.length
 
 data
 |> Seq.filter (fun _ -> true)
