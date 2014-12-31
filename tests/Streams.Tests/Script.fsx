@@ -247,3 +247,32 @@ data.AsParallel()
     .Where(fun _ -> true)
     .Select(fun x i -> i)
     .Count()
+    
+
+open System.Threading
+
+
+#time
+
+let cts = new CancellationTokenSource()
+let token = cts.Token
+let cts' = CancellationTokenSource.CreateLinkedTokenSource(token)
+let token' = cts'.Token
+let test = ref false 
+
+token.Register(fun () -> printfn "token %d" Thread.CurrentThread.ManagedThreadId )
+token'.Register(fun () -> printfn "token' %d" Thread.CurrentThread.ManagedThreadId)
+
+cts.Cancel()
+cts'.Cancel()
+
+let test'() = 
+    let mutable counter = 0
+    for i = 1 to 1000000000 do
+        [i] |> ignore
+        //if not token.IsCancellationRequested then
+        if not !test then
+            counter <- counter + 1
+    counter
+
+test'()

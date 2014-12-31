@@ -45,6 +45,20 @@
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``flatMap/find`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = Seq.initInfinite id |> Stream.ofSeq |> Stream.flatMap (fun x -> Seq.initInfinite id |> Stream.ofSeq) |> Stream.map ((+)1) |> Stream.find (fun _ -> true)
+                let y = Seq.initInfinite id |> Seq.collect (fun x -> Seq.initInfinite id) |> Seq.map ((+)1) |> Seq.find (fun _ -> true)
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``flatMap/take`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = Seq.initInfinite id |> Stream.ofSeq |> Stream.flatMap (fun x -> Seq.initInfinite id |> Stream.ofSeq |> Stream.take 10) |> Stream.map ((+)1) |> Stream.take 100 |> Stream.toArray
+                let y = Seq.initInfinite id |> Seq.collect (fun x -> Seq.initInfinite id |> Seq.take 10) |> Seq.map ((+)1) |> Seq.take 100 |> Seq.toArray 
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
         member __.``map`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> Stream.ofArray |> Stream.map (fun n -> 2 * n) |> Stream.toArray

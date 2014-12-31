@@ -1,6 +1,7 @@
 ﻿namespace Nessos.Streams
 open System
 open System.Collections.Generic
+open System.Threading
 
 /// Provides on-demand iteration 
 type Iterator = {
@@ -18,11 +19,18 @@ type Iterable = {
     Iterator : Iterator
 }
 
-// (unit -> unit) is the completed continuation
-// ('T -> bool) is the composed continutation with 'T for the current value 
-// and bool is a flag for early termination
+/// Represents the current executing contex
+type Context<'T> = {
+    /// The composed continutation
+    Cont : 'T -> unit
+    /// The completed continuation
+    Complete : unit -> unit
+    /// The current CancellationTokenSource
+    Cts : CancellationTokenSource 
+}
+
 /// Represents a Stream of values.
-type Stream<'T> = Stream of ((unit -> unit) -> ('T -> bool) -> Iterable)
+type Stream<'T> = Stream of (Context<'T> -> Iterable)
 
 // Wraps stream as a IEnumerable
 type private StreamEnumerator<'T> (stream : Stream<'T>) =
@@ -31,15 +39,15 @@ type private StreamEnumerator<'T> (stream : Stream<'T>) =
     let count = ref 0
     let (Stream f) = stream
     let { Bulk = _; Iterator = { TryAdvance = tryAdvance; Dispose = dispose } } = 
-        f (fun () -> ()) 
-          (fun v -> 
-                let currentIndex = !count
-                incr count
-                if !count <= results.Count then
-                    results.[currentIndex] <- v
-                else
-                    results.Add(v); 
-                true)
+        f { Complete = (fun () -> ()); 
+            Cont =  (fun v -> 
+                        let currentIndex = !count
+                        incr count
+                        if !count <= results.Count then
+                            results.[currentIndex] <- v
+                        else
+                            results.Add(v); 
+                        ()); Cts = null }
 
     interface System.Collections.IEnumerator with
         member __.Current = box results.[!index]
@@ -74,15 +82,15 @@ module Stream =
     /// <summary>The empty stream.</summary>
     /// <returns>An empty stream.</returns>
     let empty<'T> : Stream<'T> =
-        let iter _ _ =
-            { Bulk = ignore; Iterator = { TryAdvance = (fun () -> false); Dispose = fun () -> () } }
+        let iter { Complete = complete; Cont = iterf; Cts = cts } =
+            { Bulk = ignore; Iterator = { TryAdvance = (fun () -> false); Dispose = fun () -> if not (cts = null) then cts.Dispose() } }
         Stream iter
 
     /// <summary>Creates a singleton stream.</summary>
     /// <param name="source">The singleton stream element</param>
     /// <returns>A stream of just the given element</returns>
     let inline singleton (source: 'T) : Stream<'T> =
-        let iter complete iterf =
+        let iter { Complete = complete; Cont = iterf; Cts = cts } =
             let bulk () = iterf source |> ignore; complete ()
             let tryAdvance =
                 let pulled = ref false
@@ -93,29 +101,38 @@ module Stream =
                         pulled := true
                         complete ()
                         true
-            { Bulk = bulk; Iterator = { TryAdvance = tryAdvance; Dispose = fun () -> () } }
+            { Bulk = bulk; Iterator = { TryAdvance = tryAdvance; Dispose = fun () -> if not (cts = null) then cts.Dispose() } }
         Stream iter
            
     /// <summary>Wraps array as a stream.</summary>
     /// <param name="source">The input array.</param>
     /// <returns>The result stream.</returns>
     let inline ofArray (source : 'T []) : Stream<'T> =
-        let iter complete iterf =
+        let iter { Complete = complete; Cont = iterf; Cts = cts } =
             let bulk () =
-                let mutable i = 0
-                let mutable next = true
-                while i < source.Length && next do
-                    next <- iterf source.[i]
-                    i <- i + 1
+                if not (cts = null) then
+                    let mutable i = 0
+                    let next = ref true 
+                    cts.Token.Register(fun () -> next := false) |> ignore
+                    use cts' = cts  
+                    while i < source.Length && !next do
+                        iterf source.[i]
+                        i <- i + 1
+                else
+                    for i = 0 to source.Length - 1 do
+                        iterf source.[i]
                 complete ()
+                
             let tryAdvance = 
                 let i = ref 0
                 let continueFlag = ref true
+                if not (cts = null) then
+                    cts.Token.Register(fun () -> continueFlag := false) |> ignore
                 fun () -> 
                     if not !continueFlag then
                         false
                     else if !i < source.Length then
-                        continueFlag := iterf source.[!i] 
+                        iterf source.[!i] 
                         if not !continueFlag then
                             complete ()
                         incr i
@@ -124,29 +141,38 @@ module Stream =
                         continueFlag := false
                         complete ()
                         true
-            { Bulk = bulk; Iterator = { TryAdvance = tryAdvance; Dispose = fun () -> () } }
+            { Bulk = bulk; Iterator = { TryAdvance = tryAdvance; Dispose = fun () -> if not (cts = null) then cts.Dispose() } }
         Stream iter
 
     /// <summary>Wraps ResizeArray as a stream.</summary>
     /// <param name="source">The input array.</param>
     /// <returns>The result stream.</returns>
     let inline ofResizeArray (source : ResizeArray<'T>) : Stream<'T> =
-        let iter complete iterf =
+        let iter { Complete = complete; Cont = iterf; Cts = cts } =
             let bulk () =
-                let mutable i = 0
-                let mutable next = true
-                while i < source.Count && next do
-                    next <- iterf source.[i]
-                    i <- i + 1
+                if not (cts = null) then
+                    let mutable i = 0
+                    let next = ref true 
+                    cts.Token.Register(fun () -> next := false) |> ignore
+                    use cts' = cts  
+                    while i < source.Count && !next do
+                        iterf source.[i]
+                        i <- i + 1
+                else
+                    for i = 0 to source.Count - 1 do
+                        iterf source.[i]
                 complete ()
+
             let tryAdvance = 
                 let i = ref 0
                 let continueFlag = ref true
+                if not (cts = null) then
+                    cts.Token.Register(fun () -> continueFlag := false) |> ignore
                 fun () -> 
                     if not !continueFlag then
                         false
                     else if !i < source.Count then
-                        continueFlag := iterf source.[!i] 
+                        iterf source.[!i] 
                         if not !continueFlag then
                             complete ()
                         incr i
@@ -155,29 +181,39 @@ module Stream =
                         continueFlag := false
                         complete ()
                         true
-            { Bulk = bulk; Iterator = { TryAdvance = tryAdvance; Dispose = fun () -> ()  } }
+            { Bulk = bulk; Iterator = { TryAdvance = tryAdvance; Dispose = fun () -> if not (cts = null) then cts.Dispose()  } }
         Stream iter
 
     /// <summary>Wraps seq as a stream.</summary>
     /// <param name="source">The input seq.</param>
     /// <returns>The result stream.</returns>
     let inline ofSeq (source : seq<'T>) : Stream<'T> =
-        let iter complete iterf = 
+        let iter { Complete = complete; Cont = iterf; Cts = cts } = 
             let bulk () =
-                use enumerator = source.GetEnumerator()
-                let mutable next = true
-                while enumerator.MoveNext() && next do
-                    next <- iterf enumerator.Current
-                complete ()
-                enumerator.Dispose()
+                if not (cts = null) then
+                    use enumerator = source.GetEnumerator()
+                    let next = ref true
+                    cts.Token.Register(fun () -> next := false) |> ignore
+                    use cts' = cts
+                    while enumerator.MoveNext() && !next do
+                        iterf enumerator.Current
+                    complete ()
+                    enumerator.Dispose()
+                else
+                    for value in source do
+                        iterf value
+                    complete ()
+
             let iterator () = 
                 let enumerator = source.GetEnumerator()
                 let continueFlag = ref true
+                if not (cts = null) then
+                    cts.Token.Register(fun () -> continueFlag := false) |> ignore
                 let tryAdvance () = 
                     if not !continueFlag then
                         false
                     else if enumerator.MoveNext() then
-                        continueFlag := iterf enumerator.Current
+                        iterf enumerator.Current
                         if not !continueFlag then
                             complete ()
                         true
@@ -185,7 +221,8 @@ module Stream =
                         continueFlag := false
                         complete ()
                         true
-                { TryAdvance = tryAdvance; Dispose = fun () -> enumerator.Dispose() }
+                { TryAdvance = tryAdvance; Dispose = fun () -> if not (cts = null) then cts.Dispose() 
+                                                               enumerator.Dispose() }
             { Bulk = bulk; Iterator = iterator () }
         match source with
         | :? ('T[]) as array -> ofArray array
@@ -196,19 +233,30 @@ module Stream =
     /// <param name="source">The input seq.</param>
     /// <returns>The result stream.</returns>
     let inline cast<'T> (source : System.Collections.IEnumerable) : Stream<'T> =
-        let iter complete iterf = 
+        let iter { Complete = complete; Cont = iterf; Cts = cts } = 
             let bulk () =
-                let enumerator = source.GetEnumerator() // not disposable
-                let mutable next = true
-                while enumerator.MoveNext() && next do
-                    next <- iterf (enumerator.Current :?> 'T)
-                match enumerator with 
-                | :? System.IDisposable as disposable -> disposable.Dispose()
-                | _ -> ()
-                complete ()
+                
+                if not (cts = null) then
+                    let enumerator = source.GetEnumerator() // not disposable
+                    let next = ref true
+                    cts.Token.Register(fun () -> next := false) |> ignore
+                    use cts' = cts
+                    while enumerator.MoveNext() && !next do
+                        iterf (enumerator.Current :?> 'T)
+                    complete ()
+                    match enumerator with 
+                    | :? System.IDisposable as disposable -> disposable.Dispose()
+                    | _ -> ()                    
+                else
+                    for value in source do
+                        iterf (value :?> 'T)
+                    complete ()
+
             let iterator () = 
                 let enumerator = source.GetEnumerator()
                 let continueFlag = ref true
+                if not (cts = null) then
+                    cts.Token.Register(fun () -> continueFlag := false) |> ignore
                 let tryAdvance () = 
                     if not !continueFlag || not <| enumerator.MoveNext()  then
                         match enumerator with 
@@ -216,13 +264,14 @@ module Stream =
                         | _ -> ()
                         false
                     else
-                        continueFlag := iterf (enumerator.Current :?> 'T)
+                        iterf (enumerator.Current :?> 'T)
                         true
                 let dispose () = 
                     match enumerator with 
                     | :? System.IDisposable as disposable -> disposable.Dispose()
                     | _ -> ()
-                    complete () 
+                    complete ()
+                    if not (cts = null) then cts.Dispose() 
                 { TryAdvance = tryAdvance; Dispose = dispose }
             { Bulk = bulk; Iterator = iterator () }
         Stream iter
@@ -233,8 +282,9 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline map (f : 'T -> 'R) (stream : Stream<'T>) : Stream<'R> =
         let (Stream streamf) = stream
-        let iter complete iterf =
-            streamf complete (fun value -> iterf (f value))
+        let iter { Complete = complete; Cont = iterf; Cts = cts } =
+            streamf { Complete = complete; 
+                      Cont = (fun value -> iterf (f value)); Cts = cts }
         Stream iter
 
 
@@ -244,9 +294,10 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline mapi (f : int -> 'T -> 'R) (stream : Stream<'T>) : Stream<'R> =
         let (Stream streamf) = stream
-        let iter complete iterf =
+        let iter { Complete = complete; Cont = iterf; Cts = cts } =
             let counter = ref -1
-            streamf complete (fun value -> incr counter; iterf (f !counter value))
+            streamf { Complete = complete; 
+                      Cont = (fun value -> incr counter; iterf (f !counter value)); Cts = cts }
         Stream iter
 
     /// <summary>Transforms each element of the input stream to a new stream and flattens its elements.</summary>
@@ -255,12 +306,28 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline flatMap (f : 'T -> Stream<'R>) (stream : Stream<'T>) : Stream<'R> =
         let (Stream streamf) = stream
-        let iter complete iterf =
-            streamf complete 
-                    (fun value -> 
-                        let (Stream streamf') = f value;
-                        let { Bulk = bulk; Iterator = _ } = streamf' (fun () -> ()) iterf in bulk (); true)
+        let iter { Complete = complete; Cont = iterf; Cts = cts } =
+            streamf { Complete = complete;
+                      Cont =  
+                        (fun value -> 
+                            let cts = 
+                                if not (cts = null) then
+                                    CancellationTokenSource.CreateLinkedTokenSource(cts.Token)
+                                else cts
+                            let (Stream streamf') = f value;
+                            let { Bulk = bulk; Iterator = _ } = streamf' { Complete = (fun () -> ()); 
+                                                                           Cont = iterf;
+                                                                           Cts = cts } 
+                                                                in bulk ());
+                      Cts = cts }
         Stream iter
+
+    /// <summary>Transforms each element of the input stream to a new stream and flattens its elements.</summary>
+    /// <param name="f">A function to transform items from the input stream.</param>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The result stream.</returns>
+    let inline collect (f : 'T -> Stream<'R>) (stream : Stream<'T>) : Stream<'R> =
+        flatMap f stream
 
     /// <summary>Creates a cached version of the input stream.</summary>
     /// <param name="source">The input stream.</param>
@@ -271,30 +338,27 @@ module Stream =
         //if !cached = None && cache.Count > 0 then the stream is partially cached
         //if !cached = Some then the stream is fully cached
         let cached = ref None : Stream<'T> option ref
-        let iter complete iterf =  
+        let iter { Complete = complete; Cont = iterf; Cts = cts } =  
             if Option.isSome !cached then
                 //fully cached case
-                let (Stream streamf) = (!cached).Value in streamf complete iterf
+                let (Stream streamf) = (!cached).Value in streamf { Complete = complete; Cont = iterf; Cts = cts }
             else //partially cached or not cached at all case
                 let (Stream streamf) = source
                 let count = ref 0
-                let { Bulk = bulk; Iterator = { TryAdvance = tryAdvance; Dispose = dispose } } = streamf complete (fun v -> (if cache.Count - !count = 0 then cache.Add(v)); incr count; iterf v)
+                let { Bulk = bulk; Iterator = { TryAdvance = tryAdvance; Dispose = dispose } } = 
+                        streamf { Complete = complete;
+                                  Cont = (fun v -> (if cache.Count - !count = 0 then cache.Add(v)); incr count; iterf v);
+                                  Cts = cts }
                 let bulk' () = lock cache (fun () -> bulk(); cached := Some (ofResizeArray cache))
-//                let bulk' () = bulk(); cached := Some (Stream.ofResizeArray cache)
+
                 //locking each next() seem's overkill
                 let tryAdvance' () = lock cache (fun () -> if tryAdvance() then true else cached := Some (ofResizeArray cache); false)
-//                let next' () = if next() then true else cached := Some (Stream.ofResizeArray cache); false
 
                 { Bulk = bulk'; Iterator = { TryAdvance = tryAdvance'; Dispose = dispose } }
         
         Stream iter
 
-    /// <summary>Transforms each element of the input stream to a new stream and flattens its elements.</summary>
-    /// <param name="f">A function to transform items from the input stream.</param>
-    /// <param name="stream">The input stream.</param>
-    /// <returns>The result stream.</returns>
-    let inline collect (f : 'T -> Stream<'R>) (stream : Stream<'T>) : Stream<'R> =
-        flatMap f stream
+
 
     /// <summary>Filters the elements of the input stream.</summary>
     /// <param name="predicate">A function to test each source element for a condition.</param>
@@ -302,8 +366,10 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline filter (predicate : 'T -> bool) (stream : Stream<'T>) : Stream<'T> =
         let (Stream streamf) = stream
-        let iter complete iterf = 
-            streamf complete (fun value -> if predicate value then iterf value else true)
+        let iter { Complete = complete; Cont = iterf; Cts = cts }  = 
+            streamf { Complete = complete;
+                      Cont = (fun value -> if predicate value then iterf value else ());
+                      Cts = cts }
         Stream iter
 
     /// <summary>Applies the given function to each element of the stream and returns the stream comprised of the results for each element where the function returns Some with some value.</summary>
@@ -312,8 +378,10 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline choose (chooser : 'T -> 'R option) (stream : Stream<'T>) : Stream<'R> =
         let (Stream streamf) = stream
-        let iter complete iterf = 
-            streamf complete (fun value -> match chooser value with | Some value' -> iterf value' | None -> true)
+        let iter { Complete = complete; Cont = iterf; Cts = cts }  = 
+            streamf { Complete = complete; 
+                      Cont = (fun value -> match chooser value with | Some value' -> iterf value' | None -> ());
+                      Cts = cts }
         Stream iter
 
     /// <summary>Returns the elements of the stream up to a specified count.</summary>
@@ -324,12 +392,15 @@ module Stream =
         if n < 0 then
             raise <| new System.ArgumentException("The input must be non-negative.")
         let (Stream streamf) = stream
-        let iter complete iterf = 
+        let iter { Complete = complete; Cont = iterf; Cts = cts } = 
             let counter = ref 0
-            streamf complete
-                (fun value -> 
-                    incr counter
-                    if !counter <= n then iterf value else false)
+            let cts = if cts = null then new CancellationTokenSource() else cts
+            streamf { Complete = complete;
+                      Cont = 
+                        (fun value -> 
+                            incr counter
+                            if !counter <= n then iterf value else cts.Cancel());
+                      Cts = cts } 
         Stream iter
 
     /// <summary>Returns the elements of the stream while the given predicate returns true.</summary>
@@ -338,10 +409,13 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline takeWhile pred (stream : Stream<'T>) : Stream<'T> = 
         let (Stream streamf) = stream
-        let iter complete iterf = 
-            streamf complete
-                (fun value -> 
-                    if pred value then iterf value else false)
+        let iter { Complete = complete; Cont = iterf; Cts = cts } =
+            let cts = if cts = null then new CancellationTokenSource() else cts 
+            streamf { Complete = complete;
+                      Cont = 
+                        (fun value -> 
+                            if pred value then iterf value else cts.Cancel());
+                      Cts = cts }
         Stream iter
 
     /// <summary>Returns a stream that skips N elements of the input stream and then yields the remaining elements of the stream.</summary>
@@ -350,12 +424,14 @@ module Stream =
     /// <returns>The result stream.</returns>
     let inline skip (n : int) (stream : Stream<'T>) : Stream<'T> =
         let (Stream streamf) = stream
-        let iter complete iterf = 
+        let iter { Complete = complete; Cont = iterf; Cts = cts } = 
             let counter = ref 0
-            streamf complete
-                (fun value -> 
-                    incr counter
-                    if !counter > n then iterf value else true)
+            streamf { Complete = complete;
+                      Cont = 
+                        (fun value -> 
+                            incr counter
+                            if !counter > n then iterf value else ());
+                      Cts = cts } 
         Stream iter
 
 
@@ -363,11 +439,13 @@ module Stream =
     /// <param name="streams">The sequence of streams to concatenate.</param>
     /// <returns>The concatenated stream.</returns>
     let concat (streams: #seq<Stream<'T>>): Stream<'T> =
-        let iter complete iterf =
+        let iter { Complete = complete; Cont = iterf; Cts = cts } =
             let bulk () =
                 for stream in streams do
                     let (Stream streamF) = stream
-                    let { Bulk = bulk; Iterator = _ } = streamF (fun () -> ()) iterf
+                    let { Bulk = bulk; Iterator = _ } = streamF { Complete = (fun () -> ());
+                                                                  Cont = iterf;
+                                                                  Cts = cts }
                     bulk ()
                 complete ()
             let iterator =
@@ -382,11 +460,13 @@ module Stream =
                                                 member __.GetEnumerator () = new StreamEnumerator<'T>(stream) :> System.Collections.IEnumerator })
                         streams.GetEnumerator()
                     let continueFlag = ref true
+                    if not (cts = null) then
+                        cts.Token.Register(fun _ -> continueFlag := false) |> ignore
                     let tryAdvance () =
                         if not !continueFlag then
                             false
                         else if enumerator.MoveNext() then
-                            continueFlag := iterf enumerator.Current 
+                            iterf enumerator.Current 
                             if not !continueFlag then
                                 complete ()
                             true
@@ -395,6 +475,7 @@ module Stream =
                             complete ()
                             true
                     let dispose () =
+                        if not (cts = null) then cts.Dispose()
                         enumerator.Dispose()
                     { TryAdvance = tryAdvance; Dispose = dispose }
 
@@ -409,27 +490,32 @@ module Stream =
     /// <param name="second">The second input stream.</param>
     /// <returns>The result stream.</returns>
     let zipWith (f : 'T -> 'S -> 'R) (first : Stream<'T>) (second : Stream<'S>) : Stream<'R> =
-        let iter complete iterf =
+        let iter { Complete = complete; Cont = iterf; Cts = cts }  =
             let bulk () =
                 let firstEnumerator = new StreamEnumerator<'T>(first) :> IEnumerator<'T>
                 let secondEnumerator = new StreamEnumerator<'S>(second) :> IEnumerator<'S>
-                let mutable next = true
-                while next do
+                let next = ref true
+                if not (cts = null) then
+                    cts.Token.Register(fun _ -> next := false) |> ignore
+                use cts' = cts
+                while !next do
                     if firstEnumerator.MoveNext() && secondEnumerator.MoveNext() then
-                        next <- iterf (f firstEnumerator.Current secondEnumerator.Current)
+                        iterf (f firstEnumerator.Current secondEnumerator.Current)
                     else
-                        next <- false
+                        next := false
                     ()
                 complete ()
             let iterator = 
                 let continueFlag = ref true
+                if not (cts = null) then
+                    cts.Token.Register(fun _ -> continueFlag := false) |> ignore
                 let firstEnumerator = new StreamEnumerator<'T>(first) :> IEnumerator<'T>
                 let secondEnumerator = new StreamEnumerator<'S>(second) :> IEnumerator<'S>
                 let tryAdvance () = 
                     if not !continueFlag then
                         false
                     else if firstEnumerator.MoveNext() && secondEnumerator.MoveNext() then
-                        continueFlag := iterf (f firstEnumerator.Current secondEnumerator.Current)
+                        iterf (f firstEnumerator.Current secondEnumerator.Current)
                         if not !continueFlag then
                             complete ()
                         true
@@ -438,6 +524,8 @@ module Stream =
                         complete ()
                         true
                 let dispose () = 
+                    if not (cts = null) then
+                        cts.Dispose()
                     firstEnumerator.Dispose()
                     secondEnumerator.Dispose()
                 { TryAdvance = tryAdvance; Dispose = dispose }
@@ -454,7 +542,10 @@ module Stream =
     let inline fold (folder : 'State -> 'T -> 'State) (state : 'State) (stream : Stream<'T>) : 'State =
         let (Stream streamf) = stream 
         let accRef = ref state
-        let { Bulk = bulk; Iterator = _ } = streamf (fun () -> ()) (fun value -> accRef := folder !accRef value ; true) 
+        let { Bulk = bulk; Iterator = _ } = streamf { Complete = (fun () -> ());
+                                                      Cont = (fun value -> accRef := folder !accRef value);
+                                                      Cts = null }
+
         bulk ()
         !accRef
 
@@ -477,7 +568,9 @@ module Stream =
     /// <param name="stream">The input stream.</param>    
     let inline iter (f : 'T -> unit) (stream : Stream<'T>) : unit = 
         let (Stream streamf) = stream
-        let { Bulk = bulk; Iterator = _ } = streamf (fun () -> ()) (fun value -> f value; true) 
+        let { Bulk = bulk; Iterator = _ } = streamf { Complete = (fun () -> ());
+                                                      Cont = (fun value -> f value);
+                                                      Cts = null } 
         bulk ()
 
     /// <summary>Creates an Seq from the given stream.</summary>
@@ -514,7 +607,9 @@ module Stream =
         let (Stream streamf) = stream
         let values = new List<'T>()
         let keys = new List<'Key>()
-        let { Bulk = bulk; Iterator = _ } = streamf (fun () -> ()) (fun value -> keys.Add(projection value); values.Add(value); true)
+        let { Bulk = bulk; Iterator = _ } = streamf { Complete = (fun () -> ());
+                                                      Cont = (fun value -> keys.Add(projection value); values.Add(value));
+                                                      Cts = null }
         bulk ()
         let array = values.ToArray()
         Array.Sort(keys.ToArray(), array)
@@ -579,9 +674,11 @@ module Stream =
                 dict.Add(key, container)
 
             container := folder container.Value t
-            true
+            ()
 
-        let (Stream iter) = source in let { Bulk = bulk; Iterator = _ } = iter (fun () -> ()) body in bulk ()
+        let (Stream iter) = source in let { Bulk = bulk; Iterator = _ } =
+                                                iter { Complete = (fun () -> ());
+                                                Cont = body; Cts = null }; in bulk ()
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value.Value))
 
     /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and a sequence of all elements that have each key.</summary>
@@ -598,9 +695,11 @@ module Stream =
                 grouping <- new List<'T>()
                 dict.Add(key, grouping)
             grouping.Add(t)
-            true
+            ()
 
-        let (Stream iterf) = source in let { Bulk = bulk; Iterator = _ } = iterf (fun () -> ()) body in bulk ()
+        let (Stream iterf) = source in let { Bulk = bulk; Iterator = _ } = 
+                                        iterf { Complete = (fun () -> ());
+                                                Cont = body; Cts = null } in bulk ()
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))
 
     /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and their frequency.</summary>
@@ -617,7 +716,10 @@ module Stream =
     let inline tryFind (predicate : 'T -> bool) (stream : Stream<'T>) : 'T option = 
         let (Stream streamf) = stream
         let resultRef = ref Unchecked.defaultof<'T option>
-        let { Bulk = bulk; Iterator = _ } = streamf (fun () -> ()) (fun value -> if predicate value then resultRef := Some value; false; else true) 
+        let cts = new CancellationTokenSource()
+        let { Bulk = bulk; Iterator = _ } = streamf { Complete = (fun () -> ());
+                                                      Cont = (fun value -> if predicate value then resultRef := Some value; cts.Cancel(); else ());
+                                                      Cts = cts } 
         bulk ()
         !resultRef
 
@@ -638,7 +740,10 @@ module Stream =
     let inline tryPick (chooser : 'T -> 'R option) (stream : Stream<'T>) : 'R option = 
         let (Stream streamf) = stream
         let resultRef = ref Unchecked.defaultof<'R option>
-        let { Bulk = bulk; Iterator = _ } = streamf (fun () -> ()) (fun value -> match chooser value with | Some value' -> resultRef := Some value'; false; | None -> true) 
+        let cts = new CancellationTokenSource()
+        let { Bulk = bulk; Iterator = _ } = streamf { Complete = (fun () -> ());
+                                                      Cont = (fun value -> match chooser value with | Some value' -> resultRef := Some value'; cts.Cancel(); | None -> ())
+                                                      Cts = cts } 
         bulk ()
         !resultRef
 
@@ -679,22 +784,24 @@ module Stream =
     /// <param name="predicate">Grouping predicate.</param>
     /// <param name="source">Source stream.</param>
     let groupUntil inclusive (predicate : 'T -> bool) (source : Stream<'T>) : Stream<'T []> =
-        let iter complete (k : 'T [] -> bool) =
+        let iter { Complete = complete; Cont = k; Cts = cts } =
             let results = new ResizeArray<'T> ()
             let (Stream streamf) = source
-            streamf 
-                (fun () -> 
-                    if results.Count > 0 then
-                        k <| results.ToArray() |> ignore
-                    complete ())
-                (fun (t : 'T) ->
-                    if predicate t then
-                        results.Add t
-                        true
-                    else
-                        if inclusive then results.Add t
-                        let value = results.ToArray()
-                        results.Clear()
-                        k value)
+            streamf { Complete = 
+                        (fun () -> 
+                            if results.Count > 0 then
+                                k <| results.ToArray() |> ignore
+                            complete ());
+                      Cont = 
+                        (fun (t : 'T) ->
+                            if predicate t then
+                                results.Add t
+                                ()
+                            else
+                                if inclusive then results.Add t
+                                let value = results.ToArray()
+                                results.Clear()
+                                k value);
+                      Cts = cts }
 
         Stream iter
