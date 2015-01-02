@@ -11,8 +11,10 @@ open Nessos.Streams.Internals
 type ParIterator<'T> = {
     /// The index of the current element from the parallel source
     Index : int ref 
-    /// The composed continutation with 'T for the current value and bool is a flag for early termination
-    Func : ('T -> bool)
+    /// The composed continutation with 'T for the current value
+    Func : ('T -> unit)
+    /// The current CancellationTokenSource
+    Cts : CancellationTokenSource 
 }
 
 /// Collects elements into a mutable result container.
@@ -65,13 +67,13 @@ module ParStream =
                 if not (source.Length = 0) then 
                     let partitions = getPartitions !totalWorkers source.Length
                     let nextRef = ref true
-                    let createTask s e (iter : ParIterator<'T>) = 
+                    let createTask s e (iter : ParIterator<'T>) =
+                        iter.Cts.Token.Register(fun _ -> nextRef := false) |> ignore 
                         Task.Factory.StartNew(fun () ->
                                                 let mutable i = s
                                                 while i < e && !nextRef do
                                                     iter.Index := i
-                                                    if not <| iter.Func source.[i] then
-                                                        nextRef := false
+                                                    iter.Func source.[i]
                                                     i <- i + 1 
                                                 ())
                     let tasks = partitions 
@@ -96,12 +98,12 @@ module ParStream =
                     let partitions = getPartitions !totalWorkers source.Count
                     let nextRef = ref true
                     let createTask s e (iter : ParIterator<'T>) = 
+                        iter.Cts.Token.Register(fun _ -> nextRef := false) |> ignore 
                         Task.Factory.StartNew(fun () ->
                                                 let mutable i = s
                                                 while i < e && !nextRef do
                                                     iter.Index := i
-                                                    if not <| iter.Func source.[i] then
-                                                        nextRef := false
+                                                    iter.Func source.[i]
                                                     i <- i + 1 
                                                 ())
                     let tasks = partitions 
@@ -131,11 +133,11 @@ module ParStream =
                     let partitions = partitioner.GetOrderablePartitions(!totalWorkers).ToArray()
                     let nextRef = ref true
                     let createTask (partition : IEnumerator<KeyValuePair<int64, 'T>>) (iter : ParIterator<'T>) = 
+                        iter.Cts.Token.Register(fun _ -> nextRef := false) |> ignore 
                         Task.Factory.StartNew(fun () ->
                                                 while partition.MoveNext() && !nextRef do
                                                     iter.Index := int partition.Current.Key
-                                                    if not <| iter.Func partition.Current.Value then
-                                                        nextRef := false
+                                                    iter.Func partition.Current.Value
                                                 ())
                     let tasks = partitions 
                                 |> Array.map (fun partition -> (partition, collector.Iterator())) 
@@ -211,7 +213,8 @@ module ParStream =
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
                             {   Index = iterator.Index; 
-                                Func = (fun value -> iter (f value)) }
+                                Func = (fun value -> iter (f value));
+                                Cts = iterator.Cts }
                         member self.Result = collector.Result }
                 stream.Apply collector }
 
@@ -231,7 +234,8 @@ module ParStream =
                         member self.Iterator() =
                             let { Index = index; Func = iter } as iterator = collector.Iterator()
                             {   Index = iterator.Index; 
-                                Func = (fun value -> iter (f !index value)) }
+                                Func = (fun value -> iter (f !index value));
+                                Cts = iterator.Cts } 
                         member self.Result = collector.Result }
                 stream.Apply collector }
 
@@ -253,7 +257,9 @@ module ParStream =
                             {   Index = iterator.Index;
                                 Func = (fun value -> 
                                         let (Stream streamf) = f value
-                                        let { Bulk = bulk; Iterator = _ } = streamf { Complete = (fun () -> ()); Cont = (fun v -> iter v |> ignore); Cts = null } in bulk (); true) }
+                                        let cts = CancellationTokenSource.CreateLinkedTokenSource(iterator.Cts.Token)
+                                        let { Bulk = bulk; Iterator = _ } = streamf { Complete = (fun () -> ()); Cont = (fun v -> iter v |> ignore); Cts = cts } in bulk ());
+                                        Cts = iterator.Cts } 
                         member self.Result = collector.Result  }
                 stream.Apply collector }
 
@@ -280,7 +286,8 @@ module ParStream =
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
                             {   Index = iterator.Index; 
-                                Func = (fun value -> if predicate value then iter value else true) }
+                                Func = (fun value -> if predicate value then iter value else ());
+                                Cts = iterator.Cts }
                         member self.Result = collector.Result }
                 stream.Apply collector }
 
@@ -300,7 +307,8 @@ module ParStream =
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
                             {   Index = iterator.Index;
-                                Func = (fun value -> match chooser value with Some value' -> iter value' | None -> true) }
+                                Func = (fun value -> match chooser value with Some value' -> iter value' | None -> ());
+                                Cts = iterator.Cts }
                         member self.Result = collector.Result }
                 stream.Apply collector }
 
@@ -323,7 +331,8 @@ module ParStream =
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
                             {   Index = iterator.Index; 
-                                Func = (fun value -> if Interlocked.Increment count <= n then iter value else false) }
+                                Func = (fun value -> if Interlocked.Increment count <= n then iter value else iterator.Cts.Cancel());
+                                Cts = iterator.Cts }
                         member self.Result = collector.Result }
                 stream.Apply collector }
 
@@ -344,7 +353,8 @@ module ParStream =
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
                             {   Index = iterator.Index; 
-                                Func = (fun value -> if Interlocked.Increment count > n then iter value else true) }
+                                Func = (fun value -> if Interlocked.Increment count > n then iter value else ());
+                                Cts = iterator.Cts }
                         member self.Result = collector.Result }
                 stream.Apply collector }
 
@@ -357,7 +367,9 @@ module ParStream =
         let collector = 
             { new Collector<'T, obj> with
                 member self.Iterator() = 
-                    { Index = ref -1; Func = (fun value -> f value; true) }
+                    { Index = ref -1; 
+                      Func = (fun value -> f value);
+                      Cts = new CancellationTokenSource() }
                 member self.Result = 
                     () :> _ }
 
@@ -378,7 +390,9 @@ module ParStream =
                 member self.Iterator() = 
                     let accRef = ref <| state ()
                     results.Add(accRef)
-                    { Index = ref -1; Func = (fun value -> accRef := folder !accRef value; true) }
+                    { Index = ref -1; 
+                      Func = (fun value -> accRef := folder !accRef value);
+                      Cts = new CancellationTokenSource() }
                 member self.Result = 
                     let mutable acc = state ()
                     for result in results do
@@ -544,7 +558,8 @@ module ParStream =
                                             dict.TryGetValue(key, &grouping) |> ignore
                                         let acc = grouping
                                         lock grouping (fun () -> acc := folder !acc value) 
-                                    true) }
+                                    ());
+                        Cts = new CancellationTokenSource()  }
                 member self.Result = 
                     dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, !keyValue.Value)) |> withDegreeOfParallelism !stream.DegreeOfParallelism }
 
@@ -585,7 +600,8 @@ module ParStream =
                                         dict.TryGetValue(key, &grouping) |> ignore
                                     let list = grouping
                                     lock grouping (fun () -> list.Add(value))     
-                                true) }
+                                ());
+                        Cts = new CancellationTokenSource()   }
                 member self.Result = 
                     let stream' = dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))   
                     stream' |> withDegreeOfParallelism !stream.DegreeOfParallelism }
@@ -600,11 +616,13 @@ module ParStream =
     /// <returns>The first element for which the predicate returns true, or None if every element evaluates to false.</returns>
     let inline tryFind (predicate : 'T -> bool) (stream : ParStream<'T>) : 'T option = 
         let resultRef = ref Unchecked.defaultof<'T option>
+        let cts =  new CancellationTokenSource()
         let collector = 
             { new Collector<'T, 'T option> with
                 member self.Iterator() = 
                     {   Index = ref -1; 
-                        Func = (fun value -> if predicate value then resultRef := Some value; false else true) }
+                        Func = (fun value -> if predicate value then resultRef := Some value; cts.Cancel() else ());
+                        Cts = cts }
                 member self.Result = 
                     !resultRef }
         
@@ -627,11 +645,13 @@ module ParStream =
     /// <returns>The first element for which the chooser returns Some, or None if every element evaluates to None.</returns>
     let inline tryPick (chooser : 'T -> 'R option) (stream : ParStream<'T>) : 'R option = 
         let resultRef = ref Unchecked.defaultof<'R option>
+        let cts = new CancellationTokenSource()
         let collector = 
             { new Collector<'T, 'R option> with
                 member self.Iterator() = 
                     {   Index = ref -1; 
-                        Func = (fun value -> match chooser value with Some value' -> resultRef := Some value'; false | None -> true) }
+                        Func = (fun value -> match chooser value with Some value' -> resultRef := Some value'; cts.Cancel() | None -> ());
+                        Cts = cts }
                 member self.Result = 
                     !resultRef }
 

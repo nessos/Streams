@@ -73,11 +73,26 @@
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
-        member __.``collect`` () =
+        member __.``flatMap`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> ParStream.ofArray |> ParStream.collect (fun n -> [|1..n|] |> Stream.ofArray) |> ParStream.toArray
                 let y = xs |> PSeq.collect (fun n -> [|1..n|]) |> PSeq.toArray
                 x = y).QuickCheckThrowOnFailure()
+
+        
+        [<Test>]
+        member __.``flatMap/find`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = Seq.initInfinite id |> ParStream.ofSeq |> ParStream.flatMap (fun x -> Seq.initInfinite id |> Stream.ofSeq) |> ParStream.map ((+)1) |> ParStream.find (fun i -> i = 100)
+                let y = Seq.initInfinite id |> Seq.collect (fun x -> Seq.initInfinite id) |> Seq.map ((+)1) |> Seq.find (fun i -> i = 100)
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``flatMap/take`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = Seq.initInfinite id |> ParStream.ofSeq |> ParStream.flatMap (fun x -> Seq.initInfinite id |> Stream.ofSeq |> Stream.take 10) |> ParStream.map ((+)1) |> ParStream.take 100 |> ParStream.toArray
+                let y = Seq.initInfinite id |> Seq.collect (fun x -> Seq.initInfinite id |> Seq.take 10) |> Seq.map ((+)1) |> Seq.take 100 |> Seq.toArray 
+                x.Length = y.Length).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``fold`` () =
