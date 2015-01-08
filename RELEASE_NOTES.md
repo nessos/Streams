@@ -1,4 +1,10 @@
 
+#### 0.2.8
+* Performance improvment for Stream.toSeq
+* Support with withDegreeOfParallelism
+* New cancellation mechanism for Stream/ParStream
+
+
 #### 0.2.7
 * New functions (ParStream/Stream.mapi, ParStream.toSeq)
 * Array/ResizeArray specialization of (ParStream/Stream.ofSeq)
