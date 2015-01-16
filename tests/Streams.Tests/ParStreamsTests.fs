@@ -227,7 +227,7 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs 
                         |> ParStream.ofArray 
-                        |> ParStream.foldBy id (fun ts t -> t :: ts) (fun l r -> l @ r) (fun () -> []) // groupBy implementation
+                        |> ParStream.foldBy id (fun ts t -> t :: ts)  (fun () -> []) // groupBy implementation
                         |> ParStream.map (fun (key, values) -> (key, values |> Seq.length))
                         |> ParStream.toArray
                 let y = xs  

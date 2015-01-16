@@ -233,9 +233,9 @@ namespace Nessos.Streams.CSharp
         /// <param name="state">A function that produces the initial state.</param>
         /// <param name="stream">The input ParStream.</param>
         /// <returns>The final result.</returns> 
-        public static ParStream<Tuple<TKey, TState>> AggregateBy<TSource, TKey, TState>(this ParStream<TSource> stream, Func<TSource, TKey> projection, Func<TState, TSource, TState> folder, Func<TState, TState, TState> combiner, Func<TState> state)
+        public static ParStream<Tuple<TKey, TState>> AggregateBy<TSource, TKey, TState>(this ParStream<TSource> stream, Func<TSource, TKey> projection, Func<TState, TSource, TState> folder, Func<TState> state)
         {
-            return CSharpProxy.AggregateBy(stream, projection, folder, combiner, state);
+            return CSharpProxy.AggregateBy(stream, projection, folder, state);
         }
 
         /// <summary>

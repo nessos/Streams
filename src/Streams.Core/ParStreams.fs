@@ -532,13 +532,11 @@ module ParStream =
     /// <summary>Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and the result of the threading an accumulator.</summary>
     /// <param name="projection">A function to transform items from the input ParStream to keys.</param>
     /// <param name="folder">A function that updates the state with each element from the ParStream.</param>
-    /// <param name="combiner">A function that combines partial states into a new state.</param>
     /// <param name="state">A function that produces the initial state.</param>
     /// <param name="stream">The input ParStream.</param>
     /// <returns>The final result.</returns>
     let inline foldBy (projection : 'T -> 'Key) 
                       (folder : 'State -> 'T -> 'State) 
-                      (combiner : 'State -> 'State -> 'State) 
                       (state : unit -> 'State) (stream : ParStream<'T>) : ParStream<'Key * 'State> =
         let dict = new ConcurrentDictionary<'Key, 'State ref>()
         let collector = 
@@ -574,7 +572,7 @@ module ParStream =
     /// <param name="projection">A function that maps items from the input ParStream to keys.</param>
     /// <param name="stream">The input ParStream.</param>
     let inline countBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'Key * int> =
-        foldBy projection (fun state _ -> state + 1) (+) (fun () -> 0) stream
+        foldBy projection (fun state _ -> state + 1) (fun () -> 0) stream
 
     /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream of unique keys and a sequence of all elements that have each key.</summary>
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
