@@ -571,8 +571,10 @@ module ParStream =
                 member self.Result = 
                     dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, !keyValue.Value)) |> withDegreeOfParallelism stream.DegreeOfParallelism }
 
-        let stream = if stream.PreserveOrdering then stream.Stream() |> Stream.toSeq |> ofSeq |> withDegreeOfParallelism stream.DegreeOfParallelism else stream
-        stream.Apply collector
+        if stream.PreserveOrdering then 
+            stream.Stream() |> Stream.foldBy projection folder state |> Stream.toArray |> ofArray |> withDegreeOfParallelism stream.DegreeOfParallelism 
+        else 
+            stream.Apply collector
         
         
 
@@ -615,8 +617,10 @@ module ParStream =
                     let stream' = dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))   
                     stream' |> withDegreeOfParallelism stream.DegreeOfParallelism }
 
-        let stream = if stream.PreserveOrdering then stream.Stream() |> Stream.toSeq |> ofSeq |> withDegreeOfParallelism stream.DegreeOfParallelism else stream
-        stream.Apply collector
+        if stream.PreserveOrdering then 
+            stream.Stream() |> Stream.groupBy projection |> Stream.toArray |> ofArray |> withDegreeOfParallelism stream.DegreeOfParallelism 
+        else
+            stream.Apply collector
         
 
     /// <summary>Returns the first element for which the given function returns true. Returns None if no such element exists.</summary>

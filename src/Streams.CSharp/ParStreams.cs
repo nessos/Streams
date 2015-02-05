@@ -229,7 +229,6 @@ namespace Nessos.Streams.CSharp
         /// <summary>Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and the result of the threading an accumulator.</summary>
         /// <param name="projection">A function to transform items from the input ParStream to keys.</param>
         /// <param name="folder">A function that updates the state with each element from the ParStream.</param>
-        /// <param name="combiner">A function that combines partial states into a new state.</param>
         /// <param name="state">A function that produces the initial state.</param>
         /// <param name="stream">The input ParStream.</param>
         /// <returns>The final result.</returns> 

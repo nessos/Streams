@@ -282,4 +282,22 @@
                 if xs.Length = 0 then x = 0
                 else x = 1 ).QuickCheckThrowOnFailure()
 
+        [<Test>]
+        member __.``ordered/foldBy`` () =
+            Spec.ForAny<(int * int) []>(fun xs -> 
+                let x = xs 
+                        |> ParStream.ofSeq
+                        |> ParStream.ordered
+                        |> ParStream.foldBy fst (fun l x -> x :: l) (fun () -> [])
+                        |> ParStream.map (fun (k, vs) -> (k, List.rev vs))
+                        |> ParStream.toArray
+                let y = xs
+                        |> PSeq.ordered
+                        |> PSeq.groupBy fst
+                        |> PSeq.map (fun (k, vs) -> (k, List.ofSeq vs))
+                        |> PSeq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+
+
        
