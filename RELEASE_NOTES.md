@@ -1,4 +1,4 @@
-#### 0.2.8.2
+#### 0.2.9
 * Fix of the annoying DegreeOfParallelism ref cell hack
 * Fix ParStream.foldBy do not preserve order when requested to
 * Fix combiner parameter to ParStream.foldBy is unused
