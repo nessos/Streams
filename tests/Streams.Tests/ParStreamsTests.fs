@@ -292,10 +292,9 @@
                         |> ParStream.map (fun (k, vs) -> (k, List.rev vs))
                         |> ParStream.toArray
                 let y = xs
-                        |> PSeq.ordered
-                        |> PSeq.groupBy fst
-                        |> PSeq.map (fun (k, vs) -> (k, List.ofSeq vs))
-                        |> PSeq.toArray
+                        |> Seq.groupBy fst
+                        |> Seq.map (fun (k, vs) -> (k, List.ofSeq vs))
+                        |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
 
