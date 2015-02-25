@@ -99,10 +99,14 @@ type public CSharpProxy =
         ParStream.length stream
 
     static member First<'T>(stream : Stream<'T>, func : Func<'T, bool>)  = 
-        Stream.find (fun x -> func.Invoke(x)) stream
+        match Stream.tryFind (fun x -> func.Invoke(x)) stream with
+        | Some value -> value
+        | None -> invalidOp "Stream is empty or no elements satisfy the predicate."
 
     static member First<'T>(stream : ParStream<'T>, func : Func<'T, bool>)  = 
-        ParStream.find (fun x -> func.Invoke(x)) stream
+        match ParStream.tryFind (fun x -> func.Invoke(x)) stream with
+        | Some value -> value
+        | None -> invalidOp "Stream is empty or no elements satisfy the predicate."
 
     static member Any<'T>(stream : Stream<'T>, func : Func<'T, bool>)  = 
         Stream.exists (fun x -> func.Invoke(x)) stream

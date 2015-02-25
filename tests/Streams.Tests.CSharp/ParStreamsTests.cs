@@ -157,7 +157,7 @@ namespace Nessos.Streams.Tests.CSharp
                 {
                     x = xs.AsParStream().First(i => i == 0);
                 }
-                catch (KeyNotFoundException)
+                catch (InvalidOperationException)
                 {
                     x = -1;
                 }

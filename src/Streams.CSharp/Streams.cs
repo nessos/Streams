@@ -166,11 +166,11 @@ namespace Nessos.Streams.CSharp
             return Stream.toResizeArray(stream);
         }
 
-        /// <summary>Returns the first element for which the given function returns true. Raises KeyNotFoundException if no such element exists.</summary>
+        /// <summary>Returns the first element for which the given function returns true. Raises InvalidOperationException if no such element exists.</summary>
         /// <param name="predicate">A function to test each source element for a condition.</param>
         /// <param name="stream">The input stream.</param>
         /// <returns>The first element for which the predicate returns true.</returns>
-        /// <exception cref="System.Collections.Generic.KeyNotFoundException">Thrown if the predicate evaluates to false for all the elements of the stream.</exception>
+        /// <exception cref="System.InvalidOperationException">Thrown if the predicate evaluates to false for all the elements of the stream or the stream is empty.</exception>
         public static TSource First<TSource>(this Stream<TSource> stream, Func<TSource, bool> predicate)
         {
             return CSharpProxy.First(stream, predicate);
