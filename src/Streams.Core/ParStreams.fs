@@ -36,7 +36,7 @@ type ParStream<'T> =
     /// The Type of iteration source
     abstract SourceType : SourceType
     /// A flag that indicates that the ordering in the subsequent query operators will be preserved.
-    abstract PreserveOrdering : bool
+    abstract PreserveOrdering: bool
     /// Returns the sequential Stream
     abstract Stream : unit -> Stream<'T>
     /// Applies the given collector to the parallel Stream.
@@ -702,9 +702,37 @@ module ParStream =
     let inline forall (predicate : 'T -> bool) (stream : ParStream<'T>) : bool = 
         not <| exists (fun x -> not <| predicate x) stream
 
+    /// <summary>
+    ///     Returs the first element of the stream.
+    /// </summary
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The first element of the stream, or None if the stream has no elements.</returns>
+    let inline tryHead (stream : ParStream<'T>) : 'T option =
+        let r = stream |> ordered |> take 1 |> toArray
+        if r.Length = 0 then None
+        else Some r.[0]
 
+        // let resultRef = ref Unchecked.defaultof<'T option>
+        // let collector =
+        //     { new Collector<'T, 'T option> with
+        //         member __.DegreeOfParallelism = stream.DegreeOfParallelism
+        //         member __.Iterator() =
+        //             { Index = ref -1;
+        //               Func = (fun value -> resultRef := Some value);
+        //               Cts = new CancellationTokenSource() }
+        //         member __.Result = !resultRef
+        //     }
 
+        // let stream = if stream.PreserveOrdering then (take 1 stream).Stream() |> Stream.toSeq |> ofSeq |> withDegreeOfParallelism stream.DegreeOfParallelism else take 1 stream
+        // stream.Apply collector
 
-
-
-
+    /// <summary>
+    ///     Returs the first element of the stream.
+    /// </summary
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The first element of the stream.</returns>
+    /// <exception cref="System.ArgumentException">Thrown when the stream has no elements.</exception>
+    let inline head (stream : ParStream<'T>) : 'T =
+        match tryHead stream with
+        | Some value -> value
+        | None -> invalidArg "stream" "The stream was empty."

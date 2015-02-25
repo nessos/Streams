@@ -820,3 +820,30 @@ module Stream =
                       Cts = cts }
 
         Stream iter
+
+    /// <summary>
+    ///     Returs the first element of the stream.
+    /// </summary
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The first element of the stream, or None if the stream has no elements.</returns>
+    let inline tryHead (stream : Stream<'T>) : 'T option =
+        let stream' = take 1 stream
+        let (Stream streamf) = stream'
+        let resultRef = ref Unchecked.defaultof<'T option>
+        let { Bulk = bulk; Iterator = _ } = streamf { Complete = (fun () -> ());
+                                                      Cont = (fun value -> resultRef := Some value);
+                                                      Cts = null }
+
+        bulk ()
+        !resultRef
+
+    /// <summary>
+    ///     Returs the first element of the stream.
+    /// </summary
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The first element of the stream.</returns>
+    /// <exception cref="System.ArgumentException">Thrown when the stream has no elements.</exception>
+    let inline head (stream : Stream<'T>) : 'T =
+        match tryHead stream with
+        | Some value -> value
+        | None -> invalidArg "stream" "The stream was empty."
