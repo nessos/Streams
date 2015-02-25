@@ -372,3 +372,25 @@
                 let x = xs |> testEnumerable |> Stream.ofSeq |> Stream.filter (fun x -> x % 2 = 0) |> Stream.map ((+)1) |> Stream.toSeq |> Seq.length
                 let y = xs |> Seq.filter (fun x -> x % 2 = 0) |> Seq.map ((+)1) |> Seq.length 
                 x = y && !disposed = true).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``head``() =
+            Spec.ForAny<int []>(fun (xs : int [])->
+                if xs.Length > 0 then
+                    let head = xs.[0]
+                    let head' = xs |> Stream.ofArray |> Stream.head
+                    Assert.AreEqual(head, head')
+                else
+                    try
+                        xs |> Stream.ofArray |> Stream.head |> ignore
+                        Assert.Fail()
+                    with :? System.ArgumentException as exn ->
+                        Assert.AreEqual(exn.ParamName, "stream")).QuickCheckThrowOnFailure()
+
+
+        [<Test>]
+        member __.``tryHead``() =
+            Spec.ForAny<int []>(fun (xs : int [])->
+                let head = xs |> Stream.ofArray |> Stream.tryHead
+                if xs.Length = 0 then Assert.AreEqual(head, None)
+                else Assert.AreEqual(xs.[0], head.Value)).QuickCheckThrowOnFailure()
