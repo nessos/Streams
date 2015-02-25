@@ -98,6 +98,13 @@
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> Stream.ofArray |> Stream.map (fun n -> 2 * n) |> Stream.fold (+) 0 
                 let y = xs |> Seq.map (fun n -> 2 * n) |> Seq.fold (+) 0 
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``scan`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> Stream.ofArray |> Stream.scan (+) 0 |> Stream.toArray 
+                let y = xs |> Seq.scan (+) 0 |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()            
 
         [<Test>]

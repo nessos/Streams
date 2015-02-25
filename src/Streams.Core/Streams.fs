@@ -532,7 +532,6 @@ module Stream =
             { Bulk = bulk; Iterator = iterator }
         Stream iter
 
-    // terminal functions
 
     /// <summary>Applies a function to each element of the stream, threading an accumulator argument through the computation. If the input function is f and the elements are i0...iN, then this function computes f (... (f s i0)...) iN.</summary>
     /// <param name="folder">A function that updates the state with each element from the stream.</param>
@@ -548,6 +547,22 @@ module Stream =
 
         bulk ()
         !accRef
+
+    /// <summary>Like Stream.fold, but computes on-demand and returns the stream of intermediate and final results</summary>
+    /// <param name="folder">A function that updates the state with each element from the stream.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The final stream.</returns>
+    let inline scan (folder : 'State -> 'T -> 'State) (state : 'State) (stream : Stream<'T>) : Stream<'State> =
+        let (Stream streamf) = stream 
+        let iter { Complete = complete; Cont = iterf; Cts = cts } = 
+            let accRef = ref state
+            iterf !accRef
+            streamf { Complete = complete;
+                      Cont = (fun value -> accRef := folder !accRef value; iterf !accRef);
+                      Cts = cts }
+
+        Stream iter
 
     /// <summary>Returns the sum of the elements.</summary>
     /// <param name="stream">The input stream.</param>
