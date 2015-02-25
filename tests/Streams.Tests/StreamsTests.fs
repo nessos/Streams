@@ -375,22 +375,23 @@
 
         [<Test>]
         member __.``head``() =
-            Spec.ForAny<int []>(fun (xs : int [])->
-                if xs.Length > 0 then
-                    let head = xs.[0]
-                    let head' = xs |> Stream.ofArray |> Stream.head
-                    Assert.AreEqual(head, head')
-                else
-                    try
-                        xs |> Stream.ofArray |> Stream.head |> ignore
-                        Assert.Fail()
-                    with :? System.ArgumentException as exn ->
-                        Assert.AreEqual(exn.ParamName, "stream")).QuickCheckThrowOnFailure()
+            Spec.ForAny<int []>(fun (xs : int []) ->
+                let x =
+                    try xs |> Stream.ofArray |> Stream.head
+                    with :? System.ArgumentException -> -1
 
+                let y =
+                    try xs |> Seq.head
+                    with :? System.ArgumentException -> -1
+
+                Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``tryHead``() =
-            Spec.ForAny<int []>(fun (xs : int [])->
-                let head = xs |> Stream.ofArray |> Stream.tryHead
-                if xs.Length = 0 then Assert.AreEqual(head, None)
-                else Assert.AreEqual(xs.[0], head.Value)).QuickCheckThrowOnFailure()
+            Spec.ForAny<int []>(fun (xs : int []) ->
+                let x = xs |> Stream.ofArray |> Stream.tryHead
+                let y =
+                    try Some (xs |> Seq.head)
+                    with :? System.ArgumentException -> None
+
+                Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
