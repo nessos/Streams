@@ -103,10 +103,31 @@ type public CSharpProxy =
         | Some value -> value
         | None -> invalidOp "Stream is empty or no elements satisfy the predicate."
 
+    static member First<'T>(stream : Stream<'T>) =
+        match Stream.tryHead stream with
+        | Some value -> value
+        | None -> invalidOp "Stream is empty"
+
+    static member FirstOrDefault<'T>(stream : Stream<'T>) =
+        match Stream.tryHead stream with
+        | Some value -> value
+        | None -> Unchecked.defaultof<'T>
+
     static member First<'T>(stream : ParStream<'T>, func : Func<'T, bool>)  = 
         match ParStream.tryFind (fun x -> func.Invoke(x)) stream with
         | Some value -> value
         | None -> invalidOp "Stream is empty or no elements satisfy the predicate."
+
+
+    static member First<'T>(stream : ParStream<'T>) =
+        match ParStream.tryHead stream with
+        | Some value -> value
+        | None -> invalidOp "Stream is empty"
+
+    static member FirstOrDefault<'T>(stream : ParStream<'T>) =
+        match ParStream.tryHead stream with
+        | Some value -> value
+        | None -> Unchecked.defaultof<'T>
 
     static member Any<'T>(stream : Stream<'T>, func : Func<'T, bool>)  = 
         Stream.exists (fun x -> func.Invoke(x)) stream

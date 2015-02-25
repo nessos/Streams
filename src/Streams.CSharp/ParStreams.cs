@@ -171,6 +171,32 @@ namespace Nessos.Streams.CSharp
             return CSharpProxy.First(stream, predicate);
         }
 
+        /// <summary>Returns the first element in the stream.</summary>
+        /// <param name="stream">The input parallel stream.</param>
+        /// <returns>The first element in the parllel stream.</returns>
+        /// <exception cref="System.InvalidOperationException">Thrown if the parallel stream is empty.</exception>
+        public static T First<T>(this ParStream<T> stream)
+        {
+            return CSharpProxy.First(stream);
+        }
+
+        /// <summary>Returns the first element in the stream, or the default value if the stream is empty.</summary>
+        /// <param name="stream">The input parallel stream.</param>
+        /// <returns>The first element in the  parallel stream, or the default value if the parallel stream is empty.</returns>
+        public static T FirstOrDefault<T>(this ParStream<T> stream)
+        {
+            return CSharpProxy.FirstOrDefault(stream);
+        }
+
+        /// <summary>Returns the first element for which the given function returns true. Returns the default value if no such element exists, or the input stream is empty.</summary>
+        /// <param name="predicate">A function to test each source element for a condition.</param>
+        /// <param name="stream">The input parallel stream.</param>
+        /// <returns>The first element for which the predicate returns true, or the default value if no such element exists or the input parallel stream is empty.</returns>
+        public static T FirstOrDefault<T>(this ParStream<T> stream, Func<T, bool> predicate)
+        {
+            return stream.Where(predicate).FirstOrDefault();
+        }
+
         /// <summary>Tests if any element of the stream satisfies the given predicate.</summary>
         /// <param name="predicate">A function to test each source element for a condition.</param>
         /// <param name="stream">The input parallel stream.</param>
