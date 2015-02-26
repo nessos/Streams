@@ -535,7 +535,10 @@ module ParStream =
         let keyArray, valueArray = keyValueTuple.Item1, keyValueTuple.Item2
         let keyArray' = keyArray.ToArray()
         let valueArray' = valueArray.ToArray()
-        Sort.parallelSort (stream.DegreeOfParallelism) keyArray' valueArray'
+        if System.Environment.OSVersion.Platform = System.PlatformID.Unix then
+            Array.Sort(keyArray', valueArray')
+        else //Sort.parallel sort is known to cause hangs in linuxes
+            Sort.parallelSort (stream.DegreeOfParallelism) keyArray' valueArray'
         valueArray' |> ofArray |> ordered |> withDegreeOfParallelism stream.DegreeOfParallelism
 
     /// <summary>Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and the result of the threading an accumulator.</summary>
@@ -712,19 +715,6 @@ module ParStream =
         if r.Length = 0 then None
         else Some r.[0]
 
-        // let resultRef = ref Unchecked.defaultof<'T option>
-        // let collector =
-        //     { new Collector<'T, 'T option> with
-        //         member __.DegreeOfParallelism = stream.DegreeOfParallelism
-        //         member __.Iterator() =
-        //             { Index = ref -1;
-        //               Func = (fun value -> resultRef := Some value);
-        //               Cts = new CancellationTokenSource() }
-        //         member __.Result = !resultRef
-        //     }
-
-        // let stream = if stream.PreserveOrdering then (take 1 stream).Stream() |> Stream.toSeq |> ofSeq |> withDegreeOfParallelism stream.DegreeOfParallelism else take 1 stream
-        // stream.Apply collector
 
     /// <summary>
     ///     Returs the first element of the stream.
