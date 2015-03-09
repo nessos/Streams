@@ -27,6 +27,7 @@ type Collector<'T, 'R> =
     abstract Result : 'R
 
 /// The Type of iteration source
+[<RequireQualifiedAccess>]
 type SourceType = Array | ResizeArray | Seq
 
 /// Represents a parallel Stream of values.
