@@ -180,7 +180,7 @@ namespace Nessos.Streams.Tests.CSharp
         }
 
         [Test]
-        public void First()
+        public void FirstWithPredicate()
         {
             Spec.ForAny<int[]>(xs =>
             {
@@ -189,7 +189,7 @@ namespace Nessos.Streams.Tests.CSharp
                 {
                     x = xs.AsStream().First(i => i % 2 == 0);
                 }
-                catch (KeyNotFoundException)
+                catch (InvalidOperationException)
                 {
                     x = -1;
                 }
@@ -202,6 +202,55 @@ namespace Nessos.Streams.Tests.CSharp
                 {
                     y = -1;
                 }
+                return x == y;
+            }).QuickCheckThrowOnFailure();
+        }
+
+        [Test]
+        public void First()
+        {
+            Spec.ForAny<int[]>(xs =>
+            {
+                var x = 0;
+                try
+                {
+                    x = xs.AsStream().First();
+                }
+                catch (InvalidOperationException)
+                {
+                    x = -1;
+                }
+                var y = 0;
+                try
+                {
+                    y = xs.First();
+                }
+                catch (InvalidOperationException)
+                {
+                    y = -1;
+                }
+                return x == y;
+            }).QuickCheckThrowOnFailure();
+        }
+
+        [Test]
+        public void FirstOrDefault()
+        {
+            Spec.ForAny<int[]>(xs =>
+            {
+                var x = xs.AsStream().FirstOrDefault();
+                var y = xs.FirstOrDefault();
+                return x == y;
+            }).QuickCheckThrowOnFailure();
+        }
+
+        [Test]
+        public void FirstOrDefaultWithPredicate()
+        {
+            Spec.ForAny<int[]>(xs =>
+            {
+                var x = xs.AsStream().FirstOrDefault(i => i % 2 == 0);
+                var y = xs.FirstOrDefault(i => i % 2 == 0);
                 return x == y;
             }).QuickCheckThrowOnFailure();
         }

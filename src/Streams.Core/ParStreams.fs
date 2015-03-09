@@ -37,7 +37,7 @@ type ParStream<'T> =
     /// The Type of iteration source
     abstract SourceType : SourceType
     /// A flag that indicates that the ordering in the subsequent query operators will be preserved.
-    abstract PreserveOrdering : bool
+    abstract PreserveOrdering: bool
     /// Returns the sequential Stream
     abstract Stream : unit -> Stream<'T>
     /// Applies the given collector to the parallel Stream.
@@ -536,7 +536,10 @@ module ParStream =
         let keyArray, valueArray = keyValueTuple.Item1, keyValueTuple.Item2
         let keyArray' = keyArray.ToArray()
         let valueArray' = valueArray.ToArray()
-        Sort.parallelSort (stream.DegreeOfParallelism) keyArray' valueArray'
+        if System.Environment.OSVersion.Platform = System.PlatformID.Unix then
+            Array.Sort(keyArray', valueArray')
+        else //Sort.parallel sort is known to cause hangs in linuxes
+            Sort.parallelSort (stream.DegreeOfParallelism) keyArray' valueArray'
         valueArray' |> ofArray |> ordered |> withDegreeOfParallelism stream.DegreeOfParallelism
 
     /// <summary>Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and the result of the threading an accumulator.</summary>
@@ -703,9 +706,24 @@ module ParStream =
     let inline forall (predicate : 'T -> bool) (stream : ParStream<'T>) : bool = 
         not <| exists (fun x -> not <| predicate x) stream
 
+    /// <summary>
+    ///     Returs the first element of the stream.
+    /// </summary
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The first element of the stream, or None if the stream has no elements.</returns>
+    let inline tryHead (stream : ParStream<'T>) : 'T option =
+        let r = stream |> ordered |> take 1 |> toArray
+        if r.Length = 0 then None
+        else Some r.[0]
 
 
-
-
-
-
+    /// <summary>
+    ///     Returs the first element of the stream.
+    /// </summary
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The first element of the stream.</returns>
+    /// <exception cref="System.ArgumentException">Thrown when the stream has no elements.</exception>
+    let inline head (stream : ParStream<'T>) : 'T =
+        match tryHead stream with
+        | Some value -> value
+        | None -> invalidArg "stream" "The stream was empty."

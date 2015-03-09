@@ -298,5 +298,21 @@
                 x = y).QuickCheckThrowOnFailure()
 
 
+        [<Test>]
+        member __.``head`` () =
+            Spec.ForAny<int []>(fun (xs : int []) ->
+                let x =
+                    try xs |> ParStream.ofArray |> ParStream.head
+                    with :? System.ArgumentException -> -1
+                let y =
+                    try xs |> PSeq.ofArray |> PSeq.head
+                    with :? System.InvalidOperationException -> -1
+                Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
-       
+
+        [<Test>]
+        member __.``tryHead`` () =
+            Spec.ForAny<int []>(fun (xs : int []) ->
+                let x = xs |> ParStream.ofArray |> ParStream.tryHead
+                let y = xs |> Stream.ofArray |> Stream.tryHead
+                Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
