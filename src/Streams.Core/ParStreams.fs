@@ -411,8 +411,8 @@ module ParStream =
 
         if stream.PreserveOrdering then 
             match stream.SourceType with
-            | Array | ResizeArray -> stream.Stream() |> Stream.fold folder (state())
-            | Seq -> 
+            | SourceType.Array | SourceType.ResizeArray -> stream.Stream() |> Stream.fold folder (state())
+            | SourceType.Seq -> 
                 let stream = stream.Stream() |> Stream.toSeq |> ofSeq |> withDegreeOfParallelism stream.DegreeOfParallelism 
                 stream.Apply collector
         else 
@@ -456,11 +456,11 @@ module ParStream =
     /// <returns>The result Seq.</returns>    
     let inline toSeq (stream : ParStream<'T>) : seq<'T> =
         match stream.SourceType, stream.PreserveOrdering with
-        | Array, false -> toArray stream :> _
-        | ResizeArray, false -> toResizeArray stream :> _
-        | Array, true -> stream.Stream() |> Stream.toArray :> _
-        | ResizeArray, true -> stream.Stream() |> Stream.toResizeArray :> _
-        | Seq, _ -> stream.Stream() |> Stream.toSeq
+        | SourceType.Array, false -> toArray stream :> _
+        | SourceType.ResizeArray, false -> toResizeArray stream :> _
+        | SourceType.Array, true -> stream.Stream() |> Stream.toArray :> _
+        | SourceType.ResizeArray, true -> stream.Stream() |> Stream.toResizeArray :> _
+        | SourceType.Seq, _ -> stream.Stream() |> Stream.toSeq
         
 
     /// <summary>Locates the maximum element of the parallel stream by given key.</summary>
