@@ -823,7 +823,7 @@ module Stream =
 
     /// <summary>
     ///     Returs the first element of the stream.
-    /// </summary
+    /// </summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>The first element of the stream, or None if the stream has no elements.</returns>
     let inline tryHead (stream : Stream<'T>) : 'T option =
@@ -839,7 +839,7 @@ module Stream =
 
     /// <summary>
     ///     Returs the first element of the stream.
-    /// </summary
+    /// </summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>The first element of the stream.</returns>
     /// <exception cref="System.ArgumentException">Thrown when the stream has no elements.</exception>
