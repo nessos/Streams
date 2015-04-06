@@ -206,8 +206,8 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsParStream().FirstOrDefault();
-                var y = xs.AsParallel().FirstOrDefault();
+                var x = xs.AsParStream().Where(_x => _x == 1).FirstOrDefault();
+                var y = xs.AsParallel().Where(_x => _x == 1).FirstOrDefault();
                 return x == y;
             }).QuickCheckThrowOnFailure();
         }
@@ -217,8 +217,8 @@ namespace Nessos.Streams.Tests.CSharp
         {
             Spec.ForAny<int[]>(xs =>
             {
-                var x = xs.AsParStream().FirstOrDefault(i => i % 2 == 0);
-                var y = xs.AsParallel().FirstOrDefault(i => i % 2 == 0);
+                var x = xs.AsParStream().FirstOrDefault(i => i == 1);
+                var y = xs.AsParallel().FirstOrDefault(i => i == 1);
                 return x == y;
             }).QuickCheckThrowOnFailure();
         }
