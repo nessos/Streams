@@ -192,6 +192,22 @@
                 let x = xs |> Stream.ofArray |> Stream.take n |> Stream.length
                 let y = xs.Take(n).Count()
                 x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``take/boundary check`` () =
+            Spec.ForAny<int>(fun (n : int) ->
+                let refs = [| 1; 2; 3; 4 |]
+                let n = System.Math.Abs(n) 
+                let x = [|1..n|]
+                        |> Stream.ofArray
+                        |> Stream.map (fun i -> refs.[i])
+                        |> Stream.take 3
+                        |> Stream.toArray
+                let y = ([|1..n|] |> Seq.map (fun i -> refs.[i])).Take(3).ToArray()
+                x = y).QuickCheckThrowOnFailure()
+        
+
+
                 
         [<Test>]
         member __.``takeWhile`` () =

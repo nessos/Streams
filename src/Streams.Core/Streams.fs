@@ -399,7 +399,11 @@ module Stream =
                       Cont = 
                         (fun value -> 
                             incr counter
-                            if !counter <= n then iterf value else cts.Cancel());
+                            if !counter < n then 
+                                iterf value
+                            else if !counter = n then
+                                iterf value
+                                cts.Cancel());
                       Cts = cts } 
         Stream iter
 
