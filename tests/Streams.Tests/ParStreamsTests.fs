@@ -316,3 +316,11 @@
                 let x = xs |> ParStream.ofArray |> ParStream.tryHead
                 let y = xs |> Stream.ofArray |> Stream.tryHead
                 Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``isEmpty``() =
+            Spec.ForAny<int []>(fun (xs : int  []) ->
+                let x = xs |> ParStream.ofArray |> ParStream.isEmpty
+                let y = xs |> Stream.ofArray |> Stream.isEmpty
+
+                Assert.AreEqual(x, y)).QuickCheckThrowOnFailure()
