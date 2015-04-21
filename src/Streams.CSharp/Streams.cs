@@ -286,5 +286,14 @@ namespace Nessos.Streams.CSharp
         {
             return CSharpProxy.Zip(first, second, resultSelector);
         }
+
+
+        /// <summary>Returns true if the stream is empty, false otherwise.</summary>
+        /// <param name="source">The input stream.</param>
+        /// <returns>true if the input stream is empty, false otherwise.</returns>
+        public static bool IsEmpty<T>(this Stream<T> source)
+        {
+            return CSharpProxy.IsEmpty(source);
+        }
     }
 }

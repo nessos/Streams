@@ -169,6 +169,9 @@ type public CSharpProxy =
     static member Zip<'TFirst, 'TSecond, 'TResult>(first : Stream<'TFirst>, second : Stream<'TSecond>, resultSelector : Func<'TFirst, 'TSecond, 'TResult>) = 
         Stream.zipWith (fun x y -> resultSelector.Invoke(x, y)) first second
 
+
+    static member IsEmpty<'T>(source : Stream<'T>) : bool = Stream.isEmpty source
+
 //    static member Skip<'T>(stream : Stream<'T>, count : int) =
 //        Stream.skip count stream
 //
