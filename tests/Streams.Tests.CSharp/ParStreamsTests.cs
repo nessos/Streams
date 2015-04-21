@@ -242,5 +242,15 @@ namespace Nessos.Streams.Tests.CSharp
                 return x == y;
             }).QuickCheckThrowOnFailure();
         }
+
+        public void IsEmpty()
+        {
+            Spec.ForAny<int[]>((int[] xs) =>
+            {
+                var x = xs.AsParStream().IsEmpty<int>();
+                var y = xs.AsStream().IsEmpty<int>();
+                return x == y;
+            }).QuickCheckThrowOnFailure();
+        }
     }
 }

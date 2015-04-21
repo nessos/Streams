@@ -735,3 +735,11 @@ module ParStream =
         match tryHead stream with
         | Some value -> value
         | None -> invalidArg "stream" "The stream was empty."
+
+    /// <summary>
+    ///     Returs true if the stream is empty and false otherwise.
+    /// </summary>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>true if the input stream is empty, false otherwise</returns>
+    let inline isEmpty (stream : ParStream<'T>) : bool =
+        stream |> exists (fun _ -> true) |> not

@@ -172,6 +172,8 @@ type public CSharpProxy =
 
     static member IsEmpty<'T>(source : Stream<'T>) : bool = Stream.isEmpty source
 
+    static member IsEmpty<'T>(source : ParStream<'T>) : bool = ParStream.isEmpty source
+
 //    static member Skip<'T>(stream : Stream<'T>, count : int) =
 //        Stream.skip count stream
 //
