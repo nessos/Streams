@@ -128,7 +128,6 @@ module ParStream =
                 member self.PreserveOrdering = false
                 member self.Stream () = Stream.ofSeq source
                 member self.Apply<'R> (collector : Collector<'T, 'R>) =
-                
                     let partitioner = Partitioner.Create(source)
                     let partitions = partitioner.GetOrderablePartitions(collector.DegreeOfParallelism).ToArray()
                     let nextRef = ref true
@@ -146,6 +145,15 @@ module ParStream =
                     Task.WaitAll(tasks)
                     collector.Result }
 
+    /// <summary>
+    ///  Wraps a collection of sequences as a parallel stream.
+    /// </summary>
+    /// <param name="sources">Input sequences</param>
+    let ofSeqs (sources : seq<#seq<'T>>) =
+        match Seq.toArray sources with
+        | [| |] -> ofArray [||]
+        | [| singleton |] -> ofSeq singleton
+        | sources -> sources |> Seq.concat |> ofSeq
 
     // intermediate functions
 

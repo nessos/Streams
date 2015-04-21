@@ -9,6 +9,23 @@ open Nessos.Streams
 open Nessos.Streams.CSharp
 
 
+let refs = [| 1; 2; 3; 4 |]
+let pages = [| [| 0; 3 |]; [| 0; 5 |]; [| 0; 1 |]|]
+            |> Stream.ofArray
+            |> Stream.flatMap Stream.ofArray
+            |> Stream.map (fun i -> printfn "%d"i; i)
+            |> Stream.map (fun ref -> refs.[ref])
+            |> Stream.take 3
+            |> Stream.toArray
+
+let refs = [| 1; 2; 3; 4 |]
+[|1 .. 4|]
+|> Stream.ofArray
+|> Stream.map (fun i -> refs.[i])
+|> Stream.take 3
+|> Stream.length
+
+
 [|1|] |> Stream.ofArray |> Stream.groupUntil true (fun i -> i % 7 <> 0) |> Stream.toSeq |> Array.concat
 
 
