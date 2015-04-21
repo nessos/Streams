@@ -30,10 +30,16 @@ type Context<'T> = {
 }
 
 /// Represents a Stream of values.
-type Stream<'T> = Stream of (Context<'T> -> Iterable)
+type Stream<'T> = Stream of (Context<'T> -> Iterable) with
+    override self.ToString() = 
+        seq {
+            use enumerator = new StreamEnumerator<'T>(self) :> IEnumerator<'T>
+            while enumerator.MoveNext() do
+                yield enumerator.Current
+        } |> sprintf "%A"
 
 // Wraps stream as a IEnumerable
-type private StreamEnumerator<'T> (stream : Stream<'T>) =
+and private StreamEnumerator<'T> (stream : Stream<'T>) =
     let results = new ResizeArray<'T>()
     let index = ref -1
     let count = ref 0
