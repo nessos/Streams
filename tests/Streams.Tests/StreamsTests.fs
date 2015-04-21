@@ -411,3 +411,11 @@
                     with :? System.ArgumentException -> None
 
                 Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``isEmpty``() =
+            Spec.ForAny<int []>(fun (xs : int  []) ->
+                let x = xs |> Stream.ofArray |> Stream.isEmpty
+                let y = xs |> Array.isEmpty
+
+                Assert.AreEqual(x, y)).QuickCheckThrowOnFailure()
