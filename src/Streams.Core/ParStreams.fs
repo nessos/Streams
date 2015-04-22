@@ -474,7 +474,8 @@ module ParStream =
     /// <summary>Locates the maximum element of the parallel stream by given key.</summary>
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
     /// <param name="source">The input parallel stream.</param>
-    /// <returns>The maximum item.</returns>  
+    /// <returns>The maximum item.</returns>
+    /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
     let inline maxBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : ParStream<'T>) : 'T =
         let result =
             fold (fun state t -> 
