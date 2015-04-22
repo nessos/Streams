@@ -170,6 +170,12 @@ type public CSharpProxy =
         Stream.zipWith (fun x y -> resultSelector.Invoke(x, y)) first second
 
 
+    static member Reduce<'T>(reducer : Func<'T, 'T, 'T>, stream : Stream<'T>) : 'T =
+        Stream.reduce (fun x y -> reducer.Invoke(x, y)) stream
+
+    static member Reduce<'T>(reducer : Func<'T, 'T, 'T>, stream : ParStream<'T>) : 'T =
+        ParStream.reduce (fun x y -> reducer.Invoke(x, y)) stream
+
     static member IsEmpty<'T>(source : Stream<'T>) : bool = Stream.isEmpty source
 
     static member IsEmpty<'T>(source : ParStream<'T>) : bool = ParStream.isEmpty source

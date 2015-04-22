@@ -295,5 +295,21 @@ namespace Nessos.Streams.CSharp
         {
             return CSharpProxy.IsEmpty(source);
         }
+
+
+        /// <summary>
+        ///    Reduces the elements of the input stream to a single value via the given reducer function.
+        ///    The reducer function is first applied to the first two elements of the stream.
+        ///    Then, the reducer is applied on the result of the first reduction and the third element.
+        ///    The process continues until all the elements of the stream have been reduced.
+        /// </summary>
+        /// <param name="source">The input stream.</param>
+        /// <param name="reducer">The reducer function.</param>
+        /// <returns>The reduced value.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+        public static T Reduce<T>(this Stream<T> source, Func<T, T, T> reducer)
+        {
+            return CSharpProxy.Reduce(reducer, source);
+        }
     }
 }

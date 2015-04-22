@@ -267,6 +267,16 @@
                     let y = xs |> Seq.maxBy (fun i -> i + 1)
                     x = y).QuickCheckThrowOnFailure()
 
+        [<Test>]
+        member __.``reduce``() =
+            Spec.ForAny<int []>(fun (xs : int  []) ->
+                if Array.isEmpty xs then
+                    try let _ = xs |> ParStream.ofArray |> ParStream.reduce (+) in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x = xs |> ParStream.ofArray |> ParStream.reduce (+)
+                    let y = xs |> Stream.ofArray |> Stream.reduce (+)
+                    x = y).QuickCheckThrowOnFailure()
 
 
         [<Test>]
