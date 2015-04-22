@@ -419,3 +419,14 @@
                 let y = xs |> Array.isEmpty
 
                 Assert.AreEqual(x, y)).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``reduce``() =
+            Spec.ForAny<int []>(fun (xs : int  []) ->
+                if Array.isEmpty xs then
+                    try let _ = xs |> Stream.ofArray |> Stream.reduce (+) in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x = xs |> Stream.ofArray |> Stream.reduce (+)
+                    let y = xs |> Array.reduce (+)
+                    x = y).QuickCheckThrowOnFailure()

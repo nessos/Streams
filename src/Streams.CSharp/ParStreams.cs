@@ -296,5 +296,20 @@ namespace Nessos.Streams.CSharp
         {
             return CSharpProxy.IsEmpty(source);
         }
+
+        /// <summary>
+        /// Reduces the elements of the input parallel stream to a single value via the given reducer function.
+        /// The reducer function is first applied to the first two elements of the input parallel stream.
+        /// Then, the reducer is applied on the result of the first reduction and the third element.
+        /// The process continues until all the elements of the parallel stream have been reduced.
+        /// </summary>
+        /// <param name="source">The input parallel stream.</param>
+        /// <param name="reducer">The reducer function.</param>
+        /// <returns>The reduced value.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
+        public static T Reduce<T>(this ParStream<T> source, Func<T, T, T> reducer)
+        {
+            return CSharpProxy.Reduce(reducer, source);
+        }
     }
 }

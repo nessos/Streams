@@ -524,6 +524,36 @@ module ParStream =
         | Some (refValue,_) -> !refValue
 
 
+    /// <summary>
+    ///    Reduces the elements of the input parallel stream to a single value via the given reducer function.
+    ///    The reducer function is first applied to the first two elements of the input parallel stream.
+    ///    Then, the reducer is applied on the result of the first reduction and the third element.
+    //     The process continues until all the elements of the parallel stream have been reduced.
+    /// </summary>
+    /// <param name="reducer">The reducer function.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The reduced value.</returns>
+    /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
+    let inline reduce (reducer : 'T -> 'T -> 'T) (stream : ParStream<'T>) : 'T =
+        let result =
+            fold (fun state x ->
+                      match state with
+                      | None -> Some (ref x)
+                      | Some y -> y := reducer !y x; state)
+                 (fun left right ->
+                      match left, right with
+                      | Some y, Some x -> y := reducer !y !x; left
+                      | None, Some _ -> right
+                      | Some _, None -> left
+                      | None, None -> left)
+                 (fun () -> None)
+                 stream
+
+        match result with
+        | None -> invalidArg "stream" "The input stream was empty."
+        | Some y -> !y
+
+
     /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream ordered by keys.</summary>
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
     /// <param name="stream">The input parallel stream.</param>

@@ -582,6 +582,29 @@ module Stream =
             and  ^T : (static member Zero : ^T) = 
         fold (+) LanguagePrimitives.GenericZero stream
 
+
+    /// <summary>
+    ///    Reduces the elements of the input stream to a single value via the given reducer function.
+    ///    The reducer function is first applied to the first two elements of the stream.
+    ///    Then, the reducer is applied on the result of the first reduction and the third element.
+    //     The process continues until all the elements of the stream have been reduced.
+    /// </summary>
+    /// <param name="reducer">The reducer function.</param>
+    /// <param name="stream">The input stream.</param>
+    /// <returns>The reduced value.</returns>
+    /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+    let inline reduce (reducer : 'T -> 'T -> 'T) (stream : Stream<'T>) : 'T =
+        let result =
+            fold (fun state x ->
+                      match state with
+                      | None -> Some (ref x)
+                      | Some y -> y := reducer !y x; state
+                 ) None stream
+
+        match result with
+        | None -> invalidArg "stream" "The input stream was empty."
+        | Some y -> !y
+
     /// <summary>Returns the total number of elements of the stream.</summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>The total number of elements.</returns>

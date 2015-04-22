@@ -252,5 +252,31 @@ namespace Nessos.Streams.Tests.CSharp
                 return x == y;
             }).QuickCheckThrowOnFailure();
         }
+
+        public void Reduce()
+        {
+            Spec.ForAny<int[]>((int[] xs) =>
+            {
+                if (xs.Length == 0)
+                {
+                    var f = 0;
+                    try
+                    {
+                        xs.AsParStream().Reduce((l, r) => l + r);
+                    }
+                    catch (ArgumentException)
+                    {
+                        f = 1;
+                    }
+                    return f == 1;
+                }
+                else
+                {
+                    var x = xs.AsParStream().Reduce((l, r) => l + r);
+                    var y = xs.AsParallel().Aggregate((l, r) => l + r);
+                    return x == y;
+                }
+            }).QuickCheckThrowOnFailure();
+        }
     }
 }
