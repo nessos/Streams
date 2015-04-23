@@ -444,11 +444,13 @@
 
         [<Test>]
         member __.``average``() =
-            Spec.ForAny<float []>(fun (xs : float []) ->
+            Spec.ForAny<float []>(fun (xs : double []) ->
                 if Array.isEmpty xs then
                     try let _ = xs |> Stream.ofArray |> Stream.average in false
                     with :? System.ArgumentException -> true
                 else
                     let x = xs |> Stream.ofArray |> Stream.average
                     let y = xs |> Array.average
-                    x = y).QuickCheckThrowOnFailure()
+                    if System.Double.IsNaN x then System.Double.IsNaN y
+                    elif System.Double.IsNaN y then System.Double.IsNaN x
+                    else x = y).QuickCheckThrowOnFailure()
