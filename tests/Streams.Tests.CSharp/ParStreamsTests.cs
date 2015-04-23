@@ -337,38 +337,5 @@ namespace Nessos.Streams.Tests.CSharp
                 }
             }).QuickCheckThrowOnFailure();
         }
-
-        [Test]
-        public void AverageDoubles()
-        {
-            Spec.ForAny<double[]>((double[] xs) =>
-            {
-                if (xs.Length == 0)
-                {
-                    var f = 0;
-                    try
-                    {
-                        xs.AsParStream().Average();
-                    }
-                    catch (ArgumentException)
-                    {
-                        f = 1;
-                    }
-                    return f == 1;
-                }
-                else
-                {
-                    var x = xs.AsParStream().Average();
-                    var y = xs.Average();
-                    if (Double.IsNaN(x)) return Double.IsNaN(y);
-                    else if (Double.IsNaN(y)) return Double.IsNaN(x);
-                    else if (Double.IsPositiveInfinity(x)) return Double.IsPositiveInfinity(y);
-                    else if (Double.IsPositiveInfinity(y)) return Double.IsPositiveInfinity(x);
-                    else if (Double.IsNegativeInfinity(x)) return Double.IsNegativeInfinity(y);
-                    else if (Double.IsNegativeInfinity(y)) return Double.IsNegativeInfinity(x);
-                    else return System.Math.Abs(x - y) < 0.001;
-                }
-            }).QuickCheckThrowOnFailure();
-        }
     }
 }
