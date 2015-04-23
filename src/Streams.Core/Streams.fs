@@ -680,7 +680,7 @@ module Stream =
                 | _ -> state) None source
 
         match result with
-        | None -> invalidArg "source" "The input sequence was empty."
+        | None -> invalidArg "source" "The input stream was empty."
         | Some (refValue, _) -> !refValue
 
     /// <summary>Locates the minimum element of the stream by given key.</summary>
@@ -700,7 +700,7 @@ module Stream =
                 | _ -> state) None source
 
         match result with
-        | None -> invalidArg "source" "The input sequence was empty."
+        | None -> invalidArg "source" "The input stream was empty."
         | Some (refValue, _) -> !refValue
 
     /// <summary>Applies a state-updating function to a stream of inputs, grouped by key projection.</summary>
