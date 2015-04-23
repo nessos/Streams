@@ -311,5 +311,45 @@ namespace Nessos.Streams.CSharp
         {
             return CSharpProxy.Reduce(reducer, source);
         }
+
+        /// <summary>Computes the average of the integer projections given by the supplied function on the input stream.</summary>
+        /// <param name="source">The input stream.</param>
+        /// <param name="projection">A function to transform items of the input stream into a projection.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+        public static double Average<T>(this Stream<T> source, Func<T, int> projection)
+        {
+            return CSharpProxy.Average(source, projection);
+        }
+
+        /// <summary>Computes the average of the long integer projections given by the supplied function on the input stream.</summary>
+        /// <param name="source">The input stream.</param>
+        /// <param name="projection">A function to transform items of the input stream into a projection.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+        public static double Average<T>(this Stream<T> source, Func<T, Int64> projection)
+        {
+            return CSharpProxy.Average(source, projection);
+        }
+
+        /// <summary>Computes the average of the float projections given by the supplied function on the input stream.</summary>
+        /// <param name="source">The input stream.</param>
+        /// <param name="projection">A function to transform items of the input stream into a projection.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+        public static float Average<T>(this Stream<T> source, Func<T, float> projection)
+        {
+            return CSharpProxy.Average(source, projection);
+        }
+
+        /// <summary>Computes the average of the double projections given by the supplied function on the input stream.</summary>
+        /// <param name="source">The input stream.</param>
+        /// <param name="projection">A function to transform items of the input stream into a projection.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+        public static double Average<T>(this Stream<T> source, Func<T, double> projection)
+        {
+            return CSharpProxy.Average(source, projection);
+        }
     }
 }

@@ -414,7 +414,7 @@
 
         [<Test>]
         member __.``isEmpty``() =
-            Spec.ForAny<int []>(fun (xs : int  []) ->
+            Spec.ForAny<int []>(fun (xs : int []) ->
                 let x = xs |> Stream.ofArray |> Stream.isEmpty
                 let y = xs |> Array.isEmpty
 
@@ -422,11 +422,22 @@
 
         [<Test>]
         member __.``reduce``() =
-            Spec.ForAny<int []>(fun (xs : int  []) ->
+            Spec.ForAny<int []>(fun (xs : int []) ->
                 if Array.isEmpty xs then
                     try let _ = xs |> Stream.ofArray |> Stream.reduce (+) in false
                     with :? System.ArgumentException -> true
                 else
                     let x = xs |> Stream.ofArray |> Stream.reduce (+)
                     let y = xs |> Array.reduce (+)
+                    x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``averageBy``() =
+            Spec.ForAny<int []>(fun (xs : int []) ->
+                if Array.isEmpty xs then
+                    try let _ = xs |> Stream.ofArray |> Stream.averageBy (float) in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x = xs |> Stream.ofArray |> Stream.averageBy (float)
+                    let y = xs |> Array.averageBy (float)
                     x = y).QuickCheckThrowOnFailure()
