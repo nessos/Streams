@@ -524,6 +524,31 @@ module ParStream =
         | Some (refValue,_) -> !refValue
 
 
+    /// <summary>Computes the average of the projections given by the supplied function on the input parallel stream.</summary>
+    /// <param name="projection">A function to transform items of the input parallel stream into a projection.</param>
+    /// <param name="source">The input parallel stream.</param>
+    /// <returns>The computed average.</returns>
+    /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
+    let inline averageBy (projection : 'T -> ^U) (source : ParStream<'T>) : ^U
+            when ^U : (static member (+) : ^U * ^U -> ^U)
+            and  ^U : (static member DivideByInt : ^U * int -> ^U)
+            and  ^U : (static member Zero : ^U) =
+        let (y, c) =
+            fold (fun ((y, c) as state) v ->
+                      y := Checked.(+) !y (projection v)
+                      incr c
+                      state)
+                 (fun ((y, c) as state) (y', c') ->
+                      y := Checked.(+) !y !y'
+                      c := !c + !c'
+                      state)
+                 (fun () -> ref LanguagePrimitives.GenericZero, ref 0)
+                 source
+
+        if !c = 0 then invalidArg "source" "The input stream was empty."
+        else LanguagePrimitives.DivideByInt !y !c
+
+
     /// <summary>
     ///    Reduces the elements of the input parallel stream to a single value via the given reducer function.
     ///    The reducer function is first applied to the first two elements of the input parallel stream.
