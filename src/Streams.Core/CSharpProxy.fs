@@ -225,6 +225,21 @@ type public CSharpProxy =
     static member Average(source : Stream<decimal>) : decimal =
         Stream.average source
 
+    static member Average(source : ParStream<int>) : double =
+        ParStream.averageBy (double) source
+
+    static member Average(source : ParStream<int64>) : double =
+        ParStream.averageBy (double) source
+
+    static member Average(source : ParStream<Single>) : Single =
+        ParStream.average source
+
+    static member Average(source : ParStream<double>) : double =
+        ParStream.average source
+
+    static member Average(source : ParStream<decimal>) : decimal =
+        ParStream.average source
+
 //    static member Skip<'T>(stream : Stream<'T>, count : int) =
 //        Stream.skip count stream
 //

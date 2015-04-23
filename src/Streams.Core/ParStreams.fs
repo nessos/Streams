@@ -549,6 +549,17 @@ module ParStream =
         else LanguagePrimitives.DivideByInt !y !c
 
 
+    /// <summary>Computes the average of the elements in the input parallel stream.</summary>
+    /// <param name="source">The input parallel stream.</param>
+    /// <returns>The computed average.</returns>
+    /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
+    let inline average (source : ParStream< ^T >) : ^T
+            when ^T : (static member (+) : ^T * ^T -> ^T)
+            and  ^T : (static member DivideByInt : ^T * int -> ^T)
+            and  ^T : (static member Zero : ^T) =
+        averageBy id source
+
+
     /// <summary>
     ///    Reduces the elements of the input parallel stream to a single value via the given reducer function.
     ///    The reducer function is first applied to the first two elements of the input parallel stream.

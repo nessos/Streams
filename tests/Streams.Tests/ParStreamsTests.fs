@@ -290,6 +290,23 @@
                     x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``average``() =
+            Spec.ForAny<double []>(fun (xs : double []) ->
+                if Array.isEmpty xs then
+                    try let _ = xs |> ParStream.ofArray |> ParStream.average in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x = xs |> ParStream.ofArray |> ParStream.average
+                    let y = xs |> Array.average
+                    if System.Double.IsNaN x then System.Double.IsNaN y
+                    elif System.Double.IsNaN y then System.Double.IsNaN x
+                    elif System.Double.IsPositiveInfinity x then System.Double.IsPositiveInfinity y
+                    elif System.Double.IsPositiveInfinity y then System.Double.IsPositiveInfinity x
+                    elif System.Double.IsNegativeInfinity x then System.Double.IsNegativeInfinity y
+                    elif System.Double.IsNegativeInfinity y then System.Double.IsNegativeInfinity x
+                    else System.Math.Abs(x - y) < 0.001).QuickCheckThrowOnFailure()
+
+        [<Test>]
         member __.``withDegreeOfParallelism`` () =
             Spec.ForAny<int[]>(fun xs -> 
                 let x = xs 
