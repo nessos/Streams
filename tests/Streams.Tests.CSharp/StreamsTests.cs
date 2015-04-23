@@ -284,7 +284,7 @@ namespace Nessos.Streams.Tests.CSharp
             {
                 var xs = tuple.Item1.AsStream().Zip(tuple.Item2.AsStream(), (x, y) => x + y).ToArray();
                 var ys = tuple.Item1.Zip(tuple.Item2, (x, y) => x + y).ToArray();
-                return xs == ys;
+                xs.SequenceEqual(ys);
             }).QuickCheckThrowOnFailure();
         }
 
