@@ -879,7 +879,7 @@ module Stream =
     let inline head (stream : Stream<'T>) : 'T =
         match tryHead stream with
         | Some value -> value
-        | None -> invalidArg "stream" "The stream was empty."
+        | None -> invalidArg "stream" "The input stream was empty."
 
 
     /// <summary>
