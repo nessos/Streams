@@ -705,7 +705,6 @@ module Stream =
         | None -> invalidArg "source" "The input stream was empty."
         | Some (refValue, _) -> !refValue
 
-
     /// <summary>Computes the average of the projections given by the supplied function on the input stream.</summary>
     /// <param name="projection">A function to transform items of the input stream into a projection.</param>
     /// <param name="source">The input stream.</param>
@@ -725,6 +724,16 @@ module Stream =
 
         if !c = 0 then invalidArg "source" "The input stream was empty."
         else LanguagePrimitives.DivideByInt !y !c
+
+    /// <summary>Computes the average of the elements in the input stream.</summary>
+    /// <param name="source">The input stream.</param>
+    /// <returns>The computed average.</returns>
+    /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+    let inline average (source : Stream< ^T >) : ^T
+            when ^T : (static member (+) : ^T * ^T -> ^T)
+            and  ^T : (static member DivideByInt : ^T * int -> ^T)
+            and  ^T : (static member Zero : ^T) =
+        averageBy id source
 
     /// <summary>Applies a state-updating function to a stream of inputs, grouped by key projection.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>

@@ -441,3 +441,14 @@
                     let x = xs |> Stream.ofArray |> Stream.averageBy (float)
                     let y = xs |> Array.averageBy (float)
                     x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``average``() =
+            Spec.ForAny<float []>(fun (xs : float []) ->
+                if Array.isEmpty xs then
+                    try let _ = xs |> Stream.ofArray |> Stream.average in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x = xs |> Stream.ofArray |> Stream.average
+                    let y = xs |> Array.average
+                    x = y).QuickCheckThrowOnFailure()

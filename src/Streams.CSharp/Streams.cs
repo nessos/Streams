@@ -361,5 +361,50 @@ namespace Nessos.Streams.CSharp
         {
             return CSharpProxy.Average(source, projection);
         }
+
+        /// <summary>Computes the average of the integer elements in the input stream.</summary>
+        /// <param name="source">The input stream.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+        public static double Average(this Stream<int> source)
+        {
+            return CSharpProxy.Average(source);
+        }
+
+        /// <summary>Computes the average of the long integer elements in the input stream.</summary>
+        /// <param name="source">The input stream.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+        public static double Average(this Stream<long> source)
+        {
+            return CSharpProxy.Average(source);
+        }
+
+        /// <summary>Computes the average of the decimal elements in the input stream.</summary>
+        /// <param name="source">The input stream.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+        public static decimal Average(this Stream<decimal> source)
+        {
+            return CSharpProxy.Average(source);
+        }
+
+        /// <summary>Computes the average of the float elements in the input stream.</summary>
+        /// <param name="source">The input stream.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+        public static float Average(this Stream<float> source)
+        {
+            return CSharpProxy.Average(source);
+        }
+
+        /// <summary>Computes the average of the double elements in the input stream.</summary>
+        /// <param name="source">The input stream.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+        public static double Average(this Stream<double> source)
+        {
+            return CSharpProxy.Average(source);
+        }
     }
 }
