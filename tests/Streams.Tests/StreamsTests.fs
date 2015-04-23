@@ -444,7 +444,7 @@
 
         [<Test>]
         member __.``average``() =
-            Spec.ForAny<float []>(fun (xs : double []) ->
+            Spec.ForAny<double []>(fun (xs : double []) ->
                 if Array.isEmpty xs then
                     try let _ = xs |> Stream.ofArray |> Stream.average in false
                     with :? System.ArgumentException -> true
@@ -453,4 +453,23 @@
                     let y = xs |> Array.average
                     if System.Double.IsNaN x then System.Double.IsNaN y
                     elif System.Double.IsNaN y then System.Double.IsNaN x
-                    else x = y).QuickCheckThrowOnFailure()
+                    elif System.Double.IsPositiveInfinity x then System.Double.IsPositiveInfinity y
+                    elif System.Double.IsPositiveInfinity y then System.Double.IsPositiveInfinity x
+                    elif System.Double.IsNegativeInfinity x then System.Double.IsNegativeInfinity y
+                    elif System.Double.IsNegativeInfinity y then System.Double.IsNegativeInfinity x
+                    else System.Math.Abs(x - y) < 0.001).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``average decimals``() =
+            Spec.ForAny<decimal []>(fun (xs : decimal []) ->
+                if Array.isEmpty xs then
+                    try let _ = xs |> Stream.ofArray |> Stream.average in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x =
+                        try xs |> Stream.ofArray |> Stream.average
+                        with :? System.OverflowException -> 0M
+                    let y =
+                        try xs |> Array.average
+                        with :? System.OverflowException -> 0M
+                    x = y).QuickCheckThrowOnFailure()

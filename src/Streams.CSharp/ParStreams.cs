@@ -337,7 +337,7 @@ namespace Nessos.Streams.CSharp
         /// <param name="projection">A function to transform items of the input parallel stream into a projection.</param>
         /// <returns>The computed average.</returns>
         /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
-        public static float Average<T>(this Stream<T> source, Func<T, float> projection)
+        public static float Average<T>(this ParStream<T> source, Func<T, float> projection)
         {
             return CSharpProxy.Average(source, projection);
         }
@@ -347,7 +347,7 @@ namespace Nessos.Streams.CSharp
         /// <param name="projection">A function to transform items of the input parallel stream into a projection.</param>
         /// <returns>The computed average.</returns>
         /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
-        public static double Average<T>(this Stream<T> source, Func<T, double> projection)
+        public static double Average<T>(this ParStream<T> source, Func<T, double> projection)
         {
             return CSharpProxy.Average(source, projection);
         }
@@ -357,9 +357,54 @@ namespace Nessos.Streams.CSharp
         /// <param name="projection">A function to transform items of the input parallel stream into a projection.</param>
         /// <returns>The computed average.</returns>
         /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
-        public static decimal Average<T>(this Stream<T> source, Func<T, decimal> projection)
+        public static decimal Average<T>(this ParStream<T> source, Func<T, decimal> projection)
         {
             return CSharpProxy.Average(source, projection);
+        }
+
+        /// <summary>Computes the average of the integer elements in the input parallel stream.</summary>
+        /// <param name="source">The input parallel stream.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
+        public static double Average(this ParStream<int> source)
+        {
+            return CSharpProxy.Average(source);
+        }
+
+        /// <summary>Computes the average of the long integer elements in the input parallel stream.</summary>
+        /// <param name="source">The input parallel stream.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
+        public static double Average(this ParStream<long> source)
+        {
+            return CSharpProxy.Average(source);
+        }
+
+        /// <summary>Computes the average of the decimal elements in the input parallel stream.</summary>
+        /// <param name="source">The input parallel stream.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
+        public static decimal Average(this ParStream<decimal> source)
+        {
+            return CSharpProxy.Average(source);
+        }
+
+        /// <summary>Computes the average of the float elements in the input parallel stream.</summary>
+        /// <param name="source">The input parallel stream.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
+        public static float Average(this ParStream<float> source)
+        {
+            return CSharpProxy.Average(source);
+        }
+
+        /// <summary>Computes the average of the double elements in the input parallel stream.</summary>
+        /// <param name="source">The input parallel stream.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input parallel stream is empty.</exception>
+        public static double Average(this ParStream<double> source)
+        {
+            return CSharpProxy.Average(source);
         }
     }
 }
