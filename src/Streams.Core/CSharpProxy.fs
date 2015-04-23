@@ -195,6 +195,21 @@ type public CSharpProxy =
     static member Average<'T>(source : Stream<'T>, projection : Func<'T, double>) : double =
         Stream.averageBy (fun v -> projection.Invoke(v)) source
 
+    static member Average<'T>(source : ParStream<'T>, projection : Func<'T, int>) : double =
+        ParStream.averageBy (fun v -> projection.Invoke(v) |> double) source
+
+    static member Average<'T>(source : ParStream<'T>, projection : Func<'T, int64>) : double =
+        ParStream.averageBy (fun v -> projection.Invoke(v) |> double) source
+
+    static member Average<'T>(source : ParStream<'T>, projection : Func<'T, decimal>) : decimal =
+        ParStream.averageBy (fun v -> projection.Invoke(v)) source
+
+    static member Average<'T>(source : ParStream<'T>, projection : Func<'T, Single>) : Single =
+        ParStream.averageBy (fun v -> projection.Invoke(v)) source
+
+    static member Average<'T>(source : ParStream<'T>, projection : Func<'T, double>) : double =
+        ParStream.averageBy (fun v -> projection.Invoke(v)) source
+
 //    static member Skip<'T>(stream : Stream<'T>, count : int) =
 //        Stream.skip count stream
 //

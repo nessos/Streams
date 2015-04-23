@@ -223,6 +223,7 @@ namespace Nessos.Streams.Tests.CSharp
             }).QuickCheckThrowOnFailure();
         }
 
+        [Test]
         public void Any()
         {
             Spec.ForAny<int[]>(xs =>
@@ -233,6 +234,7 @@ namespace Nessos.Streams.Tests.CSharp
             }).QuickCheckThrowOnFailure();
         }
 
+        [Test]
         public void All()
         {
             Spec.ForAny<int[]>(xs =>
@@ -243,6 +245,7 @@ namespace Nessos.Streams.Tests.CSharp
             }).QuickCheckThrowOnFailure();
         }
 
+        [Test]
         public void IsEmpty()
         {
             Spec.ForAny<int[]>((int[] xs) =>
@@ -253,6 +256,7 @@ namespace Nessos.Streams.Tests.CSharp
             }).QuickCheckThrowOnFailure();
         }
 
+        [Test]
         public void Reduce()
         {
             Spec.ForAny<int[]>((int[] xs) =>
@@ -274,6 +278,33 @@ namespace Nessos.Streams.Tests.CSharp
                 {
                     var x = xs.AsParStream().Reduce((l, r) => l + r);
                     var y = xs.AsParallel().Aggregate((l, r) => l + r);
+                    return x == y;
+                }
+            }).QuickCheckThrowOnFailure();
+        }
+
+        [Test]
+        public void AverageBy()
+        {
+            Spec.ForAny<int[]>((int[] xs) =>
+            {
+                if (xs.Length == 0)
+                {
+                    var f = 0;
+                    try
+                    {
+                        xs.AsParStream().Average(x => x);
+                    }
+                    catch (ArgumentException)
+                    {
+                        f = 1;
+                    }
+                    return f == 1;
+                }
+                else
+                {
+                    var x = xs.AsParStream().Average(z => z);
+                    var y = xs.AsParallel().Average(z => z);
                     return x == y;
                 }
             }).QuickCheckThrowOnFailure();

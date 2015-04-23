@@ -278,6 +278,16 @@
                     let y = xs |> Stream.ofArray |> Stream.reduce (+)
                     x = y).QuickCheckThrowOnFailure()
 
+        [<Test>]
+        member __.``averageBy``() =
+            Spec.ForAny<int []>(fun (xs : int  []) ->
+                if Array.isEmpty xs then
+                    try let _ = xs |> ParStream.ofArray |> ParStream.averageBy (float) in false
+                    with :? System.ArgumentException -> true
+                else
+                    let x = xs |> ParStream.ofArray |> ParStream.averageBy (float)
+                    let y = xs |> Stream.ofArray |> Stream.averageBy (float)
+                    x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``withDegreeOfParallelism`` () =
