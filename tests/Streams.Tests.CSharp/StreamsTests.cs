@@ -255,6 +255,7 @@ namespace Nessos.Streams.Tests.CSharp
             }).QuickCheckThrowOnFailure();
         }
 
+        [Test]
         public void Any()
         {
             Spec.ForAny<int[]>(xs =>
@@ -265,6 +266,7 @@ namespace Nessos.Streams.Tests.CSharp
             }).QuickCheckThrowOnFailure();
         }
 
+        [Test]
         public void All()
         {
             Spec.ForAny<int[]>(xs =>
@@ -275,17 +277,18 @@ namespace Nessos.Streams.Tests.CSharp
             }).QuickCheckThrowOnFailure();
         }
 
-
+        [Test]
         public void Zip()
         {
             Spec.ForAny<Tuple<int[], int[]>>(tuple =>
             {
                 var xs = tuple.Item1.AsStream().Zip(tuple.Item2.AsStream(), (x, y) => x + y).ToArray();
                 var ys = tuple.Item1.Zip(tuple.Item2, (x, y) => x + y).ToArray();
-                return xs == ys;
+                xs.SequenceEqual(ys);
             }).QuickCheckThrowOnFailure();
         }
 
+        [Test]
         public void IsEmpty()
         {
             Spec.ForAny<int[]>((int[] xs) =>
@@ -296,6 +299,7 @@ namespace Nessos.Streams.Tests.CSharp
             }).QuickCheckThrowOnFailure();
         }
 
+        [Test]
         public void Reduce()
         {
             Spec.ForAny<int[]>((int[] xs) =>
@@ -320,6 +324,33 @@ namespace Nessos.Streams.Tests.CSharp
                         return x == y;
                     }
                 }).QuickCheckThrowOnFailure();
+        }
+
+        [Test]
+        public void AverageBy()
+        {
+            Spec.ForAny<int[]>((int[] xs) =>
+            {
+                if (xs.Length == 0)
+                {
+                    var f = 0;
+                    try
+                    {
+                        xs.AsStream().Average(x => x);
+                    }
+                    catch (ArgumentException)
+                    {
+                        f = 1;
+                    }
+                    return f == 1;
+                }
+                else
+                {
+                    var x = xs.AsStream().Average(z => z);
+                    var y = xs.Average(z => z);
+                    return x == y;
+                }
+            }).QuickCheckThrowOnFailure();
         }
     }
 }

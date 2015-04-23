@@ -666,7 +666,8 @@ module Stream =
     /// <summary>Locates the maximum element of the stream by given key.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
     /// <param name="source">The input stream.</param>
-    /// <returns>The maximum item.</returns>  
+    /// <returns>The maximum item.</returns>
+    /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
     let inline maxBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : Stream<'T>) : 'T =
         let result =
             fold (fun state t -> 
@@ -680,13 +681,14 @@ module Stream =
                 | _ -> state) None source
 
         match result with
-        | None -> invalidArg "source" "The input sequence was empty."
+        | None -> invalidArg "source" "The input stream was empty."
         | Some (refValue, _) -> !refValue
 
     /// <summary>Locates the minimum element of the stream by given key.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
     /// <param name="source">The input stream.</param>
-    /// <returns>The maximum item.</returns>  
+    /// <returns>The maximum item.</returns>
+    /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
     let inline minBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (source : Stream<'T>) : 'T =
         let result = 
             fold (fun state t ->
@@ -700,8 +702,29 @@ module Stream =
                 | _ -> state) None source
 
         match result with
-        | None -> invalidArg "source" "The input sequence was empty."
+        | None -> invalidArg "source" "The input stream was empty."
         | Some (refValue, _) -> !refValue
+
+
+    /// <summary>Computes the average of the projections given by the supplied function on the input stream.</summary>
+    /// <param name="projection">A function to transform items of the input stream into a projection.</param>
+    /// <param name="source">The input stream.</param>
+    /// <returns>The computed average.</returns>
+    /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+    let inline averageBy (projection : 'T -> ^U) (source : Stream<'T>) : ^U
+            when ^U : (static member (+) : ^U * ^U -> ^U)
+            and  ^U : (static member DivideByInt : ^U * int -> ^U)
+            and  ^U : (static member Zero : ^U) =
+        let (y, c) =
+            fold (fun ((y, c) as state) v ->
+                      y := Checked.(+) !y (projection v)
+                      incr c
+                      state)
+                 (ref LanguagePrimitives.GenericZero, ref 0)
+                 source
+
+        if !c = 0 then invalidArg "source" "The input stream was empty."
+        else LanguagePrimitives.DivideByInt !y !c
 
     /// <summary>Applies a state-updating function to a stream of inputs, grouped by key projection.</summary>
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
@@ -879,7 +902,7 @@ module Stream =
     let inline head (stream : Stream<'T>) : 'T =
         match tryHead stream with
         | Some value -> value
-        | None -> invalidArg "stream" "The stream was empty."
+        | None -> invalidArg "stream" "The input stream was empty."
 
 
     /// <summary>
