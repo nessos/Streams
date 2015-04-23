@@ -351,5 +351,15 @@ namespace Nessos.Streams.CSharp
         {
             return CSharpProxy.Average(source, projection);
         }
+
+        /// <summary>Computes the average of the decimal projections given by the supplied function on the input stream.</summary>
+        /// <param name="source">The input stream.</param>
+        /// <param name="projection">A function to transform items of the input stream into a projection.</param>
+        /// <returns>The computed average.</returns>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
+        public static decimal Average<T>(this Stream<T> source, Func<T, decimal> projection)
+        {
+            return CSharpProxy.Average(source, projection);
+        }
     }
 }
