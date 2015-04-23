@@ -352,5 +352,32 @@ namespace Nessos.Streams.Tests.CSharp
                 }
             }).QuickCheckThrowOnFailure();
         }
+
+        [Test]
+        public void Average()
+        {
+            Spec.ForAny<int[]>((int[] xs) =>
+            {
+                if (xs.Length == 0)
+                {
+                    var f = 0;
+                    try
+                    {
+                        xs.AsStream().Average(x => x);
+                    }
+                    catch (ArgumentException)
+                    {
+                        f = 1;
+                    }
+                    return f == 1;
+                }
+                else
+                {
+                    var x = xs.AsStream().Average(z => z);
+                    var y = xs.Average(z => z);
+                    return x == y;
+                }
+            }).QuickCheckThrowOnFailure();
+        }
     }
 }

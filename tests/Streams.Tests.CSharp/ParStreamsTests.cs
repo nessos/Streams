@@ -277,7 +277,8 @@ namespace Nessos.Streams.Tests.CSharp
                 else
                 {
                     var x = xs.AsParStream().Reduce((l, r) => l + r);
-                    var y = xs.AsParallel().Aggregate((l, r) => l + r);
+                    // AsParallel().Aggregate throws ArgumentNullException on [|0|] input in mono
+                    var y = xs.Aggregate((l, r) => l + r);
                     return x == y;
                 }
             }).QuickCheckThrowOnFailure();
