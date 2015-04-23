@@ -711,7 +711,7 @@ module Stream =
     /// <param name="source">The input stream.</param>
     /// <returns>The computed average.</returns>
     /// <exception cref="System.ArgumentException">Thrown if the input stream is empty.</exception>
-    let inline averageBy (projection : 'T -> ^Key) (source : Stream<'T>) : ^U
+    let inline averageBy (projection : 'T -> ^U) (source : Stream<'T>) : ^U
             when ^U : (static member (+) : ^U * ^U -> ^U)
             and  ^U : (static member DivideByInt : ^U * int -> ^U)
             and  ^U : (static member Zero : ^U) =
