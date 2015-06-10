@@ -268,10 +268,9 @@ module ParStream =
                             let { Func = iter } as iterator = collector.Iterator()
                             {   Index = iterator.Index
                                 Func = (fun value -> 
-                                        let (Stream streamf) = f value
+                                        let stream' = f value
                                         let cts = CancellationTokenSource.CreateLinkedTokenSource(iterator.Cts.Token)
-                                        let iterable = streamf { Complete = (fun () -> ()); Cont = (fun v -> iter v |> ignore); Cts = cts } 
-                                        iterable.Bulk ())
+                                        stream'.RunBulk { Complete = (fun () -> ()); Cont = (fun v -> iter v |> ignore); Cts = cts })
                                 Cts = iterator.Cts } 
                         member self.Result = collector.Result  }
                 stream.Apply collector }
