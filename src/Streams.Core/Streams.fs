@@ -844,7 +844,7 @@ module Stream =
     let inline tryHead (stream : Stream<'T>) : 'T option =
         let stream' = take 1 stream
         let resultRef = ref Unchecked.defaultof<'T option>
-        stream.RunBulk
+        stream'.RunBulk
             { Complete = (fun () -> ());
               Cont = (fun value -> resultRef := Some value);
               Cts = null }
