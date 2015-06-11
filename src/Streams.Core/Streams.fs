@@ -29,9 +29,8 @@ type Context<'T> = {
 
 /// Represents a Stream of values.
 type Stream<'T> = 
-    { run : Context<'T> -> Iterable } 
-    member inline (* internal *) stream.Run ctxt = stream.run ctxt
-    member inline (* internal *) stream.RunBulk ctxt = (stream.run ctxt).Bulk()
+    { Run : Context<'T> -> Iterable } 
+    member inline (* internal *) stream.RunBulk ctxt = (stream.Run ctxt).Bulk()
     override self.ToString() = 
         seq {
             use enumerator = new StreamEnumerator<'T>(self) :> IEnumerator<'T>
@@ -88,7 +87,7 @@ and private StreamEnumerator<'T> (stream : Stream<'T>) =
 [<RequireQualifiedAccessAttribute>]
 module Stream =
 
-    let inline internal Stream s = { run = s }
+    let inline internal Stream f = { Run = f }
 
     /// <summary>The empty stream.</summary>
     /// <returns>An empty stream.</returns>
@@ -316,7 +315,6 @@ module Stream =
             stream.Run { Complete = complete; 
                          Cont = (fun value -> iterf (f value)); 
                          Cts = cts })
-
 
     /// <summary>Transforms each element of the input stream. The integer index passed to the function indicates the index (from 0) of element being transformed.</summary>
     /// <param name="f">A function to transform items and also supplies the current index.</param>
