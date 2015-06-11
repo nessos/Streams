@@ -332,8 +332,6 @@ module Stream =
                 member __.Bulk() = bulk()
                 member __.Iterator = iterator()  })
 
-    // Used to indicate that we don't want a tailcall on a continuation call
-    let inline internal notailcall() = Unchecked.defaultof<unit>
     // Used to indicate that we don't want a closure to be curried
     let inline internal nocurry() = Unchecked.defaultof<unit>
 
@@ -342,7 +340,7 @@ module Stream =
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
     let inline map (f : 'T -> 'R) (stream : Stream<'T>) : Stream<'R> =
-        stream |> Internals.mapCont (fun iterf -> nocurry(); fun value -> iterf (f value); notailcall())
+        stream |> Internals.mapCont (fun iterf -> nocurry(); fun value -> iterf (f value))
 
 
     /// <summary>Transforms each element of the input stream. The integer index passed to the function indicates the index (from 0) of element being transformed.</summary>
@@ -350,7 +348,7 @@ module Stream =
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
     let inline mapi (f : int -> 'T -> 'R) (stream : Stream<'T>) : Stream<'R> =
-        stream |> Internals.mapCont (fun iterf -> let counter = ref -1 in (fun value -> incr counter; iterf (f !counter value); notailcall())) 
+        stream |> Internals.mapCont (fun iterf -> let counter = ref -1 in (fun value -> incr counter; iterf (f !counter value))) 
 
     /// <summary>Transforms each element of the input stream to a new stream and flattens its elements.</summary>
     /// <param name="f">A function to transform items from the input stream.</param>
@@ -417,14 +415,14 @@ module Stream =
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
     let inline filter (predicate : 'T -> bool) (stream : Stream<'T>) : Stream<'T> =
-        stream |> Internals.mapCont (fun iterf -> nocurry(); fun value -> if predicate value then iterf value; notailcall())
+        stream |> Internals.mapCont (fun iterf -> nocurry(); fun value -> if predicate value then iterf value)
 
     /// <summary>Applies the given function to each element of the stream and returns the stream comprised of the results for each element where the function returns Some with some value.</summary>
     /// <param name="chooser">A function to transform items of type 'T into options of type 'R.</param>
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
     let inline choose (chooser : 'T -> 'R option) (stream : Stream<'T>) : Stream<'R> =
-        stream |> Internals.mapCont (fun iterf -> nocurry(); fun value -> match chooser value with | Some value' -> iterf value'; notailcall() | None -> ())
+        stream |> Internals.mapCont (fun iterf -> nocurry(); fun value -> match chooser value with | Some value' -> iterf value' | None -> ())
 
     /// <summary>Returns the elements of the stream up to a specified count.</summary>
     /// <param name="n">The number of items to take.</param>
@@ -453,7 +451,7 @@ module Stream =
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
     let inline takeWhile pred (stream : Stream<'T>) : Stream<'T> = 
-        stream |> Internals.mapContCancel (fun cts iterf -> nocurry(); fun value -> if pred value then iterf value; notailcall() else cts.Cancel())
+        stream |> Internals.mapContCancel (fun cts iterf -> nocurry(); fun value -> if pred value then iterf value else cts.Cancel())
         
 
     /// <summary>Returns a stream that skips N elements of the input stream and then yields the remaining elements of the stream.</summary>
@@ -601,8 +599,7 @@ module Stream =
             iterf !accRef
             (fun value -> 
                 accRef := folder !accRef value
-                iterf !accRef
-                notailcall() ))
+                iterf !accRef ))
 
     /// <summary>Returns the sum of the elements.</summary>
     /// <param name="stream">The input stream.</param>

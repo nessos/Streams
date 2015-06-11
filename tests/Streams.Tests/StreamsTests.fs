@@ -480,8 +480,8 @@ module PerfTests =
         |> Array.filter (fun x -> x % 2 = 0)
         |> Array.length
 
-    let runStream() =
-     for i in 0 .. 100 do
+    let runStream n =
+     for i in 1 .. n do
         xs 
         |> Stream.ofArray
         |> Stream.take 1000000
@@ -501,7 +501,7 @@ module PerfTests =
 
     runSeq() |> ignore
     runList() |> ignore
-    runStream() |> ignore
+    runStream 100 |> ignore
       //0.3.0: 
       //   Real: 00:00:03.352, CPU: 00:00:03.343, GC gen0: 0, gen1: 0, gen2: 0
       //   Real: 00:00:02.631, CPU: 00:00:02.640, GC gen0: 0, gen1: 0, gen2: 0
@@ -513,12 +513,9 @@ module PerfTests =
       //   Real: 00:00:17.750, CPU: 00:00:17.687, GC gen0: 0, gen1: 0, gen2: 0
       //
       //New (fully hidden represenations, with inlining reducing to Internals)
-      //   Real: 00:00:02.980, CPU: 00:00:02.968, GC gen0: 0, gen1: 0, gen2: 0
-      //   Real: 00:00:02.961, CPU: 00:00:02.953, GC gen0: 0, gen1: 0, gen2: 0
-      //   Real: 00:00:03.009, CPU: 00:00:03.015, GC gen0: 0, gen1: 0, gen2: 0
-      //   Real: 00:00:02.952, CPU: 00:00:02.921, GC gen0: 0, gen1: 0, gen2: 0
-      //   Real: 00:00:03.812, CPU: 00:00:03.796, GC gen0: 0, gen1: 0, gen2: 0
-      //   Real: 00:00:03.483, CPU: 00:00:03.484, GC gen0: 0, gen1: 0, gen2: 0
+      //   Real: 00:00:02.384, CPU: 00:00:02.375, GC gen0: 0, gen1: 0, gen2: 0
+      //   Real: 00:00:02.490, CPU: 00:00:02.484, GC gen0: 0, gen1: 0, gen2: 0
+      //   Real: 00:00:02.362, CPU: 00:00:02.343, GC gen0: 0, gen1: 0, gen2: 0
 
 
 
