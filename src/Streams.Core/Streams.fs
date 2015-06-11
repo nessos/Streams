@@ -19,7 +19,7 @@ type internal Iterable =
 
 [<AllowNullLiteral>]
 /// An internal type used for the inlined implementation of this API
-type StreamCancellationTokenSource() = 
+type internal StreamCancellationTokenSource() = 
      let mutable cancelled = false
      let mutable linked : StreamCancellationTokenSource list = []
      member x.CreateLinkedTokenSource() = let sc = StreamCancellationTokenSource() in linked <- sc :: linked; sc
@@ -114,14 +114,24 @@ module Stream =
                 let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 stream.Run 
                         { Complete = complete;
-                          Cont = f cts iterf;
+                          Cont = f cts.Cancel iterf;
                           Cts = cts })
 
         // Public permanent entrypoint to implement inlined versions of tryFind, tryPick
-        let iterCancel cts (f : ('T -> unit)) (stream : Stream<'T>) : unit = 
+        let internal iterCancelLink (cts: CancellationTokenSource) (f : ('T -> unit)) (stream : Stream<'T>) : unit = 
+           let cts' = StreamCancellationTokenSource()
+           cts.Token.Register(fun _ -> cts'.Cancel()) |> ignore
            stream.RunBulk
                 { Complete = (fun () -> ())
                   Cont = f 
+                  Cts = cts' } 
+
+        // Public permanent entrypoint to implement inlined versions of tryFind, tryPick
+        let iterCancel (f : (unit -> unit) -> ('T -> unit)) (stream : Stream<'T>) : unit = 
+           let cts = StreamCancellationTokenSource()
+           stream.RunBulk
+                { Complete = (fun () -> ())
+                  Cont = f cts.Cancel
                   Cts = cts } 
 
     /// <summary>The empty stream.</summary>
@@ -436,7 +446,7 @@ module Stream =
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
     let inline takeWhile pred (stream : Stream<'T>) : Stream<'T> = 
-        stream |> Internals.mapContCancel (fun cts iterf -> nocurry(); fun value -> if pred value then iterf value else cts.Cancel())
+        stream |> Internals.mapContCancel (fun cancel iterf -> nocurry(); fun value -> if pred value then iterf value else cancel())
         
 
     /// <summary>Returns a stream that skips N elements of the input stream and then yields the remaining elements of the stream.</summary>
@@ -715,8 +725,7 @@ module Stream =
     /// <returns>The first element for which the predicate returns true, or None if every element evaluates to false.</returns>
     let inline tryFind (predicate : 'T -> bool) (stream : Stream<'T>) : 'T option = 
         let resultRef = ref Unchecked.defaultof<'T option>
-        let cts = StreamCancellationTokenSource()
-        stream |> Internals.iterCancel cts (fun value -> if predicate value then resultRef := Some value; cts.Cancel())
+        stream |> Internals.iterCancel (fun cancel -> nocurry(); fun value -> if predicate value then resultRef := Some value; cancel())
         !resultRef
 
     /// <summary>Returns the first element for which the given function returns true. Raises KeyNotFoundException if no such element exists.</summary>
@@ -735,8 +744,7 @@ module Stream =
     /// <returns>The first element for which the chooser returns Some, or None if every element evaluates to None.</returns>
     let inline tryPick (chooser : 'T -> 'R option) (stream : Stream<'T>) : 'R option = 
         let resultRef = ref Unchecked.defaultof<'R option>
-        let cts = StreamCancellationTokenSource()
-        stream |> Internals.iterCancel cts (fun value -> match chooser value with | Some value' -> resultRef := Some value'; cts.Cancel() | None -> ())
+        stream |> Internals.iterCancel (fun cancel -> nocurry(); fun value -> match chooser value with | Some value' -> resultRef := Some value'; cancel() | None -> ())
         !resultRef
 
     /// <summary>Applies the given function to successive elements, returning the first result where the function returns a Some value.
