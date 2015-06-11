@@ -30,6 +30,7 @@ type (* internal *) Context<'T> = {
 /// Represents a Stream of values.
 type Stream<'T> = 
     { Run : Context<'T> -> Iterable } 
+    member inline internal stream.RunBulk ctxt = (stream.Run ctxt).Bulk()
     override self.ToString() = 
         seq {
             use enumerator = new StreamEnumerator<'T>(self) :> IEnumerator<'T>
@@ -87,8 +88,6 @@ and private StreamEnumerator<'T> (stream : Stream<'T>) =
 module Stream =
 
     let inline internal Stream f = { Run = f }
-    type Stream<'T> with 
-        member  inline (* internal *) stream.RunBulk ctxt = (stream.Run ctxt).Bulk()
 
     /// <summary>The empty stream.</summary>
     /// <returns>An empty stream.</returns>
