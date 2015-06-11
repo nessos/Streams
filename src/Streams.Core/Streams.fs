@@ -4,21 +4,21 @@ open System.Collections.Generic
 open System.Threading
 
 /// Provides on-demand iteration 
-type (* internal *) Iterator = 
+type internal Iterator = 
     /// Function for on-demand processing
     abstract TryAdvance : unit -> bool 
     /// Cleanup function
     abstract Dispose : unit -> unit 
 
 /// Provides functions for iteration
-type (* internal *) Iterable = 
+type internal Iterable = 
     /// Function for bulk processing
     abstract Bulk : unit -> unit 
     /// Iterator for on-demand processing
     abstract Iterator : Iterator
 
 /// Represents the current executing contex
-type (* internal *) Context<'T> = {
+type internal Context<'T> = {
     /// The composed continutation
     Cont : 'T -> unit
     /// The completed continuation
@@ -29,7 +29,7 @@ type (* internal *) Context<'T> = {
 
 /// Represents a Stream of values.
 type Stream<'T> = 
-    { Run : Context<'T> -> Iterable } 
+    internal { Run : Context<'T> -> Iterable } 
     member inline internal stream.RunBulk ctxt = (stream.Run ctxt).Bulk()
     override self.ToString() = 
         seq {
@@ -87,7 +87,33 @@ and private StreamEnumerator<'T> (stream : Stream<'T>) =
 [<RequireQualifiedAccessAttribute>]
 module Stream =
 
-    let inline internal Stream f = { Run = f }
+    let inline  internal Stream f = { Run = f }
+
+    module Internals = 
+        // Public permanent entrypoint to implement inlined versions of map, filter, choose etc.
+        // 'f' is called with one argument before iteration.
+        let mapCont f stream =
+            Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
+                stream.Run { Complete = complete; 
+                             Cont = f iterf; 
+                             Cts = cts })
+
+        // Public permanent entrypoint to implement inlined versions of takeWhile etc.
+        // 'f' is called with two arguments before iteration.
+        let mapContCancel f stream =
+            Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
+                let cts = if cts = null then new CancellationTokenSource() else cts 
+                stream.Run 
+                        { Complete = complete;
+                          Cont = f cts iterf;
+                          Cts = cts })
+
+        // Public permanent entrypoint to implement inlined versions of tryFind, tryPick
+        let iterCancel cts (f : ('T -> unit)) (stream : Stream<'T>) : unit = 
+           stream.RunBulk
+                { Complete = (fun () -> ())
+                  Cont = f 
+                  Cts = cts } 
 
     /// <summary>The empty stream.</summary>
     /// <returns>An empty stream.</returns>
@@ -103,7 +129,7 @@ module Stream =
     /// <summary>Creates a singleton stream.</summary>
     /// <param name="source">The singleton stream element</param>
     /// <returns>A stream of just the given element</returns>
-    let inline singleton (source: 'T) : Stream<'T> =
+    let singleton (source: 'T) : Stream<'T> =
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts }->
             let pulled = ref false
             { new Iterable with 
@@ -122,7 +148,7 @@ module Stream =
     /// <summary>Wraps array as a stream.</summary>
     /// <param name="source">The input array.</param>
     /// <returns>The result stream.</returns>
-    let inline ofArray (source : 'T []) : Stream<'T> =
+    let ofArray (source : 'T []) : Stream<'T> =
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
             let bulk () =
                 if not (cts = null) then
@@ -166,7 +192,7 @@ module Stream =
     /// <summary>Wraps ResizeArray as a stream.</summary>
     /// <param name="source">The input array.</param>
     /// <returns>The result stream.</returns>
-    let inline ofResizeArray (source : ResizeArray<'T>) : Stream<'T> =
+    let ofResizeArray (source : ResizeArray<'T>) : Stream<'T> =
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
             let bulk () =
                 if not (cts = null) then
@@ -212,7 +238,7 @@ module Stream =
     /// <summary>Wraps seq as a stream.</summary>
     /// <param name="source">The input seq.</param>
     /// <returns>The result stream.</returns>
-    let inline ofSeq (source : seq<'T>) : Stream<'T> =
+    let ofSeq (source : seq<'T>) : Stream<'T> =
         match source with
         | :? ('T[]) as array -> ofArray array
         | :? ResizeArray<'T> as list -> ofResizeArray list
@@ -261,7 +287,7 @@ module Stream =
     /// <summary>Wraps an IEnumerable as a stream.</summary>
     /// <param name="source">The input seq.</param>
     /// <returns>The result stream.</returns>
-    let inline cast<'T> (source : System.Collections.IEnumerable) : Stream<'T> =
+    let cast<'T> (source : System.Collections.IEnumerable) : Stream<'T> =
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
             let bulk () =
                 
@@ -306,32 +332,29 @@ module Stream =
                 member __.Bulk() = bulk()
                 member __.Iterator = iterator()  })
 
+    // Used to indicate that we don't want a closure to be curried
+    let inline internal nocurry() = Unchecked.defaultof<unit>
+
     /// <summary>Transforms each element of the input stream.</summary>
     /// <param name="f">A function to transform items from the input stream.</param>
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
     let inline map (f : 'T -> 'R) (stream : Stream<'T>) : Stream<'R> =
-        Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
-            stream.Run { Complete = complete; 
-                         Cont = (fun value -> iterf (f value)); 
-                         Cts = cts })
+        stream |> Internals.mapCont (fun iterf -> nocurry(); fun value -> iterf (f value))
+
 
     /// <summary>Transforms each element of the input stream. The integer index passed to the function indicates the index (from 0) of element being transformed.</summary>
     /// <param name="f">A function to transform items and also supplies the current index.</param>
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
     let inline mapi (f : int -> 'T -> 'R) (stream : Stream<'T>) : Stream<'R> =
-        Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
-            let counter = ref -1
-            stream.Run { Complete = complete; 
-                         Cont = (fun value -> incr counter; iterf (f !counter value)); 
-                         Cts = cts })
+        stream |> Internals.mapCont (fun iterf -> let counter = ref -1 in (fun value -> incr counter; iterf (f !counter value))) 
 
     /// <summary>Transforms each element of the input stream to a new stream and flattens its elements.</summary>
     /// <param name="f">A function to transform items from the input stream.</param>
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
-    let inline flatMap (f : 'T -> Stream<'R>) (stream : Stream<'T>) : Stream<'R> =
+    let flatMap (f : 'T -> Stream<'R>) (stream : Stream<'T>) : Stream<'R> =
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
             stream.Run
                     { Complete = complete;
@@ -355,7 +378,7 @@ module Stream =
     /// <summary>Creates a cached version of the input stream.</summary>
     /// <param name="source">The input stream.</param>
     /// <returns>The cached stream.</returns>
-    let inline cache (source: Stream<'T>): Stream<'T> =
+    let cache (source: Stream<'T>): Stream<'T> =
         let cache = new ResizeArray<'T>()
         //if !cached = None && cache.Count = 0 then the stream is not cached
         //if !cached = None && cache.Count > 0 then the stream is partially cached
@@ -392,28 +415,20 @@ module Stream =
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
     let inline filter (predicate : 'T -> bool) (stream : Stream<'T>) : Stream<'T> =
-        Stream (fun { Complete = complete; Cont = iterf; Cts = cts }  ->
-            stream.Run
-                    { Complete = complete;
-                      Cont = (fun value -> if predicate value then iterf value else ());
-                      Cts = cts })
+        stream |> Internals.mapCont (fun iterf -> nocurry(); fun value -> if predicate value then iterf value)
 
     /// <summary>Applies the given function to each element of the stream and returns the stream comprised of the results for each element where the function returns Some with some value.</summary>
     /// <param name="chooser">A function to transform items of type 'T into options of type 'R.</param>
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
     let inline choose (chooser : 'T -> 'R option) (stream : Stream<'T>) : Stream<'R> =
-        Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
-            stream.Run
-                    { Complete = complete; 
-                      Cont = (fun value -> match chooser value with | Some value' -> iterf value' | None -> ());
-                      Cts = cts })
+        stream |> Internals.mapCont (fun iterf -> nocurry(); fun value -> match chooser value with | Some value' -> iterf value' | None -> ())
 
     /// <summary>Returns the elements of the stream up to a specified count.</summary>
     /// <param name="n">The number of items to take.</param>
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
-    let inline take (n : int) (stream : Stream<'T>) : Stream<'T> =
+    let take (n : int) (stream : Stream<'T>) : Stream<'T> =
         if n < 0 then
             raise <| new System.ArgumentException("The input must be non-negative.")
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
@@ -436,21 +451,14 @@ module Stream =
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
     let inline takeWhile pred (stream : Stream<'T>) : Stream<'T> = 
-        Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
-            let cts = if cts = null then new CancellationTokenSource() else cts 
-            stream.Run 
-                    { Complete = complete;
-                      Cont = 
-                        (fun value -> 
-                            if pred value then iterf value else cts.Cancel());
-                      Cts = cts })
+        stream |> Internals.mapContCancel (fun cts iterf -> nocurry(); fun value -> if pred value then iterf value else cts.Cancel())
         
 
     /// <summary>Returns a stream that skips N elements of the input stream and then yields the remaining elements of the stream.</summary>
     /// <param name="n">The number of items to skip.</param>
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
-    let inline skip (n : int) (stream : Stream<'T>) : Stream<'T> =
+    let skip (n : int) (stream : Stream<'T>) : Stream<'T> =
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
             let counter = ref 0
             stream.Run 
@@ -561,6 +569,15 @@ module Stream =
                 member __.Iterator = iterator() })
 
 
+    /// <summary>Applies the given function to each element of the stream.</summary>
+    /// <param name="f">A function to apply to each element of the stream.</param>
+    /// <param name="stream">The input stream.</param>    
+    let iter (f : 'T -> unit) (stream : Stream<'T>) : unit = 
+       stream.RunBulk
+            { Complete = (fun () -> ())
+              Cont = f
+              Cts = null } 
+
     /// <summary>Applies a function to each element of the stream, threading an accumulator argument through the computation. If the input function is f and the elements are i0...iN, then this function computes f (... (f s i0)...) iN.</summary>
     /// <param name="folder">A function that updates the state with each element from the stream.</param>
     /// <param name="state">The initial state.</param>
@@ -568,10 +585,7 @@ module Stream =
     /// <returns>The final result.</returns>
     let inline fold (folder : 'State -> 'T -> 'State) (state : 'State) (stream : Stream<'T>) : 'State =
         let accRef = ref state
-        stream.RunBulk
-            { Complete = (fun () -> ());
-              Cont = (fun value -> accRef := folder !accRef value);
-              Cts = null }
+        stream |> iter (fun value -> accRef := folder !accRef value)
         !accRef
 
     /// <summary>Like Stream.fold, but computes on-demand and returns the stream of intermediate and final results</summary>
@@ -580,13 +594,12 @@ module Stream =
     /// <param name="stream">The input stream.</param>
     /// <returns>The final stream.</returns>
     let inline scan (folder : 'State -> 'T -> 'State) (state : 'State) (stream : Stream<'T>) : Stream<'State> =
-        Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
+        stream |> Internals.mapCont (fun iterf -> 
             let accRef = ref state
             iterf !accRef
-            stream.Run
-                 { Complete = complete;
-                   Cont = (fun value -> accRef := folder !accRef value; iterf !accRef);
-                   Cts = cts })
+            (fun value -> 
+                accRef := folder !accRef value
+                iterf !accRef ))
 
     /// <summary>Returns the sum of the elements.</summary>
     /// <param name="stream">The input stream.</param>
@@ -601,15 +614,6 @@ module Stream =
     /// <returns>The total number of elements.</returns>
     let inline length (stream : Stream<'T>) : int =
         fold (fun acc _  -> 1 + acc) 0 stream
-
-    /// <summary>Applies the given function to each element of the stream.</summary>
-    /// <param name="f">A function to apply to each element of the stream.</param>
-    /// <param name="stream">The input stream.</param>    
-    let inline iter (f : 'T -> unit) (stream : Stream<'T>) : unit = 
-       stream.RunBulk
-            { Complete = (fun () -> ())
-              Cont = (fun value -> f value)
-              Cts = null } 
 
     /// <summary>Creates an Seq from the given stream.</summary>
     /// <param name="stream">The input stream.</param>
@@ -641,10 +645,7 @@ module Stream =
     let inline sortBy<'T, 'Key when 'Key :> IComparable<'Key>> (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'T> =
         let values = new List<'T>()
         let keys = new List<'Key>()
-        stream.RunBulk
-           { Complete = (fun () -> ());
-             Cont = (fun value -> keys.Add(projection value); values.Add(value));
-             Cts = null }
+        stream |> iter (fun value -> keys.Add(projection value); values.Add(value));
         let array = values.ToArray()
         Array.Sort(keys.ToArray(), array)
         array |> ofArray
@@ -696,21 +697,18 @@ module Stream =
     /// <param name="source">The input stream.</param>
     /// <returns>A stream of tuples where each tuple contains the unique key and a sequence of all the elements that match the key.</returns>    
     let inline foldBy (projection : 'T -> 'Key) (folder : 'State -> 'T -> 'State) 
-                        (init : unit -> 'State) (source : Stream<'T>) : Stream<'Key * 'State> =
+                      (init : unit -> 'State) (source : Stream<'T>) : Stream<'Key * 'State> =
 
         let dict = new Dictionary<'Key, 'State ref>()
 
-        let inline body (t : 'T) =
+        source |> iter (fun t -> 
             let key = projection t
             let mutable container = Unchecked.defaultof<'State ref>
             if not <| dict.TryGetValue(key, &container) then
                 container <- ref <| init ()
                 dict.Add(key, container)
+            container := folder container.Value t)
 
-            container := folder container.Value t
-            ()
-
-        source.RunBulk { Complete = (fun () -> ()); Cont = body; Cts = null }
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value.Value))
 
     /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and a sequence of all elements that have each key.</summary>
@@ -720,16 +718,13 @@ module Stream =
     let inline groupBy (projection : 'T -> 'Key) (source : Stream<'T>) : Stream<'Key * seq<'T>>  =
         let dict = new Dictionary<'Key, List<'T>>()
         
-        let inline body (t : 'T) = 
+        source |> iter (fun t -> 
             let mutable grouping = Unchecked.defaultof<List<'T>>
             let key = projection t
             if not <| dict.TryGetValue(key, &grouping) then
                 grouping <- new List<'T>()
                 dict.Add(key, grouping)
-            grouping.Add(t)
-            ()
-
-        source.RunBulk { Complete = (fun () -> ()); Cont = body; Cts = null } 
+            grouping.Add(t))
         dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))
 
     /// <summary>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and their frequency.</summary>
@@ -745,11 +740,8 @@ module Stream =
     /// <returns>The first element for which the predicate returns true, or None if every element evaluates to false.</returns>
     let inline tryFind (predicate : 'T -> bool) (stream : Stream<'T>) : 'T option = 
         let resultRef = ref Unchecked.defaultof<'T option>
-        let cts = new CancellationTokenSource()
-        stream.RunBulk 
-            { Complete = (fun () -> ());
-              Cont = (fun value -> if predicate value then resultRef := Some value; cts.Cancel(); else ());
-              Cts = cts } 
+        let cts = new CancellationTokenSource ()
+        stream |> Internals.iterCancel cts (fun value -> if predicate value then resultRef := Some value; cts.Cancel())
         !resultRef
 
     /// <summary>Returns the first element for which the given function returns true. Raises KeyNotFoundException if no such element exists.</summary>
@@ -768,11 +760,8 @@ module Stream =
     /// <returns>The first element for which the chooser returns Some, or None if every element evaluates to None.</returns>
     let inline tryPick (chooser : 'T -> 'R option) (stream : Stream<'T>) : 'R option = 
         let resultRef = ref Unchecked.defaultof<'R option>
-        let cts = new CancellationTokenSource()
-        stream.RunBulk
-            { Complete = (fun () -> ());
-              Cont = (fun value -> match chooser value with | Some value' -> resultRef := Some value'; cts.Cancel(); | None -> ())
-              Cts = cts } 
+        let cts = new CancellationTokenSource ()
+        stream |> Internals.iterCancel cts (fun value -> match chooser value with | Some value' -> resultRef := Some value'; cts.Cancel() | None -> ())
         !resultRef
 
     /// <summary>Applies the given function to successive elements, returning the first result where the function returns a Some value.
@@ -833,21 +822,18 @@ module Stream =
                       Cts = cts })
 
     /// <summary>
-    ///     Returs the first element of the stream.
+    ///     Returns the first element of the stream.
     /// </summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>The first element of the stream, or None if the stream has no elements.</returns>
     let inline tryHead (stream : Stream<'T>) : 'T option =
         let stream' = take 1 stream
         let resultRef = ref Unchecked.defaultof<'T option>
-        stream'.RunBulk
-            { Complete = (fun () -> ());
-              Cont = (fun value -> resultRef := Some value);
-              Cts = null }
+        stream' |> iter (fun value -> resultRef := Some value)
         !resultRef
 
     /// <summary>
-    ///     Returs the first element of the stream.
+    ///     Returns the first element of the stream.
     /// </summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>The first element of the stream.</returns>
@@ -859,7 +845,7 @@ module Stream =
 
 
     /// <summary>
-    ///     Returs true if the stream is empty and false otherwise.
+    ///     Returns true if the stream is empty and false otherwise.
     /// </summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>true if the input stream is empty, false otherwise</returns>
