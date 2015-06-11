@@ -420,6 +420,7 @@ module ``Streams tests``  =
 
                 Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
+(*
         [<Test>]
         let ``isEmpty``() =
             Spec.ForAny<int []>(fun (xs : int  []) ->
@@ -427,6 +428,7 @@ module ``Streams tests``  =
                 let y = xs |> Array.isEmpty
 
                 Assert.AreEqual(x, y)).QuickCheckThrowOnFailure()
+*)
 
 module PerfTests = 
   let AdhocPerformanceTest() = 
@@ -527,6 +529,13 @@ module PerfTests =
       // Real: 00:00:02.853, CPU: 00:00:02.859, GC gen0: 0, gen1: 0, gen2: 0
       // Real: 00:00:03.276, CPU: 00:00:03.234, GC gen0: 0, gen1: 0, gen2: 0
       // Real: 00:00:02.757, CPU: 00:00:02.718, GC gen0: 0, gen1: 0, gen2: 0
+      // New (without inlining but map partially inlined)
+      // Real: 00:00:08.328, CPU: 00:00:08.250, GC gen0: 0, gen1: 0, gen2: 0
+      // New (fully hidden represenations)
+      // Real: 00:00:02.980, CPU: 00:00:02.968, GC gen0: 0, gen1: 0, gen2: 0
+      // Real: 00:00:02.961, CPU: 00:00:02.953, GC gen0: 0, gen1: 0, gen2: 0
+      // Real: 00:00:03.009, CPU: 00:00:03.015, GC gen0: 0, gen1: 0, gen2: 0
+      // Real: 00:00:02.952, CPU: 00:00:02.921, GC gen0: 0, gen1: 0, gen2: 0
 
 
 
