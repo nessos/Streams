@@ -182,7 +182,7 @@ module ParStream =
     /// <summary>Returns a parallel stream that preserves ordering.</summary>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result parallel stream as ordered.</returns>
-    let inline ordered (stream : ParStream<'T>) : ParStream<'T> = 
+    let ordered (stream : ParStream<'T>) : ParStream<'T> = 
         { new ParStream<'T> with
                 member self.DegreeOfParallelism = stream.DegreeOfParallelism
                 member self.SourceType = stream.SourceType
@@ -200,7 +200,7 @@ module ParStream =
     /// <summary>Returns a parallel stream that is unordered.</summary>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result parallel stream as unordered.</returns>
-    let inline unordered (stream : ParStream<'T>) : ParStream<'T> = 
+    let unordered (stream : ParStream<'T>) : ParStream<'T> = 
         if stream.PreserveOrdering then
             stream.Stream() |> Stream.toSeq |> ofSeq |> withDegreeOfParallelism stream.DegreeOfParallelism 
         else
@@ -330,7 +330,7 @@ module ParStream =
     /// <param name="n">The number of items to take.</param>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result prallel stream.</returns>
-    let inline take (n : int) (stream : ParStream<'T>) : ParStream<'T> =
+    let take (n : int) (stream : ParStream<'T>) : ParStream<'T> =
         if n < 0 then
             raise <| new System.ArgumentException("The input must be non-negative.")
         { new ParStream<'T> with
@@ -355,7 +355,7 @@ module ParStream =
     /// <param name="n">The number of items to skip.</param>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result parallel stream.</returns>
-    let inline skip (n : int) (stream : ParStream<'T>) : ParStream<'T> =
+    let skip (n : int) (stream : ParStream<'T>) : ParStream<'T> =
         { new ParStream<'T> with
             member self.DegreeOfParallelism = stream.DegreeOfParallelism
             member self.SourceType = stream.SourceType
@@ -437,13 +437,13 @@ module ParStream =
     /// <summary>Returns the total number of elements of the parallel stream.</summary>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The total number of elements.</returns>
-    let inline length (stream : ParStream<'T>) : int =
+    let length (stream : ParStream<'T>) : int =
         fold (fun acc _  -> 1 + acc) (+) (fun () -> 0) stream
 
     /// <summary>Creates an array from the given parallel stream.</summary>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result array.</returns>    
-    let inline toArray (stream : ParStream<'T>) : 'T[] =
+    let toArray (stream : ParStream<'T>) : 'T[] =
         if stream.PreserveOrdering then
             stream.Stream() |> Stream.toArray
         else
@@ -456,13 +456,13 @@ module ParStream =
     /// <summary>Creates an ResizeArray from the given parallel stream.</summary>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result ResizeArray.</returns>    
-    let inline toResizeArray (stream : ParStream<'T>) : ResizeArray<'T> =
+    let toResizeArray (stream : ParStream<'T>) : ResizeArray<'T> =
         new ResizeArray<'T>(toArray stream)
 
     /// <summary>Creates an Seq from the given parallel stream.</summary>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result Seq.</returns>    
-    let inline toSeq (stream : ParStream<'T>) : seq<'T> =
+    let toSeq (stream : ParStream<'T>) : seq<'T> =
         match stream.SourceType, stream.PreserveOrdering with
         | SourceType.Array, false -> toArray stream :> _
         | SourceType.ResizeArray, false -> toResizeArray stream :> _
@@ -719,7 +719,7 @@ module ParStream =
     /// </summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>The first element of the stream, or None if the stream has no elements.</returns>
-    let inline tryHead (stream : ParStream<'T>) : 'T option =
+    let tryHead (stream : ParStream<'T>) : 'T option =
         let r = stream |> ordered |> take 1 |> toArray
         if r.Length = 0 then None
         else Some r.[0]
@@ -731,7 +731,7 @@ module ParStream =
     /// <param name="stream">The input stream.</param>
     /// <returns>The first element of the stream.</returns>
     /// <exception cref="System.ArgumentException">Thrown when the stream has no elements.</exception>
-    let inline head (stream : ParStream<'T>) : 'T =
+    let head (stream : ParStream<'T>) : 'T =
         match tryHead stream with
         | Some value -> value
         | None -> invalidArg "stream" "The stream was empty."
@@ -741,5 +741,5 @@ module ParStream =
     /// </summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>true if the input stream is empty, false otherwise</returns>
-    let inline isEmpty (stream : ParStream<'T>) : bool =
+    let isEmpty (stream : ParStream<'T>) : bool =
         stream |> exists (fun _ -> true) |> not

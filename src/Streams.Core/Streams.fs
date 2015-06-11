@@ -612,7 +612,7 @@ module Stream =
     /// <summary>Returns the total number of elements of the stream.</summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>The total number of elements.</returns>
-    let inline length (stream : Stream<'T>) : int =
+    let length (stream : Stream<'T>) : int =
         fold (fun acc _  -> 1 + acc) 0 stream
 
     /// <summary>Creates an Seq from the given stream.</summary>
@@ -634,7 +634,7 @@ module Stream =
     /// <summary>Creates an array from the given stream.</summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>The result array.</returns>    
-    let inline toArray (stream : Stream<'T>) : 'T[] =
+    let toArray (stream : Stream<'T>) : 'T[] =
         let list = toResizeArray stream
         list.ToArray()
 
@@ -826,7 +826,7 @@ module Stream =
     /// </summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>The first element of the stream, or None if the stream has no elements.</returns>
-    let inline tryHead (stream : Stream<'T>) : 'T option =
+    let tryHead (stream : Stream<'T>) : 'T option =
         let stream' = take 1 stream
         let resultRef = ref Unchecked.defaultof<'T option>
         stream' |> iter (fun value -> resultRef := Some value)
@@ -838,7 +838,7 @@ module Stream =
     /// <param name="stream">The input stream.</param>
     /// <returns>The first element of the stream.</returns>
     /// <exception cref="System.ArgumentException">Thrown when the stream has no elements.</exception>
-    let inline head (stream : Stream<'T>) : 'T =
+    let head (stream : Stream<'T>) : 'T =
         match tryHead stream with
         | Some value -> value
         | None -> invalidArg "stream" "The stream was empty."
@@ -849,5 +849,5 @@ module Stream =
     /// </summary>
     /// <param name="stream">The input stream.</param>
     /// <returns>true if the input stream is empty, false otherwise</returns>
-    let inline isEmpty (stream : Stream<'T>) : bool =
+    let isEmpty (stream : Stream<'T>) : bool =
         stream |> exists (fun _ -> true) |> not
