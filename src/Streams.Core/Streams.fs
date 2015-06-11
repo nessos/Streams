@@ -18,10 +18,10 @@ type internal Iterable =
     abstract Iterator : Iterator
 
 [<AllowNullLiteral>]
-type StreamCancellation() = 
+type StreamCancellationTokenSource() = 
      let mutable cancelled = false
-     let mutable linked : StreamCancellation list = []
-     member x.CreateLinked() = let sc = StreamCancellation() in linked <- sc :: linked; sc
+     let mutable linked : StreamCancellationTokenSource list = []
+     member x.CreateLinkedTokenSource() = let sc = StreamCancellationTokenSource() in linked <- sc :: linked; sc
      member x.Cancel() = cancelled <- true; for l in linked do l.Cancel()
      member x.Cancelled = cancelled
 
@@ -32,7 +32,7 @@ type internal Context<'T> = {
     /// The completed continuation
     Complete : unit -> unit
     /// The current CancellationTokenSource
-    Cts : StreamCancellation 
+    Cts : StreamCancellationTokenSource 
 }
 
 /// Represents a Stream of values.
@@ -110,7 +110,7 @@ module Stream =
         // 'f' is called with two arguments before iteration.
         let mapContCancel f stream =
             Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
-                let cts = if cts = null then StreamCancellation() else cts 
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 stream.Run 
                         { Complete = complete;
                           Cont = f cts iterf;
@@ -171,7 +171,7 @@ module Stream =
                 
             let iterator() = 
                 let i = ref 0
-                let cts = if cts = null then StreamCancellation() else cts 
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 { new Iterator with 
                     member __.TryAdvance() = 
                         if cts.Cancelled then
@@ -211,7 +211,7 @@ module Stream =
             let iterator() = 
                 let i = ref 0
                 let continueFlag = ref true
-                let cts = if cts = null then StreamCancellation() else cts 
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 { new Iterator with 
                     member __.TryAdvance() = 
                         if cts.Cancelled then
@@ -256,7 +256,7 @@ module Stream =
 
             let iterator() = 
                 let enumerator = source.GetEnumerator()
-                let cts = if cts = null then StreamCancellation() else cts 
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 { new Iterator with 
                      member __.TryAdvance() = 
                         if cts.Cancelled then
@@ -301,7 +301,7 @@ module Stream =
 
             let iterator() = 
                 let enumerator = source.GetEnumerator()
-                let cts = if cts = null then StreamCancellation() else cts 
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 { new Iterator with 
                      member __.TryAdvance() = 
                         if not cts.Cancelled && enumerator.MoveNext()  then
@@ -348,7 +348,7 @@ module Stream =
                       Cont =  
                         (fun value -> 
                             let stream' = f value;
-                            let cts' = if cts = null then cts else cts.CreateLinked()
+                            let cts' = if cts = null then cts else cts.CreateLinkedTokenSource()
                             stream'.RunBulk { Complete = (fun () -> ()); Cont = iterf; Cts = cts' } );
                       Cts = cts })
 
@@ -417,7 +417,7 @@ module Stream =
             raise <| new System.ArgumentException("The input must be non-negative.")
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
             let counter = ref 0
-            let cts = if cts = null then StreamCancellation() else cts
+            let cts = if cts = null then StreamCancellationTokenSource() else cts
             stream.Run 
                     { Complete = complete;
                       Cont = 
@@ -469,7 +469,7 @@ module Stream =
                         member __.TryAdvance() = false; 
                         member __.Dispose() = () }
                 else                    
-                    let cts = if cts = null then StreamCancellation() else cts 
+                    let cts = if cts = null then StreamCancellationTokenSource() else cts 
                     let enumerator =
                         let streams = 
                             streams
@@ -510,7 +510,7 @@ module Stream =
             let bulk () =
                 let firstEnumerator = new StreamEnumerator<'T>(first) :> IEnumerator<'T>
                 let secondEnumerator = new StreamEnumerator<'S>(second) :> IEnumerator<'S>
-                let cts = if cts = null then StreamCancellation() else cts
+                let cts = if cts = null then StreamCancellationTokenSource() else cts
                 while not cts.Cancelled do
                     if firstEnumerator.MoveNext() && secondEnumerator.MoveNext() then
                         iterf (f firstEnumerator.Current secondEnumerator.Current)
@@ -521,7 +521,7 @@ module Stream =
             let iterator() = 
                 let firstEnumerator = new StreamEnumerator<'T>(first) :> IEnumerator<'T>
                 let secondEnumerator = new StreamEnumerator<'S>(second) :> IEnumerator<'S>
-                let cts = if cts = null then StreamCancellation() else cts
+                let cts = if cts = null then StreamCancellationTokenSource() else cts
                 { new Iterator with 
                     member __.TryAdvance() = 
                         if cts.Cancelled then
@@ -714,7 +714,7 @@ module Stream =
     /// <returns>The first element for which the predicate returns true, or None if every element evaluates to false.</returns>
     let inline tryFind (predicate : 'T -> bool) (stream : Stream<'T>) : 'T option = 
         let resultRef = ref Unchecked.defaultof<'T option>
-        let cts = StreamCancellation()
+        let cts = StreamCancellationTokenSource()
         stream |> Internals.iterCancel cts (fun value -> if predicate value then resultRef := Some value; cts.Cancel())
         !resultRef
 
@@ -734,7 +734,7 @@ module Stream =
     /// <returns>The first element for which the chooser returns Some, or None if every element evaluates to None.</returns>
     let inline tryPick (chooser : 'T -> 'R option) (stream : Stream<'T>) : 'R option = 
         let resultRef = ref Unchecked.defaultof<'R option>
-        let cts = StreamCancellation()
+        let cts = StreamCancellationTokenSource()
         stream |> Internals.iterCancel cts (fun value -> match chooser value with | Some value' -> resultRef := Some value'; cts.Cancel() | None -> ())
         !resultRef
 
