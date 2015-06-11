@@ -99,7 +99,7 @@ module Stream =
                              Cts = cts })
 
         // Public permanent entrypoint to implement inlined versions of takeWhile etc.
-        // 'f' is called with one argument before iteration.
+        // 'f' is called with two arguments before iteration.
         let mapContCancel f stream =
             Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
                 let cts = if cts = null then new CancellationTokenSource() else cts 
@@ -109,7 +109,6 @@ module Stream =
                           Cts = cts })
 
         // Public permanent entrypoint to implement inlined versions of tryFind, tryPick
-        // 'f' is called with one argument before iteration.
         let iterCancel cts (f : ('T -> unit)) (stream : Stream<'T>) : unit = 
            stream.RunBulk
                 { Complete = (fun () -> ())
