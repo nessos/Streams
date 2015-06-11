@@ -17,6 +17,15 @@ type internal Iterable =
     /// Iterator for on-demand processing
     abstract Iterator : Iterator
 
+[<AllowNullLiteral>]
+/// An internal type used for the inlined implementation of this API
+type internal StreamCancellationTokenSource() = 
+     let mutable cancelled = false
+     let mutable linked : StreamCancellationTokenSource list = []
+     member x.CreateLinkedTokenSource() = let sc = StreamCancellationTokenSource() in linked <- sc :: linked; sc
+     member x.Cancel() = cancelled <- true; for l in linked do l.Cancel()
+     member x.Cancelled = cancelled
+
 /// Represents the current executing contex
 type internal Context<'T> = {
     /// The composed continutation
@@ -24,7 +33,7 @@ type internal Context<'T> = {
     /// The completed continuation
     Complete : unit -> unit
     /// The current CancellationTokenSource
-    Cts : CancellationTokenSource 
+    Cts : StreamCancellationTokenSource 
 }
 
 /// Represents a Stream of values.
@@ -102,17 +111,29 @@ module Stream =
         // 'f' is called with two arguments before iteration.
         let mapContCancel f stream =
             Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
-                let cts = if cts = null then new CancellationTokenSource() else cts 
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 stream.Run 
                         { Complete = complete;
-                          Cont = f cts iterf;
+                          Cont = f cts.Cancel iterf;
                           Cts = cts })
 
-        // Public permanent entrypoint to implement inlined versions of tryFind, tryPick
-        let iterCancel cts (f : ('T -> unit)) (stream : Stream<'T>) : unit = 
+        // Public permanent entrypoint to implement inlined versions of linked iteration in ParStreams
+        // Iterates using a new cancellation source linked to the given source.
+        let iterCancelLink (cts: CancellationTokenSource) (f : ('T -> unit)) (stream : Stream<'T>) : unit = 
+           let cts' = StreamCancellationTokenSource()
+           cts.Token.Register(fun _ -> cts'.Cancel()) |> ignore
            stream.RunBulk
                 { Complete = (fun () -> ())
                   Cont = f 
+                  Cts = cts' } 
+
+        // Public permanent entrypoint to implement inlined versions of tryFind, tryPick
+        // Iterates using a new cancellation source and passes the cancel function to the caller when computing Cont.
+        let iterCancel (f : (unit -> unit) -> ('T -> unit)) (stream : Stream<'T>) : unit = 
+           let cts = StreamCancellationTokenSource()
+           stream.RunBulk
+                { Complete = (fun () -> ())
+                  Cont = f cts.Cancel
                   Cts = cts } 
 
     /// <summary>The empty stream.</summary>
@@ -124,7 +145,7 @@ module Stream =
                  member __.Iterator = 
                     { new Iterator with 
                          member __.TryAdvance() = false
-                         member __.Dispose () = if not (cts = null) then cts.Dispose() } })
+                         member __.Dispose () = ()} })
 
     /// <summary>Creates a singleton stream.</summary>
     /// <param name="source">The singleton stream element</param>
@@ -143,7 +164,7 @@ module Stream =
                                 pulled := true
                                 complete ()
                                 true
-                          member __.Dispose() = if not (cts = null) then cts.Dispose() } })
+                          member __.Dispose() = ()} })
            
     /// <summary>Wraps array as a stream.</summary>
     /// <param name="source">The input array.</param>
@@ -153,10 +174,7 @@ module Stream =
             let bulk () =
                 if not (cts = null) then
                     let mutable i = 0
-                    let next = ref true 
-                    cts.Token.Register(fun () -> next := false) |> ignore
-                    use cts' = cts  
-                    while i < source.Length && !next do
+                    while i < source.Length && not cts.Cancelled do
                         iterf source.[i]
                         i <- i + 1
                 else
@@ -166,25 +184,23 @@ module Stream =
                 
             let iterator() = 
                 let i = ref 0
-                let continueFlag = ref true
-                if not (cts = null) then
-                    cts.Token.Register(fun () -> continueFlag := false) |> ignore
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 { new Iterator with 
                     member __.TryAdvance() = 
-                        if not !continueFlag then
+                        if cts.Cancelled then
                             false
                         else if !i < source.Length then
                             iterf source.[!i] 
-                            if not !continueFlag then
+                            if cts.Cancelled then
                                 complete ()
                             incr i
                             true
                         else
-                            continueFlag := false
+                            cts.Cancel()
                             complete ()
                             true
                     member __.Dispose() = 
-                        if not (cts = null) then cts.Dispose() }
+                        ()}
             { new Iterable with 
                  member __.Bulk() = bulk()
                  member __.Iterator = iterator() })
@@ -197,10 +213,7 @@ module Stream =
             let bulk () =
                 if not (cts = null) then
                     let mutable i = 0
-                    let next = ref true 
-                    cts.Token.Register(fun () -> next := false) |> ignore
-                    use cts' = cts  
-                    while i < source.Count && !next do
+                    while i < source.Count && not cts.Cancelled do
                         iterf source.[i]
                         i <- i + 1
                 else
@@ -211,25 +224,24 @@ module Stream =
             let iterator() = 
                 let i = ref 0
                 let continueFlag = ref true
-                if not (cts = null) then
-                    cts.Token.Register(fun () -> continueFlag := false) |> ignore
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 { new Iterator with 
                     member __.TryAdvance() = 
-                        if not !continueFlag then
+                        if cts.Cancelled then
                             false
                         else if !i < source.Count then
                             iterf source.[!i] 
-                            if not !continueFlag then
+                            if cts.Cancelled then
                                 complete ()
                             incr i
                             true
                         else
-                            continueFlag := false
+                            cts.Cancel()
                             complete ()
                             true
 
                     member __.Dispose() = 
-                        if not (cts = null) then cts.Dispose() }
+                        ()}
 
             { new Iterable with 
                  member __.Bulk() = bulk()
@@ -247,13 +259,9 @@ module Stream =
             let bulk () =
                 if not (cts = null) then
                     use enumerator = source.GetEnumerator()
-                    let next = ref true
-                    cts.Token.Register(fun () -> next := false) |> ignore
-                    use cts' = cts
-                    while enumerator.MoveNext() && !next do
+                    while enumerator.MoveNext() && not cts.Cancelled do
                         iterf enumerator.Current
                     complete ()
-                    enumerator.Dispose()
                 else
                     for value in source do
                         iterf value
@@ -261,24 +269,22 @@ module Stream =
 
             let iterator() = 
                 let enumerator = source.GetEnumerator()
-                let continueFlag = ref true
-                if not (cts = null) then
-                    cts.Token.Register(fun () -> continueFlag := false) |> ignore
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 { new Iterator with 
                      member __.TryAdvance() = 
-                        if not !continueFlag then
+                        if cts.Cancelled then
                             false
                         else if enumerator.MoveNext() then
                             iterf enumerator.Current
-                            if not !continueFlag then
+                            if cts.Cancelled then
                                 complete ()
                             true
                         else
-                            continueFlag := false
+                            cts.Cancel()
                             complete ()
                             true
                      member __.Dispose() = 
-                         if not (cts = null) then cts.Dispose() 
+                         ()
                          enumerator.Dispose() }
             { new Iterable with 
                  member __.Bulk() = bulk() 
@@ -292,13 +298,12 @@ module Stream =
             let bulk () =
                 
                 if not (cts = null) then
-                    let enumerator = source.GetEnumerator() // not disposable
-                    let next = ref true
-                    cts.Token.Register(fun () -> next := false) |> ignore
-                    use cts' = cts
-                    while enumerator.MoveNext() && !next do
+                  let enumerator = source.GetEnumerator() // not disposable
+                  try
+                    while enumerator.MoveNext() && not cts.Cancelled do
                         iterf (enumerator.Current :?> 'T)
                     complete ()
+                  finally
                     match enumerator with 
                     | :? System.IDisposable as disposable -> disposable.Dispose()
                     | _ -> ()                    
@@ -309,25 +314,20 @@ module Stream =
 
             let iterator() = 
                 let enumerator = source.GetEnumerator()
-                let continueFlag = ref true
-                if not (cts = null) then
-                    cts.Token.Register(fun () -> continueFlag := false) |> ignore
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 { new Iterator with 
                      member __.TryAdvance() = 
-                        if not !continueFlag || not <| enumerator.MoveNext()  then
-                            match enumerator with 
-                            | :? System.IDisposable as disposable -> disposable.Dispose()
-                            | _ -> ()
-                            false
-                        else
+                        if not cts.Cancelled && enumerator.MoveNext()  then
                             iterf (enumerator.Current :?> 'T)
                             true
+                        else
+                            false
                      member __.Dispose() = 
                         match enumerator with 
                         | :? System.IDisposable as disposable -> disposable.Dispose()
                         | _ -> ()
                         complete ()
-                        if not (cts = null) then cts.Dispose()  }
+                        () }
             { new Iterable with 
                 member __.Bulk() = bulk()
                 member __.Iterator = iterator()  })
@@ -360,12 +360,9 @@ module Stream =
                     { Complete = complete;
                       Cont =  
                         (fun value -> 
-                            let cts = 
-                                if not (cts = null) then
-                                    CancellationTokenSource.CreateLinkedTokenSource(cts.Token)
-                                else cts
                             let stream' = f value;
-                            stream'.RunBulk { Complete = (fun () -> ()); Cont = iterf; Cts = cts } );
+                            let cts' = if cts = null then cts else cts.CreateLinkedTokenSource()
+                            stream'.RunBulk { Complete = (fun () -> ()); Cont = iterf; Cts = cts' } );
                       Cts = cts })
 
     /// <summary>Transforms each element of the input stream to a new stream and flattens its elements.</summary>
@@ -433,7 +430,7 @@ module Stream =
             raise <| new System.ArgumentException("The input must be non-negative.")
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
             let counter = ref 0
-            let cts = if cts = null then new CancellationTokenSource() else cts
+            let cts = if cts = null then StreamCancellationTokenSource() else cts
             stream.Run 
                     { Complete = complete;
                       Cont = 
@@ -451,7 +448,7 @@ module Stream =
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>
     let inline takeWhile pred (stream : Stream<'T>) : Stream<'T> = 
-        stream |> Internals.mapContCancel (fun cts iterf -> nocurry(); fun value -> if pred value then iterf value else cts.Cancel())
+        stream |> Internals.mapContCancel (fun cancel iterf -> nocurry(); fun value -> if pred value then iterf value else cancel())
         
 
     /// <summary>Returns a stream that skips N elements of the input stream and then yields the remaining elements of the stream.</summary>
@@ -466,7 +463,7 @@ module Stream =
                       Cont = 
                         (fun value -> 
                             incr counter
-                            if !counter > n then iterf value else ());
+                            if !counter > n then iterf value);
                       Cts = cts })
 
 
@@ -485,6 +482,7 @@ module Stream =
                         member __.TryAdvance() = false; 
                         member __.Dispose() = () }
                 else                    
+                    let cts = if cts = null then StreamCancellationTokenSource() else cts 
                     let enumerator =
                         let streams = 
                             streams
@@ -493,24 +491,20 @@ module Stream =
                                                 member __.GetEnumerator () = new StreamEnumerator<'T>(stream) :> IEnumerator<'T>
                                                 member __.GetEnumerator () = new StreamEnumerator<'T>(stream) :> System.Collections.IEnumerator })
                         streams.GetEnumerator()
-                    let continueFlag = ref true
-                    if not (cts = null) then
-                        cts.Token.Register(fun _ -> continueFlag := false) |> ignore
                     { new Iterator with 
                         member __.TryAdvance() = 
-                            if not !continueFlag then
+                            if cts.Cancelled then
                                 false
                             else if enumerator.MoveNext() then
                                 iterf enumerator.Current 
-                                if not !continueFlag then
+                                if cts.Cancelled then
                                     complete ()
                                 true
                             else 
-                                continueFlag := false
+                                cts.Cancel()
                                 complete ()
                                 true
                         member __.Dispose() = 
-                            if not (cts = null) then cts.Dispose()
                             enumerator.Dispose() }
 
             { new Iterable with 
@@ -529,39 +523,32 @@ module Stream =
             let bulk () =
                 let firstEnumerator = new StreamEnumerator<'T>(first) :> IEnumerator<'T>
                 let secondEnumerator = new StreamEnumerator<'S>(second) :> IEnumerator<'S>
-                let next = ref true
-                if not (cts = null) then
-                    cts.Token.Register(fun _ -> next := false) |> ignore
-                use cts' = cts
-                while !next do
+                let cts = if cts = null then StreamCancellationTokenSource() else cts
+                while not cts.Cancelled do
                     if firstEnumerator.MoveNext() && secondEnumerator.MoveNext() then
                         iterf (f firstEnumerator.Current secondEnumerator.Current)
                     else
-                        next := false
+                        cts.Cancel()
                     ()
                 complete ()
             let iterator() = 
-                let continueFlag = ref true
-                if not (cts = null) then
-                    cts.Token.Register(fun _ -> continueFlag := false) |> ignore
                 let firstEnumerator = new StreamEnumerator<'T>(first) :> IEnumerator<'T>
                 let secondEnumerator = new StreamEnumerator<'S>(second) :> IEnumerator<'S>
+                let cts = if cts = null then StreamCancellationTokenSource() else cts
                 { new Iterator with 
                     member __.TryAdvance() = 
-                        if not !continueFlag then
+                        if cts.Cancelled then
                             false
                         else if firstEnumerator.MoveNext() && secondEnumerator.MoveNext() then
                             iterf (f firstEnumerator.Current secondEnumerator.Current)
-                            if not !continueFlag then
+                            if cts.Cancelled then
                                 complete ()
                             true
                         else
-                            continueFlag := false
+                            cts.Cancel()
                             complete ()
                             true
                     member __.Dispose() = 
-                        if not (cts = null) then
-                            cts.Dispose()
                         firstEnumerator.Dispose()
                         secondEnumerator.Dispose() }
             { new Iterable with 
@@ -740,8 +727,7 @@ module Stream =
     /// <returns>The first element for which the predicate returns true, or None if every element evaluates to false.</returns>
     let inline tryFind (predicate : 'T -> bool) (stream : Stream<'T>) : 'T option = 
         let resultRef = ref Unchecked.defaultof<'T option>
-        let cts = new CancellationTokenSource ()
-        stream |> Internals.iterCancel cts (fun value -> if predicate value then resultRef := Some value; cts.Cancel())
+        stream |> Internals.iterCancel (fun cancel -> nocurry(); fun value -> if predicate value then resultRef := Some value; cancel())
         !resultRef
 
     /// <summary>Returns the first element for which the given function returns true. Raises KeyNotFoundException if no such element exists.</summary>
@@ -760,8 +746,7 @@ module Stream =
     /// <returns>The first element for which the chooser returns Some, or None if every element evaluates to None.</returns>
     let inline tryPick (chooser : 'T -> 'R option) (stream : Stream<'T>) : 'R option = 
         let resultRef = ref Unchecked.defaultof<'R option>
-        let cts = new CancellationTokenSource ()
-        stream |> Internals.iterCancel cts (fun value -> match chooser value with | Some value' -> resultRef := Some value'; cts.Cancel() | None -> ())
+        stream |> Internals.iterCancel (fun cancel -> nocurry(); fun value -> match chooser value with | Some value' -> resultRef := Some value'; cancel() | None -> ())
         !resultRef
 
     /// <summary>Applies the given function to successive elements, returning the first result where the function returns a Some value.
