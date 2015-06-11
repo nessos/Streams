@@ -335,7 +335,7 @@ type ``ParStreams tests`` () =
                 Assert.AreEqual(x, y)).QuickCheckThrowOnFailure()
 
         [<Test>]
-        member __.``mapi/filter``() =
+        member __.``filter/mapi/iter``() =
             Spec.ForAny<int []>(fun (xs : int  []) ->
                 let x = 
                     let ra = ResizeArray()
@@ -347,4 +347,34 @@ type ``ParStreams tests`` () =
                     ra.ToArray()
 
                 x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``choose/mapi/iter``() =
+            Spec.ForAny<int []>(fun (xs : int  []) ->
+                let x = 
+                    let ra = ResizeArray()
+                    ParStream.ofArray xs |> ParStream.choose (fun x -> if x % 2 = 0 then Some x else None) |> ParStream.mapi (fun i x -> (i,x)) |> ParStream.iter ra.Add
+                    ra.ToArray()
+                let y = 
+                    let ra = ResizeArray()
+                    Stream.ofArray xs |> Stream.choose (fun x -> if x % 2 = 0 then Some x else None) |> Stream.mapi (fun i x -> (i,x)) |> Stream.iter ra.Add
+                    ra.ToArray()
+
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``skip/mapi/iter``() =
+            Spec.ForAny<int []>(fun (xs : int  []) ->
+                if xs.Length > 0 then 
+                    let x = 
+                        let ra = ResizeArray()
+                        ParStream.ofArray xs |> ParStream.skip 1 |> ParStream.mapi (fun i x -> (i,x)) |> ParStream.iter ra.Add
+                        ra.ToArray()
+                    let y = 
+                        let ra = ResizeArray()
+                        Stream.ofArray xs |> Stream.skip 1 |> Stream.mapi (fun i x -> (i,x)) |> Stream.iter ra.Add
+                        ra.ToArray()
+
+                    x = y
+                 else true).QuickCheckThrowOnFailure()
 
