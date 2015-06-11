@@ -18,6 +18,7 @@ type internal Iterable =
     abstract Iterator : Iterator
 
 [<AllowNullLiteral>]
+/// An internal type used for the inlined implementation of this API
 type StreamCancellationTokenSource() = 
      let mutable cancelled = false
      let mutable linked : StreamCancellationTokenSource list = []
