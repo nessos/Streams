@@ -9,8 +9,6 @@ open Nessos.Streams.Internals
 
 /// Represents the iteration function
 type ParIterator<'T> = {
-    /// The index of the current element from the parallel source
-    Index : int ref 
     /// The composed continutation with 'T for the current value
     Func : ('T -> unit)
     /// The current CancellationTokenSource
@@ -74,7 +72,6 @@ module ParStream =
                         Task.Factory.StartNew(fun () ->
                                                 let mutable i = s
                                                 while i < e && !nextRef do
-                                                    iter.Index := i
                                                     iter.Func source.[i]
                                                     i <- i + 1 
                                                 ())
@@ -103,7 +100,6 @@ module ParStream =
                         Task.Factory.StartNew(fun () ->
                                                 let mutable i = s
                                                 while i < e && !nextRef do
-                                                    iter.Index := i
                                                     iter.Func source.[i]
                                                     i <- i + 1 
                                                 ())
@@ -135,7 +131,6 @@ module ParStream =
                         iter.Cts.Token.Register(fun _ -> nextRef := false) |> ignore 
                         Task.Factory.StartNew(fun () ->
                                                 while partition.MoveNext() && !nextRef do
-                                                    iter.Index := int partition.Current.Key
                                                     iter.Func partition.Current.Value
                                                 ())
                     let tasks = partitions 
@@ -222,8 +217,7 @@ module ParStream =
                         member self.DegreeOfParallelism = collector.DegreeOfParallelism
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
-                            {   Index = iterator.Index; 
-                                Func = (fun value -> iter (f value));
+                            {   Func = (fun value -> iter (f value));
                                 Cts = iterator.Cts }
                         member self.Result = collector.Result }
                 stream.Apply collector }
@@ -238,17 +232,7 @@ module ParStream =
             member self.SourceType = stream.SourceType
             member self.PreserveOrdering = true
             member self.Stream () = stream.Stream() |> Stream.mapi f 
-            member self.Apply<'S> (collector : Collector<'R, 'S>) =
-                let collector = 
-                    { new Collector<'T, 'S> with
-                        member self.DegreeOfParallelism = collector.DegreeOfParallelism
-                        member self.Iterator() =
-                            let { Index = index; Func = iter } as iterator = collector.Iterator()
-                            {   Index = iterator.Index; 
-                                Func = (fun value -> iter (f !index value));
-                                Cts = iterator.Cts } 
-                        member self.Result = collector.Result }
-                stream.Apply collector }
+            member self.Apply<'S> (collector : Collector<'R, 'S>) = (unordered self).Apply collector }
 
     /// <summary>Transforms each element of the input parallel stream to a new stream and flattens its elements.</summary>
     /// <param name="f">A function to transform items from the input parallel stream.</param>
@@ -266,8 +250,7 @@ module ParStream =
                         member self.DegreeOfParallelism = collector.DegreeOfParallelism
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
-                            {   Index = iterator.Index
-                                Func = (fun value -> 
+                            {   Func = (fun value -> 
                                         let stream' = f value
                                         let cts = CancellationTokenSource.CreateLinkedTokenSource(iterator.Cts.Token)
                                         stream' |> Stream.Internals.iterCancel cts (fun v -> iter v |> ignore))
@@ -298,8 +281,7 @@ module ParStream =
                         member self.DegreeOfParallelism = collector.DegreeOfParallelism
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
-                            {   Index = iterator.Index; 
-                                Func = (fun value -> if predicate value then iter value else ());
+                            {   Func = (fun value -> if predicate value then iter value else ());
                                 Cts = iterator.Cts }
                         member self.Result = collector.Result }
                 stream.Apply collector }
@@ -320,8 +302,7 @@ module ParStream =
                         member self.DegreeOfParallelism = collector.DegreeOfParallelism
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
-                            {   Index = iterator.Index;
-                                Func = (fun value -> match chooser value with Some value' -> iter value' | None -> ());
+                            {   Func = (fun value -> match chooser value with Some value' -> iter value' | None -> ());
                                 Cts = iterator.Cts }
                         member self.Result = collector.Result }
                 stream.Apply collector }
@@ -345,8 +326,7 @@ module ParStream =
                         member self.DegreeOfParallelism = collector.DegreeOfParallelism
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
-                            {   Index = iterator.Index; 
-                                Func = (fun value -> if Interlocked.Increment count <= n then iter value else iterator.Cts.Cancel());
+                            {   Func = (fun value -> if Interlocked.Increment count <= n then iter value else iterator.Cts.Cancel());
                                 Cts = iterator.Cts }
                         member self.Result = collector.Result }
                 stream.Apply collector }
@@ -368,8 +348,7 @@ module ParStream =
                         member self.DegreeOfParallelism = collector.DegreeOfParallelism
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
-                            {   Index = iterator.Index; 
-                                Func = (fun value -> if Interlocked.Increment count > n then iter value else ());
+                            {   Func = (fun value -> if Interlocked.Increment count > n then iter value else ());
                                 Cts = iterator.Cts }
                         member self.Result = collector.Result }
                 stream.Apply collector }
@@ -387,8 +366,7 @@ module ParStream =
                 { new Collector<'T, obj> with
                     member self.DegreeOfParallelism = stream.DegreeOfParallelism
                     member self.Iterator() = 
-                        { Index = ref -1; 
-                          Func = (fun value -> f value);
+                        { Func = (fun value -> f value);
                           Cts = new CancellationTokenSource() }
                     member self.Result = 
                         () :> _ }
@@ -411,8 +389,7 @@ module ParStream =
                 member self.Iterator() = 
                     let accRef = ref <| state ()
                     results.Add(accRef)
-                    { Index = ref -1; 
-                      Func = (fun value -> accRef := folder !accRef value);
+                    { Func = (fun value -> accRef := folder !accRef value);
                       Cts = new CancellationTokenSource() }
                 member self.Result = 
                     let mutable acc = state ()
@@ -567,8 +544,7 @@ module ParStream =
             { new Collector<'T, ParStream<'Key * 'State>> with
                 member self.DegreeOfParallelism = stream.DegreeOfParallelism
                 member self.Iterator() = 
-                    {   Index = ref -1; 
-                        Func =
+                    {   Func =
                             (fun value -> 
                                     let mutable grouping = Unchecked.defaultof<_>
                                     let key = projection value
@@ -612,8 +588,7 @@ module ParStream =
             { new Collector<'T, ParStream<'Key * seq<'T>>> with
                 member self.DegreeOfParallelism = stream.DegreeOfParallelism
                 member self.Iterator() = 
-                    {   Index = ref -1; 
-                        Func =
+                    {   Func =
                             (fun value -> 
                                 let mutable grouping = Unchecked.defaultof<List<'T>>
                                 let key = projection value
@@ -649,8 +624,7 @@ module ParStream =
             { new Collector<'T, 'T option> with
                 member self.DegreeOfParallelism = stream.DegreeOfParallelism 
                 member self.Iterator() = 
-                    {   Index = ref -1; 
-                        Func = (fun value -> if predicate value then resultRef := Some value; cts.Cancel() else ());
+                    {   Func = (fun value -> if predicate value then resultRef := Some value; cts.Cancel() else ());
                         Cts = cts }
                 member self.Result = 
                     !resultRef }
@@ -679,8 +653,7 @@ module ParStream =
             { new Collector<'T, 'R option> with
                 member self.DegreeOfParallelism = stream.DegreeOfParallelism
                 member self.Iterator() = 
-                    {   Index = ref -1; 
-                        Func = (fun value -> match chooser value with Some value' -> resultRef := Some value'; cts.Cancel() | None -> ());
+                    {   Func = (fun value -> match chooser value with Some value' -> resultRef := Some value'; cts.Cancel() | None -> ());
                         Cts = cts }
                 member self.Result = 
                     !resultRef }
