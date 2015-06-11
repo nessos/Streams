@@ -117,8 +117,9 @@ module Stream =
                           Cont = f cts.Cancel iterf;
                           Cts = cts })
 
-        // Public permanent entrypoint to implement inlined versions of tryFind, tryPick
-        let internal iterCancelLink (cts: CancellationTokenSource) (f : ('T -> unit)) (stream : Stream<'T>) : unit = 
+        // Public permanent entrypoint to implement inlined versions of linked iteration in ParStreams
+        // Iterates using a new cancellation source linked to the given source.
+        let iterCancelLink (cts: CancellationTokenSource) (f : ('T -> unit)) (stream : Stream<'T>) : unit = 
            let cts' = StreamCancellationTokenSource()
            cts.Token.Register(fun _ -> cts'.Cancel()) |> ignore
            stream.RunBulk
@@ -127,6 +128,7 @@ module Stream =
                   Cts = cts' } 
 
         // Public permanent entrypoint to implement inlined versions of tryFind, tryPick
+        // Iterates using a new cancellation source and passes the cancel function to the caller when computing Cont.
         let iterCancel (f : (unit -> unit) -> ('T -> unit)) (stream : Stream<'T>) : unit = 
            let cts = StreamCancellationTokenSource()
            stream.RunBulk
