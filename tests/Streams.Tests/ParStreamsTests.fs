@@ -1,15 +1,24 @@
-﻿namespace Nessos.Streams.Tests
-    open System.Linq
-    open System.Threading
-    open System.Collections.Generic
-    open FsCheck
-    open FsCheck.Fluent
-    open NUnit.Framework
-    open FSharp.Collections.ParallelSeq
-    open Nessos.Streams
+﻿#if INTERACTIVE
+#r @"../../bin/Streams.Core.dll"
+//#r @"../../packages/Streams.0.3.0/lib/net45/Streams.Core.dll"
+#r @"../../packages/NUnit.3.0.0-alpha/lib/net45/nunit.framework.dll"
+#r @"../../packages/FsCheck.1.0.1/lib/net45/FSCheck.dll"
+#time "on"
+#else
+namespace Nessos.Streams.Tests
+#endif
 
-    [<TestFixture; Category("ParStreams.FSharp")>]
-    type ``ParStreams tests`` () =
+open System.Linq
+open System.Threading
+open System.Collections.Generic
+open FsCheck
+open FsCheck.Fluent
+open NUnit.Framework
+open FSharp.Collections.ParallelSeq
+open Nessos.Streams
+
+[<TestFixture; Category("ParStreams.FSharp")>]
+type ``ParStreams tests`` () =
 
         [<OneTimeSetUp>]
         member __.SetUp() =
@@ -324,3 +333,48 @@
                 let y = xs |> Stream.ofArray |> Stream.isEmpty
 
                 Assert.AreEqual(x, y)).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``filter/mapi/iter``() =
+            Spec.ForAny<int []>(fun (xs : int  []) ->
+                let x = 
+                    let ra = ResizeArray()
+                    ParStream.ofArray xs |> ParStream.filter (fun x -> x % 2 = 0) |> ParStream.mapi (fun i x -> (i,x)) |> ParStream.iter ra.Add
+                    ra.ToArray()
+                let y = 
+                    let ra = ResizeArray()
+                    Stream.ofArray xs |> Stream.filter (fun x -> x % 2 = 0) |> Stream.mapi (fun i x -> (i,x)) |> Stream.iter ra.Add
+                    ra.ToArray()
+
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``choose/mapi/iter``() =
+            Spec.ForAny<int []>(fun (xs : int  []) ->
+                let x = 
+                    let ra = ResizeArray()
+                    ParStream.ofArray xs |> ParStream.choose (fun x -> if x % 2 = 0 then Some x else None) |> ParStream.mapi (fun i x -> (i,x)) |> ParStream.iter ra.Add
+                    ra.ToArray()
+                let y = 
+                    let ra = ResizeArray()
+                    Stream.ofArray xs |> Stream.choose (fun x -> if x % 2 = 0 then Some x else None) |> Stream.mapi (fun i x -> (i,x)) |> Stream.iter ra.Add
+                    ra.ToArray()
+
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``skip/mapi/iter``() =
+            Spec.ForAny<int []>(fun (xs : int  []) ->
+                if xs.Length > 0 then 
+                    let x = 
+                        let ra = ResizeArray()
+                        ParStream.ofArray xs |> ParStream.skip 1 |> ParStream.mapi (fun i x -> (i,x)) |> ParStream.iter ra.Add
+                        ra.ToArray()
+                    let y = 
+                        let ra = ResizeArray()
+                        Stream.ofArray xs |> Stream.skip 1 |> Stream.mapi (fun i x -> (i,x)) |> Stream.iter ra.Add
+                        ra.ToArray()
+
+                    x = y
+                 else true).QuickCheckThrowOnFailure()
+
