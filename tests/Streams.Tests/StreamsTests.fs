@@ -420,7 +420,6 @@ module ``Streams tests``  =
 
                 Assert.AreEqual(y, x)).QuickCheckThrowOnFailure()
 
-(*
         [<Test>]
         let ``isEmpty``() =
             Spec.ForAny<int []>(fun (xs : int  []) ->
@@ -428,7 +427,6 @@ module ``Streams tests``  =
                 let y = xs |> Array.isEmpty
 
                 Assert.AreEqual(x, y)).QuickCheckThrowOnFailure()
-*)
 
 module PerfTests = 
   let AdhocPerformanceTest() = 
@@ -505,37 +503,22 @@ module PerfTests =
     runList() |> ignore
     runStream() |> ignore
       //0.3.0: 
-      // Real: 00:00:03.696, CPU: 00:00:03.671, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:03.519, CPU: 00:00:03.515, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:04.427, CPU: 00:00:04.406, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:02.735, CPU: 00:00:02.718, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:03.358, CPU: 00:00:03.359, GC gen0: 0, gen1: 0, gen2: 0
-      // New (with inlining)
-      // Real: 00:00:03.893, CPU: 00:00:03.906, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:02.672, CPU: 00:00:02.625, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:03.298, CPU: 00:00:03.296, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:02.859, CPU: 00:00:02.859, GC gen0: 1, gen1: 0, gen2: 0
-      // Real: 00:00:03.102, CPU: 00:00:03.093, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:04.127, CPU: 00:00:04.093, GC gen0: 0, gen1: 0, gen2: 0
-      // New (without inlining)
-      // Real: 00:00:17.211, CPU: 00:00:16.937, GC gen0: 1, gen1: 0, gen2: 0
-      // Real: 00:00:17.750, CPU: 00:00:17.687, GC gen0: 0, gen1: 0, gen2: 0
-      // New (with inlining and Stream as record)
-      // Real: 00:00:02.411, CPU: 00:00:02.390, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:02.487, CPU: 00:00:02.468, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:02.428, CPU: 00:00:02.437, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:02.465, CPU: 00:00:02.468, GC gen0: 1, gen1: 0, gen2: 0
-      // Real: 00:00:02.495, CPU: 00:00:02.484, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:02.853, CPU: 00:00:02.859, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:03.276, CPU: 00:00:03.234, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:02.757, CPU: 00:00:02.718, GC gen0: 0, gen1: 0, gen2: 0
-      // New (without inlining but map partially inlined)
-      // Real: 00:00:08.328, CPU: 00:00:08.250, GC gen0: 0, gen1: 0, gen2: 0
-      // New (fully hidden represenations)
-      // Real: 00:00:02.980, CPU: 00:00:02.968, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:02.961, CPU: 00:00:02.953, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:03.009, CPU: 00:00:03.015, GC gen0: 0, gen1: 0, gen2: 0
-      // Real: 00:00:02.952, CPU: 00:00:02.921, GC gen0: 0, gen1: 0, gen2: 0
+      //   Real: 00:00:03.352, CPU: 00:00:03.343, GC gen0: 0, gen1: 0, gen2: 0
+      //   Real: 00:00:02.631, CPU: 00:00:02.640, GC gen0: 0, gen1: 0, gen2: 0
+      //   Real: 00:00:02.858, CPU: 00:00:02.843, GC gen0: 0, gen1: 0, gen2: 0
+      //   Real: 00:00:03.156, CPU: 00:00:03.156, GC gen0: 0, gen1: 0, gen2: 0
+      //
+      //New (fully hidden represenations, without any inlining)
+      //   Real: 00:00:17.211, CPU: 00:00:16.937, GC gen0: 1, gen1: 0, gen2: 0
+      //   Real: 00:00:17.750, CPU: 00:00:17.687, GC gen0: 0, gen1: 0, gen2: 0
+      //
+      //New (fully hidden represenations, with inlining reducing to Internals)
+      //   Real: 00:00:02.980, CPU: 00:00:02.968, GC gen0: 0, gen1: 0, gen2: 0
+      //   Real: 00:00:02.961, CPU: 00:00:02.953, GC gen0: 0, gen1: 0, gen2: 0
+      //   Real: 00:00:03.009, CPU: 00:00:03.015, GC gen0: 0, gen1: 0, gen2: 0
+      //   Real: 00:00:02.952, CPU: 00:00:02.921, GC gen0: 0, gen1: 0, gen2: 0
+      //   Real: 00:00:03.812, CPU: 00:00:03.796, GC gen0: 0, gen1: 0, gen2: 0
+      //   Real: 00:00:03.483, CPU: 00:00:03.484, GC gen0: 0, gen1: 0, gen2: 0
 
 
 
