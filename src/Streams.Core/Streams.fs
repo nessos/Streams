@@ -18,7 +18,7 @@ type (* internal *) Iterable =
     abstract Iterator : Iterator
 
 /// Represents the current executing contex
-type Context<'T> = {
+type (* internal *) Context<'T> = {
     /// The composed continutation
     Cont : 'T -> unit
     /// The completed continuation
@@ -28,9 +28,9 @@ type Context<'T> = {
 }
 
 /// Represents a Stream of values.
-type Stream<'T> (* internal *) (run : Context<'T> -> Iterable) = 
-    member (* internal *) __.Run ctxt = run ctxt
-    member (* internal *) __.RunBulk ctxt = (run ctxt).Bulk()
+type Stream<'T> = 
+    { Run : Context<'T> -> Iterable } 
+    member inline internal stream.RunBulk ctxt = (stream.Run ctxt).Bulk()
     override self.ToString() = 
         seq {
             use enumerator = new StreamEnumerator<'T>(self) :> IEnumerator<'T>
@@ -64,7 +64,7 @@ and private StreamEnumerator<'T> (stream : Stream<'T>) =
                 index <- index + 1
                 if index >= count then
                     count <- 0
-                    if iterable.Iterator.TryAdvance() then
+                    if iterator.TryAdvance() then
                         if count > 0 then 
                             index <- 0
                             true
@@ -86,6 +86,8 @@ and private StreamEnumerator<'T> (stream : Stream<'T>) =
 /// Provides basic operations on Streams.
 [<RequireQualifiedAccessAttribute>]
 module Stream =
+
+    let inline internal Stream f = { Run = f }
 
     /// <summary>The empty stream.</summary>
     /// <returns>An empty stream.</returns>
@@ -111,7 +113,7 @@ module Stream =
                           member __.TryAdvance() = 
                             if !pulled then false
                             else
-                                iterf source |> ignore
+                                iterf source 
                                 pulled := true
                                 complete ()
                                 true
@@ -136,30 +138,30 @@ module Stream =
                         iterf source.[i]
                 complete ()
                 
-            let tryAdvance = 
+            let iterator() = 
                 let i = ref 0
                 let continueFlag = ref true
                 if not (cts = null) then
                     cts.Token.Register(fun () -> continueFlag := false) |> ignore
-                fun () -> 
-                    if not !continueFlag then
-                        false
-                    else if !i < source.Length then
-                        iterf source.[!i] 
+                { new Iterator with 
+                    member __.TryAdvance() = 
                         if not !continueFlag then
+                            false
+                        else if !i < source.Length then
+                            iterf source.[!i] 
+                            if not !continueFlag then
+                                complete ()
+                            incr i
+                            true
+                        else
+                            continueFlag := false
                             complete ()
-                        incr i
-                        true
-                    else
-                        continueFlag := false
-                        complete ()
-                        true
+                            true
+                    member __.Dispose() = 
+                        if not (cts = null) then cts.Dispose() }
             { new Iterable with 
                  member __.Bulk() = bulk()
-                 member __.Iterator = 
-                     { new Iterator with 
-                          member __.TryAdvance() = tryAdvance()
-                          member __.Dispose() = if not (cts = null) then cts.Dispose() } })
+                 member __.Iterator = iterator() })
 
     /// <summary>Wraps ResizeArray as a stream.</summary>
     /// <param name="source">The input array.</param>
@@ -180,30 +182,32 @@ module Stream =
                         iterf source.[i]
                 complete ()
 
-            let tryAdvance = 
+            let iterator() = 
                 let i = ref 0
                 let continueFlag = ref true
                 if not (cts = null) then
                     cts.Token.Register(fun () -> continueFlag := false) |> ignore
-                fun () -> 
-                    if not !continueFlag then
-                        false
-                    else if !i < source.Count then
-                        iterf source.[!i] 
+                { new Iterator with 
+                    member __.TryAdvance() = 
                         if not !continueFlag then
+                            false
+                        else if !i < source.Count then
+                            iterf source.[!i] 
+                            if not !continueFlag then
+                                complete ()
+                            incr i
+                            true
+                        else
+                            continueFlag := false
                             complete ()
-                        incr i
-                        true
-                    else
-                        continueFlag := false
-                        complete ()
-                        true
+                            true
+
+                    member __.Dispose() = 
+                        if not (cts = null) then cts.Dispose() }
+
             { new Iterable with 
                  member __.Bulk() = bulk()
-                 member __.Iterator = 
-                     { new Iterator with 
-                          member __.TryAdvance() = tryAdvance()
-                          member __.Dispose() = if not (cts = null) then cts.Dispose()  } })
+                 member __.Iterator = iterator() })
 
     /// <summary>Wraps seq as a stream.</summary>
     /// <param name="source">The input seq.</param>
@@ -229,31 +233,30 @@ module Stream =
                         iterf value
                     complete ()
 
-            let iterator = 
+            let iterator() = 
                 let enumerator = source.GetEnumerator()
                 let continueFlag = ref true
                 if not (cts = null) then
                     cts.Token.Register(fun () -> continueFlag := false) |> ignore
-                let tryAdvance () = 
-                    if not !continueFlag then
-                        false
-                    else if enumerator.MoveNext() then
-                        iterf enumerator.Current
-                        if not !continueFlag then
-                            complete ()
-                        true
-                    else
-                        continueFlag := false
-                        complete ()
-                        true
                 { new Iterator with 
-                     member __.TryAdvance() = tryAdvance()
+                     member __.TryAdvance() = 
+                        if not !continueFlag then
+                            false
+                        else if enumerator.MoveNext() then
+                            iterf enumerator.Current
+                            if not !continueFlag then
+                                complete ()
+                            true
+                        else
+                            continueFlag := false
+                            complete ()
+                            true
                      member __.Dispose() = 
                          if not (cts = null) then cts.Dispose() 
                          enumerator.Dispose() }
             { new Iterable with 
                  member __.Bulk() = bulk() 
-                 member __.Iterator = iterator  })
+                 member __.Iterator = iterator()  })
         
     /// <summary>Wraps an IEnumerable as a stream.</summary>
     /// <param name="source">The input seq.</param>
@@ -278,32 +281,30 @@ module Stream =
                         iterf (value :?> 'T)
                     complete ()
 
-            let iterator = 
+            let iterator() = 
                 let enumerator = source.GetEnumerator()
                 let continueFlag = ref true
                 if not (cts = null) then
                     cts.Token.Register(fun () -> continueFlag := false) |> ignore
-                let tryAdvance () = 
-                    if not !continueFlag || not <| enumerator.MoveNext()  then
+                { new Iterator with 
+                     member __.TryAdvance() = 
+                        if not !continueFlag || not <| enumerator.MoveNext()  then
+                            match enumerator with 
+                            | :? System.IDisposable as disposable -> disposable.Dispose()
+                            | _ -> ()
+                            false
+                        else
+                            iterf (enumerator.Current :?> 'T)
+                            true
+                     member __.Dispose() = 
                         match enumerator with 
                         | :? System.IDisposable as disposable -> disposable.Dispose()
                         | _ -> ()
-                        false
-                    else
-                        iterf (enumerator.Current :?> 'T)
-                        true
-                let dispose () = 
-                    match enumerator with 
-                    | :? System.IDisposable as disposable -> disposable.Dispose()
-                    | _ -> ()
-                    complete ()
-                    if not (cts = null) then cts.Dispose() 
-                { new Iterator with 
-                     member __.TryAdvance() = tryAdvance()
-                     member __.Dispose() = dispose() }
+                        complete ()
+                        if not (cts = null) then cts.Dispose()  }
             { new Iterable with 
                 member __.Bulk() = bulk()
-                member __.Iterator = iterator  })
+                member __.Iterator = iterator()  })
 
     /// <summary>Transforms each element of the input stream.</summary>
     /// <param name="f">A function to transform items from the input stream.</param>
@@ -314,7 +315,6 @@ module Stream =
             stream.Run { Complete = complete; 
                          Cont = (fun value -> iterf (f value)); 
                          Cts = cts })
-
 
     /// <summary>Transforms each element of the input stream. The integer index passed to the function indicates the index (from 0) of element being transformed.</summary>
     /// <param name="f">A function to transform items and also supplies the current index.</param>
@@ -342,8 +342,7 @@ module Stream =
                                     CancellationTokenSource.CreateLinkedTokenSource(cts.Token)
                                 else cts
                             let stream' = f value;
-                            let iterable' = stream'.Run { Complete = (fun () -> ()); Cont = iterf; Cts = cts } 
-                            iterable'.Bulk());
+                            stream'.RunBulk { Complete = (fun () -> ()); Cont = iterf; Cts = cts } );
                       Cts = cts })
 
     /// <summary>Transforms each element of the input stream to a new stream and flattens its elements.</summary>
@@ -373,18 +372,19 @@ module Stream =
                      source.Run { Complete = complete;
                                   Cont = (fun v -> (if cache.Count - !count = 0 then cache.Add(v)); incr count; iterf v);
                                   Cts = cts }
-                let iterator = iterable.Iterator 
                 let bulk' () = lock cache (fun () -> iterable.Bulk(); cached := Some (ofResizeArray cache))
-
-                //locking each next() seem's overkill
-                let tryAdvance' () = lock cache (fun () -> if iterator.TryAdvance() then true else cached := Some (ofResizeArray cache); false)
-
+                let iterator'() = 
+                    let iterator = iterable.Iterator 
+                    { new Iterator with 
+                        member __.TryAdvance() = 
+                            //locking each next() seem's overkill
+                            lock cache (fun () -> 
+                                if iterator.TryAdvance() then true 
+                                else cached := Some (ofResizeArray cache); false)
+                        member __.Dispose() = iterator.Dispose() } 
                 { new Iterable with 
                     member __.Bulk() = bulk'(); 
-                    member __.Iterator = 
-                        { new Iterator with 
-                            member __.TryAdvance() = tryAdvance'(); 
-                            member __.Dispose() = iterator.Dispose() } })
+                    member __.Iterator = iterator'() })
 
 
     /// <summary>Filters the elements of the input stream.</summary>
@@ -471,7 +471,7 @@ module Stream =
                 for stream in streams do
                     stream.RunBulk { Complete = (fun () -> ()); Cont = iterf; Cts = cts }
                 complete ()
-            let iterator =
+            let iterator() =
                 if Seq.isEmpty streams then 
                     { new Iterator with 
                         member __.TryAdvance() = false; 
@@ -488,28 +488,26 @@ module Stream =
                     let continueFlag = ref true
                     if not (cts = null) then
                         cts.Token.Register(fun _ -> continueFlag := false) |> ignore
-                    let tryAdvance () =
-                        if not !continueFlag then
-                            false
-                        else if enumerator.MoveNext() then
-                            iterf enumerator.Current 
-                            if not !continueFlag then
-                                complete ()
-                            true
-                        else 
-                            continueFlag := false
-                            complete ()
-                            true
-                    let dispose () =
-                        if not (cts = null) then cts.Dispose()
-                        enumerator.Dispose()
                     { new Iterator with 
-                        member __.TryAdvance() = tryAdvance() 
-                        member __.Dispose() = dispose() }
+                        member __.TryAdvance() = 
+                            if not !continueFlag then
+                                false
+                            else if enumerator.MoveNext() then
+                                iterf enumerator.Current 
+                                if not !continueFlag then
+                                    complete ()
+                                true
+                            else 
+                                continueFlag := false
+                                complete ()
+                                true
+                        member __.Dispose() = 
+                            if not (cts = null) then cts.Dispose()
+                            enumerator.Dispose() }
 
             { new Iterable with 
                 member __.Bulk() = bulk()
-                member __.Iterator = iterator })
+                member __.Iterator = iterator() })
 
 
 
@@ -534,35 +532,33 @@ module Stream =
                         next := false
                     ()
                 complete ()
-            let iterator = 
+            let iterator() = 
                 let continueFlag = ref true
                 if not (cts = null) then
                     cts.Token.Register(fun _ -> continueFlag := false) |> ignore
                 let firstEnumerator = new StreamEnumerator<'T>(first) :> IEnumerator<'T>
                 let secondEnumerator = new StreamEnumerator<'S>(second) :> IEnumerator<'S>
-                let tryAdvance () = 
-                    if not !continueFlag then
-                        false
-                    else if firstEnumerator.MoveNext() && secondEnumerator.MoveNext() then
-                        iterf (f firstEnumerator.Current secondEnumerator.Current)
-                        if not !continueFlag then
-                            complete ()
-                        true
-                    else
-                        continueFlag := false
-                        complete ()
-                        true
-                let dispose () = 
-                    if not (cts = null) then
-                        cts.Dispose()
-                    firstEnumerator.Dispose()
-                    secondEnumerator.Dispose()
                 { new Iterator with 
-                    member __.TryAdvance() = tryAdvance() 
-                    member __.Dispose() = dispose() }
+                    member __.TryAdvance() = 
+                        if not !continueFlag then
+                            false
+                        else if firstEnumerator.MoveNext() && secondEnumerator.MoveNext() then
+                            iterf (f firstEnumerator.Current secondEnumerator.Current)
+                            if not !continueFlag then
+                                complete ()
+                            true
+                        else
+                            continueFlag := false
+                            complete ()
+                            true
+                    member __.Dispose() = 
+                        if not (cts = null) then
+                            cts.Dispose()
+                        firstEnumerator.Dispose()
+                        secondEnumerator.Dispose() }
             { new Iterable with 
                 member __.Bulk() = bulk()
-                member __.Iterator = iterator })
+                member __.Iterator = iterator() })
 
 
     /// <summary>Applies a function to each element of the stream, threading an accumulator argument through the computation. If the input function is f and the elements are i0...iN, then this function computes f (... (f s i0)...) iN.</summary>
@@ -822,7 +818,7 @@ module Stream =
                     { Complete = 
                         (fun () -> 
                             if results.Count > 0 then
-                                k <| results.ToArray() |> ignore
+                                k <| results.ToArray() 
                             complete ());
                       Cont = 
                         (fun (t : 'T) ->
