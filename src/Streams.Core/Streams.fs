@@ -18,7 +18,7 @@ type (* internal *) Iterable =
     abstract Iterator : Iterator
 
 /// Represents the current executing contex
-type Context<'T> = {
+type (* internal *) Context<'T> = {
     /// The composed continutation
     Cont : 'T -> unit
     /// The completed continuation
@@ -30,7 +30,6 @@ type Context<'T> = {
 /// Represents a Stream of values.
 type Stream<'T> = 
     { Run : Context<'T> -> Iterable } 
-    member inline (* internal *) stream.RunBulk ctxt = (stream.Run ctxt).Bulk()
     override self.ToString() = 
         seq {
             use enumerator = new StreamEnumerator<'T>(self) :> IEnumerator<'T>
@@ -88,6 +87,8 @@ and private StreamEnumerator<'T> (stream : Stream<'T>) =
 module Stream =
 
     let inline internal Stream f = { Run = f }
+    type Stream<'T> with 
+        member  inline (* internal *) stream.RunBulk ctxt = (stream.Run ctxt).Bulk()
 
     /// <summary>The empty stream.</summary>
     /// <returns>An empty stream.</returns>
@@ -113,7 +114,7 @@ module Stream =
                           member __.TryAdvance() = 
                             if !pulled then false
                             else
-                                iterf source |> ignore
+                                iterf source 
                                 pulled := true
                                 complete ()
                                 true
@@ -342,8 +343,7 @@ module Stream =
                                     CancellationTokenSource.CreateLinkedTokenSource(cts.Token)
                                 else cts
                             let stream' = f value;
-                            let iterable' = stream'.Run { Complete = (fun () -> ()); Cont = iterf; Cts = cts } 
-                            iterable'.Bulk());
+                            stream'.RunBulk { Complete = (fun () -> ()); Cont = iterf; Cts = cts } );
                       Cts = cts })
 
     /// <summary>Transforms each element of the input stream to a new stream and flattens its elements.</summary>
@@ -819,7 +819,7 @@ module Stream =
                     { Complete = 
                         (fun () -> 
                             if results.Count > 0 then
-                                k <| results.ToArray() |> ignore
+                                k <| results.ToArray() 
                             complete ());
                       Cont = 
                         (fun (t : 'T) ->
