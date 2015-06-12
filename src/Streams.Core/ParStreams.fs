@@ -523,11 +523,11 @@ module ParStream =
                     state
                 | _ -> state) 
               (fun left right -> 
-                match left, right with
-                | Some (_, key), Some (_, key') ->
-                    if !key' > !key then right else left
-                | None, _ -> right
-                | _, None -> left) 
+                                    match left, right with
+                                    | Some (_, key), Some (_, key') ->
+                                        if !key' > !key then right else left
+                                    | None, _ -> right
+                                    | _, None -> left) 
               (fun () -> None) 
 
         match result with
@@ -551,11 +551,11 @@ module ParStream =
                     state 
                 | _ -> state) 
               (fun left right -> 
-                match left, right with
-                | Some (_, key), Some (_, key') ->
-                    if !key' > !key then left else right
-                | None, _ -> right
-                | _, None -> left) 
+                                    match left, right with
+                                    | Some (_, key), Some (_, key') ->
+                                        if !key' > !key then left else right
+                                    | None, _ -> right
+                                    | _, None -> left) 
               (fun () -> None) 
 
         match result with
@@ -643,20 +643,20 @@ module ParStream =
             let dict = new ConcurrentDictionary<'Key, List<'T>>()
             stream |> Internals.iterCont 
                 (fun cts -> nocurry(); fun value -> 
-                                        let mutable grouping = Unchecked.defaultof<List<'T>>
-                                        let key = projection value
-                                        if dict.TryGetValue(key, &grouping) then
-                                            let list = grouping
-                                            lock grouping (fun () -> list.Add(value))
-                                        else
-                                            grouping <- new List<'T>()
-                                            if not <| dict.TryAdd(key, grouping) then
-                                                dict.TryGetValue(key, &grouping) |> ignore
-                                            let list = grouping
-                                            lock grouping (fun () -> list.Add(value)))
+                                let mutable grouping = Unchecked.defaultof<List<'T>>
+                                let key = projection value
+                                if dict.TryGetValue(key, &grouping) then
+                                    let list = grouping
+                                    lock grouping (fun () -> list.Add(value))
+                                else
+                                    grouping <- new List<'T>()
+                                    if not <| dict.TryAdd(key, grouping) then
+                                        dict.TryGetValue(key, &grouping) |> ignore
+                                    let list = grouping
+                                    lock grouping (fun () -> list.Add(value)))
                  (fun () -> 
-                                        let stream' = dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))   
-                                        stream' |> Internals.looksLike stream))
+                                let stream' = dict |> ofSeq |> map (fun keyValue -> (keyValue.Key, keyValue.Value :> seq<'T>))   
+                                stream' |> Internals.looksLike stream))
         
 
     /// <summary>Returns the first element for which the given function returns true. Returns None if no such element exists.</summary>
