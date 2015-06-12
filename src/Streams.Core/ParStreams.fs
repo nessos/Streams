@@ -8,7 +8,7 @@ open System.Threading.Tasks
 open Nessos.Streams.Internals
 
 /// Represents the iteration function
-type internal ParIterator<'T> = {
+type ParIterator<'T> = {
     /// The composed continutation with 'T for the current value
     Func : ('T -> unit)
     /// The current CancellationTokenSource
@@ -16,7 +16,7 @@ type internal ParIterator<'T> = {
 }
 
 /// Collects elements into a mutable result container.
-type internal Collector<'T, 'R> = 
+type ParCollector<'T, 'R> = 
     /// The number of concurrently executing tasks
     abstract DegreeOfParallelism : int 
     /// Gets an iterator over the elements.
@@ -39,7 +39,7 @@ type internal ParStreamImpl<'T> =
     /// Returns the sequential Stream
     abstract Stream : unit -> Stream<'T>
     /// Applies the given collector to the parallel Stream.
-    abstract Apply<'R> : Collector<'T, 'R> -> 'R
+    abstract Apply<'R> : ParCollector<'T, 'R> -> 'R
 
 /// Represents a parallel Stream of values.
 type ParStream<'T> = 
@@ -48,7 +48,8 @@ type ParStream<'T> =
     member internal x.DegreeOfParallelism = x.Impl.DegreeOfParallelism
     member internal x.PreserveOrdering = x.Impl.PreserveOrdering
     member internal x.SourceType = x.Impl.SourceType
-    member internal x.Apply<'R>(collector: Collector<'T, 'R>) = x.Impl.Apply collector
+    /// Applies the given collector to the parallel Stream.
+    member x.Apply<'R>(collector: ParCollector<'T, 'R>) = x.Impl.Apply collector
 
 /// Provides basic operations on Parallel Streams.
 [<RequireQualifiedAccessAttribute>]
@@ -75,7 +76,7 @@ module ParStream =
             member self.SourceType = SourceType.Array
             member self.PreserveOrdering = false
             member self.Stream () = Stream.ofArray source
-            member self.Apply<'R> (collector : Collector<'T, 'R>) =
+            member self.Apply<'R> (collector : ParCollector<'T, 'R>) =
                 if not (source.Length = 0) then 
                     let partitions = getPartitions collector.DegreeOfParallelism source.Length
                     let nextRef = ref true
@@ -103,7 +104,7 @@ module ParStream =
             member self.SourceType = SourceType.ResizeArray
             member self.PreserveOrdering = false
             member self.Stream () = Stream.ofResizeArray source
-            member self.Apply<'R> (collector : Collector<'T, 'R>) =
+            member self.Apply<'R> (collector : ParCollector<'T, 'R>) =
                 if not (source.Count = 0) then 
                     let partitions = getPartitions collector.DegreeOfParallelism source.Count
                     let nextRef = ref true
@@ -135,7 +136,7 @@ module ParStream =
                 member self.SourceType = SourceType.Seq
                 member self.PreserveOrdering = false
                 member self.Stream () = Stream.ofSeq source
-                member self.Apply<'R> (collector : Collector<'T, 'R>) =
+                member self.Apply<'R> (collector : ParCollector<'T, 'R>) =
                     let partitioner = Partitioner.Create(source)
                     let partitions = partitioner.GetOrderablePartitions(collector.DegreeOfParallelism).ToArray()
                     let nextRef = ref true
@@ -177,9 +178,9 @@ module ParStream =
                     member self.SourceType = stream.SourceType
                     member self.PreserveOrdering = stream.PreserveOrdering
                     member self.Stream () = stream.Stream() 
-                    member self.Apply<'S> (collector : Collector<'T, 'S>) =
+                    member self.Apply<'S> (collector : ParCollector<'T, 'S>) =
                         let collector = 
-                            { new Collector<'T, 'S> with
+                            { new ParCollector<'T, 'S> with
                                 member self.DegreeOfParallelism = degreeOfParallelism
                                 member self.Iterator() = collector.Iterator()
                                 member self.Result = collector.Result }
@@ -195,9 +196,9 @@ module ParStream =
                 member self.SourceType = stream.SourceType
                 member self.PreserveOrdering = true
                 member self.Stream () = stream.Stream() 
-                member self.Apply<'S> (collector : Collector<'T, 'S>) =
+                member self.Apply<'S> (collector : ParCollector<'T, 'S>) =
                     let collector = 
-                        { new Collector<'T, 'S> with
+                        { new ParCollector<'T, 'S> with
                             member self.DegreeOfParallelism = collector.DegreeOfParallelism
                             member self.Iterator() = 
                                 collector.Iterator()
@@ -229,9 +230,9 @@ module ParStream =
                 member self.SourceType = stream.SourceType
                 member self.PreserveOrdering = stream.PreserveOrdering
                 member self.Stream () = stream.Stream() |> Stream.Internals.mapCont f 
-                member self.Apply<'S> (collector : Collector<'R, 'S>) =
+                member self.Apply<'S> (collector : ParCollector<'R, 'S>) =
                     let collector = 
-                        { new Collector<'T, 'S> with
+                        { new ParCollector<'T, 'S> with
                             member self.DegreeOfParallelism = collector.DegreeOfParallelism
                             member self.Iterator() = 
                                 let { Func = iter } as iterator = collector.Iterator()
@@ -249,7 +250,7 @@ module ParStream =
         let parallelIterateAndCollect (streamf: Stream<'T> -> 'R) (mkIterator: unit -> ('T -> unit)) (collectResult: unit -> 'R) (stream : ParStream<'T>) : 'R =
 
             let collector = 
-                { new Collector<'T, 'R> with
+                { new ParCollector<'T, 'R> with
                     member self.DegreeOfParallelism = stream.DegreeOfParallelism
                     member self.Iterator() = 
                         { Func = mkIterator() 
@@ -301,7 +302,7 @@ module ParStream =
         let iterCont iterf resf (stream : ParStream<'T>) = 
             let cts =  new CancellationTokenSource()
             let collector = 
-                { new Collector<'T, 'R> with
+                { new ParCollector<'T, 'R> with
                     member self.DegreeOfParallelism = stream.DegreeOfParallelism 
                     member self.Iterator() = 
                         {   Func = iterf cts;
@@ -345,7 +346,7 @@ module ParStream =
             member self.SourceType = stream.SourceType
             member self.PreserveOrdering = true
             member self.Stream () = stream.Stream() |> Stream.mapi f 
-            member self.Apply<'S> (collector : Collector<'R, 'S>) = (unordered (ParStream self)).Impl.Apply collector }
+            member self.Apply<'S> (collector : ParCollector<'R, 'S>) = (unordered (ParStream self)).Impl.Apply collector }
 
     /// <summary>Transforms each element of the input parallel stream to a new stream and flattens its elements.</summary>
     /// <param name="f">A function to transform items from the input parallel stream.</param>
@@ -358,9 +359,9 @@ module ParStream =
             member self.SourceType = stream.SourceType
             member self.PreserveOrdering = stream.PreserveOrdering
             member self.Stream () = stream.Stream() |> Stream.flatMap f
-            member self.Apply<'S> (collector : Collector<'R, 'S>) =
+            member self.Apply<'S> (collector : ParCollector<'R, 'S>) =
                 let collector = 
-                    { new Collector<'T, 'S> with
+                    { new ParCollector<'T, 'S> with
                         member self.DegreeOfParallelism = collector.DegreeOfParallelism
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
@@ -405,10 +406,10 @@ module ParStream =
             member self.SourceType = stream.SourceType
             member self.PreserveOrdering = stream.PreserveOrdering
             member self.Stream() = stream.Stream() |> Stream.take n
-            member self.Apply<'S> (collector : Collector<'T, 'S>) =
+            member self.Apply<'S> (collector : ParCollector<'T, 'S>) =
                 let collector = 
                     let count = ref 0
-                    { new Collector<'T, 'S> with
+                    { new ParCollector<'T, 'S> with
                         member self.DegreeOfParallelism = collector.DegreeOfParallelism
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
@@ -428,10 +429,10 @@ module ParStream =
             member self.SourceType = stream.SourceType
             member self.PreserveOrdering = stream.PreserveOrdering
             member self.Stream() = stream.Stream() |> Stream.skip n
-            member self.Apply<'S> (collector : Collector<'T, 'S>) =
+            member self.Apply<'S> (collector : ParCollector<'T, 'S>) =
                 let collector = 
                     let count = ref 0
-                    { new Collector<'T, 'S> with
+                    { new ParCollector<'T, 'S> with
                         member self.DegreeOfParallelism = collector.DegreeOfParallelism
                         member self.Iterator() = 
                             let { Func = iter } as iterator = collector.Iterator()
@@ -482,12 +483,12 @@ module ParStream =
         if stream.PreserveOrdering then
             stream.Stream() |> Stream.toArray
         else
-            let arrayCollector = 
+            let arrayParCollector = 
                 Internals.foldInlined
                     (fun (acc : ArrayCollector<'T>) value -> acc.Add(value); acc)
                     (fun left right -> left.AddRange(right); left) 
                     (fun () -> new ArrayCollector<'T>()) stream 
-            arrayCollector.ToArray()
+            arrayParCollector.ToArray()
 
     /// <summary>Creates an ResizeArray from the given parallel stream.</summary>
     /// <param name="stream">The input parallel stream.</param>
