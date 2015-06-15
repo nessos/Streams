@@ -378,3 +378,10 @@ type ``ParStreams tests`` () =
                     x = y
                  else true).QuickCheckThrowOnFailure()
 
+        [<Test>]
+        member __.``dispose ofSeq``() =
+            Spec.ForAny<int []>(fun (xs : int  []) ->
+                   let disposed = ref false
+                   seq { try for x in xs do yield x finally  disposed := true } |> ParStream.ofSeq |> ParStream.toArray |> ignore
+                   disposed.Value).QuickCheckThrowOnFailure()
+
