@@ -289,6 +289,36 @@ module Stream =
             { new Iterable with 
                  member __.Bulk() = bulk() 
                  member __.Iterator = iterator()  })
+
+    /// <summary>Produces an infinite stream from generator function.</summary>
+    /// <param name="generator">A function used to generate values.</param>
+    /// <returns>The result stream.</returns>
+    let infinite (generator : Unit -> 'T) : Stream<'T> =
+        Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
+            let bulk () =
+                if not (cts = null) then
+                    while not cts.Cancelled do
+                        iterf (generator())
+                else
+                    while true do
+                        iterf (generator())
+                    complete ()
+            let iterator() = 
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
+                { new Iterator with 
+                     member __.TryAdvance() = 
+                        if cts.Cancelled then
+                            false
+                        else 
+                            iterf (generator())
+                            if cts.Cancelled then
+                                complete ()
+                            true
+                     member __.Dispose() = 
+                         () }
+            { new Iterable with 
+                 member __.Bulk() = bulk() 
+                 member __.Iterator = iterator()  })
         
     /// <summary>Wraps an IEnumerable as a stream.</summary>
     /// <param name="source">The input seq.</param>
