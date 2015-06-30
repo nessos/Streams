@@ -42,7 +42,7 @@ module ``Streams tests``  =
         let ``infinite`` () =
             Spec.ForAny<int[]>(fun xs ->
                 // we use modulus here to keep the runtime sane.
-                let sumTo v= (fun _ -> 1) |> Stream.infinite |> Stream.toSeq |> Seq.take (abs(v) % 100) |> Seq.sum
+                let sumTo v= (fun _ -> 1) |> Stream.infinite |> Stream.take (abs(v) % 100) |> Stream.sum
                 let x = Array.map sumTo xs
                 let y = Array.map (fun v -> abs(v) % 100) xs
                 x = y).QuickCheckThrowOnFailure()
