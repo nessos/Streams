@@ -290,10 +290,10 @@ module Stream =
                  member __.Bulk() = bulk() 
                  member __.Iterator = iterator()  })
 
-    /// <summary>Produces an infinite stream from generator function.</summary>
+    /// <summary>Produces an infinite Stream by calling the given function.</summary>
     /// <param name="generator">A function used to generate values.</param>
     /// <returns>The result stream.</returns>
-    let infinite (generator : Unit -> 'T) : Stream<'T> =
+    let generateInfinite (generator : Unit -> 'T) : Stream<'T> =
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
             let bulk () =
                 if not (cts = null) then
@@ -311,6 +311,45 @@ module Stream =
                             false
                         else 
                             iterf (generator())
+                            if cts.Cancelled then
+                                complete ()
+                            true
+                     member __.Dispose() = 
+                         () }
+            { new Iterable with 
+                 member __.Bulk() = bulk() 
+                 member __.Iterator = iterator()  })
+
+
+    /// <summary>
+    ///     Generates an infinite Stream which returns successive elements by calling the given function.
+    ///     Indexing starts at 0, and continues until Int32.MaxValue
+    /// </summary>
+    /// <param name="initializer">A function that generates an item in the sequence from a given index.</param>
+    /// <returns>The result stream.</returns>
+    let initInfinite (initializer : int -> 'T) : Stream<'T> =
+        Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
+            let bulk () =
+                let mutable index = 0
+                if not (cts = null) then
+                    while not cts.Cancelled do
+                        iterf (initializer index)
+                        index <- index + 1
+                else
+                    while true do
+                        iterf (initializer index)
+                        index <- index + 1
+                    complete ()
+            let iterator() = 
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
+                let index = ref 0
+                { new Iterator with 
+                     member __.TryAdvance() = 
+                        if cts.Cancelled then
+                            false
+                        else 
+                            iterf (initializer(index.Value))
+                            index.Value <- index.Value + 1
                             if cts.Cancelled then
                                 complete ()
                             true
