@@ -293,7 +293,7 @@ module Stream =
     /// <summary>Produces an infinite Stream by calling the given function.</summary>
     /// <param name="generator">A function used to generate values.</param>
     /// <returns>The result stream.</returns>
-    let generateInfinite (generator : Unit -> 'T) : Stream<'T> =
+    let generateInfinite (generator : unit -> 'T) : Stream<'T> =
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
             let bulk () =
                 if not (cts = null) then
@@ -302,7 +302,7 @@ module Stream =
                 else
                     while true do
                         iterf (generator())
-                    complete ()
+                complete ()
             let iterator() = 
                 let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 { new Iterator with 
@@ -333,13 +333,14 @@ module Stream =
                 let mutable index = 0
                 if not (cts = null) then
                     while not cts.Cancelled do
+                        printfn "%d %A" index cts.Cancelled
                         iterf (initializer index)
                         index <- index + 1
                 else
                     while true do
                         iterf (initializer index)
                         index <- index + 1
-                    complete ()
+                complete ()
             let iterator() = 
                 let cts = if cts = null then StreamCancellationTokenSource() else cts 
                 let index = ref 0
@@ -509,7 +510,8 @@ module Stream =
                                 iterf value
                             else if !counter = n then
                                 iterf value
-                                cts.Cancel());
+                                cts.Cancel()
+                            else cts.Cancel());
                       Cts = cts } )
 
     /// <summary>Returns the elements of the stream while the given predicate returns true.</summary>

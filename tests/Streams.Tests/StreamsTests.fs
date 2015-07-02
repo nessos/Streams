@@ -40,18 +40,18 @@ module ``Streams tests``  =
 
         [<Test>]
         let ``generateInfinite`` () =
-            Spec.ForAny<int[]>(fun xs ->
+            Spec.ForAny<int>(fun n ->
                 // we use modulus here to keep the test duration somewhat short.
-                let sumTo v= (fun _ -> 1) |> Stream.generateInfinite |> Stream.toSeq |> Seq.take (abs(v) % 100) |> Seq.sum
-                let x = Array.map sumTo xs
-                let y = Array.map (fun v -> abs(v) % 100) xs
+                let x = (fun _ -> 1) |> Stream.generateInfinite |> Stream.take (abs(n) % 100) |> Stream.toArray
+                let y = (fun _ -> 1) |> Seq.initInfinite |> Seq.take (abs(n) % 100) |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
         let ``initInfinite`` () =
-            Spec.ForAny<int[]>(fun (xs:int[]) ->
-                let x = (fun i -> xs.[i]) |> Stream.initInfinite |> Stream.toSeq |> Seq.take xs.Length |> Array.ofSeq
-                let y = xs
+            Spec.ForAny<int>(fun n ->
+                // we use modulus here to keep the test duration somewhat short.
+                let x = (fun _ -> 1) |> Stream.initInfinite |> Stream.take (abs(n) % 100) |> Stream.toArray
+                let y = (fun _ -> 1) |> Seq.initInfinite |> Seq.take (abs(n) % 100) |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
