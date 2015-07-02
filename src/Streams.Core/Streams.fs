@@ -333,7 +333,6 @@ module Stream =
                 let mutable index = 0
                 if not (cts = null) then
                     while not cts.Cancelled do
-                        printfn "%d %A" index cts.Cancelled
                         iterf (initializer index)
                         index <- index + 1
                 else
