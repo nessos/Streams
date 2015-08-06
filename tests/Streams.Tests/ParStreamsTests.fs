@@ -20,8 +20,7 @@ open Nessos.Streams
 [<TestFixture; Category("ParStreams.FSharp")>]
 type ``ParStreams tests`` () =
 
-        [<OneTimeSetUp>]
-        member __.SetUp() =
+        static do
             System.Threading.ThreadPool.SetMinThreads(200, 200) |> ignore
 
         [<Test>]
