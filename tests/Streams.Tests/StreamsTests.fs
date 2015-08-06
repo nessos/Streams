@@ -32,6 +32,20 @@ module ``Streams tests``  =
                 (x.ToArray()) = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        let ``ofList`` () =
+            Spec.ForAny<int list>(fun xs ->
+                let x = xs |> Stream.ofList |> Stream.map ((+)1) |> Stream.toArray
+                let y = xs |> Seq.map ((+)1) |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        let ``ofList pull`` () =
+            Spec.ForAny<int list>(fun xs ->
+                let x = xs |> Stream.ofList |> Stream.map ((+)1) |> Stream.toSeq |> Seq.toArray
+                let y = xs |> Seq.map ((+)1) |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
         let ``ofSeq`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> Stream.ofSeq |> Stream.map ((+)1) |> Stream.toArray

@@ -32,6 +32,13 @@ type ``ParStreams tests`` () =
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``ofList`` () =
+            Spec.ForAny<int list>(fun xs ->
+                let x = xs |> ParStream.ofList |> ParStream.map ((+)1) |> ParStream.toArray
+                let y = xs |> Seq.map ((+)1) |> Seq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
         member __.``ofResizeArray/toResizeArray`` () =
             Spec.ForAny<ResizeArray<int>>(fun xs ->
                 let x = xs |> ParStream.ofResizeArray |> ParStream.map ((+)1) |> ParStream.toResizeArray

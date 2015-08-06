@@ -172,7 +172,7 @@ module Stream =
     let ofArray (source : 'T []) : Stream<'T> =
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
             let bulk () =
-                if not (cts = null) then
+                if not <| obj.ReferenceEquals(cts, null) then
                     let mutable i = 0
                     while i < source.Length && not cts.Cancelled do
                         iterf source.[i]
@@ -199,6 +199,52 @@ module Stream =
                             cts.Cancel()
                             complete ()
                             true
+                    member __.Dispose() = 
+                        ()}
+            { new Iterable with 
+                 member __.Bulk() = bulk()
+                 member __.Iterator = iterator() })
+
+    /// <summary>Wraps list as a stream.</summary>
+    /// <param name="source">The input list.</param>
+    /// <returns>The result stream.</returns>
+    let ofList (source : 'T list) : Stream<'T> =
+        Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
+            let bulk () =
+                if not <| obj.ReferenceEquals(cts, null) then
+                    let rec aux rest =
+                        if cts.Cancelled then () else
+                        match rest with
+                        | [] -> ()
+                        | t :: tl -> iterf t ; aux tl
+
+                    aux source
+                else
+                    let rec aux rest =
+                        match rest with
+                        | [] -> ()
+                        | t :: tl -> iterf t ; aux tl
+
+                    aux source
+
+                complete ()
+                
+            let iterator() = 
+                let tail = ref source
+                let cts = if cts = null then StreamCancellationTokenSource() else cts 
+                { new Iterator with 
+                    member __.TryAdvance() = 
+                        if cts.Cancelled then
+                            false
+                        else 
+                            match !tail with
+                            | [] -> cts.Cancel() ; complete () ; true
+                            | hd :: tl ->
+                                iterf hd
+                                if cts.Cancelled then complete ()
+                                tail := tl
+                                true
+
                     member __.Dispose() = 
                         ()}
             { new Iterable with 
@@ -253,6 +299,7 @@ module Stream =
     let ofSeq (source : seq<'T>) : Stream<'T> =
         match source with
         | :? ('T[]) as array -> ofArray array
+        | :? ('T list) as list -> ofList list
         | :? ResizeArray<'T> as list -> ofResizeArray list
         | _ -> 
         Stream (fun { Complete = complete; Cont = iterf; Cts = cts } ->
