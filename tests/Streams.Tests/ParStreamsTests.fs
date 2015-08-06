@@ -20,8 +20,7 @@ open Nessos.Streams
 [<TestFixture; Category("ParStreams.FSharp")>]
 type ``ParStreams tests`` () =
 
-        [<OneTimeSetUp>]
-        member __.SetUp() =
+        static do
             System.Threading.ThreadPool.SetMinThreads(200, 200) |> ignore
 
         [<Test>]
@@ -29,6 +28,13 @@ type ``ParStreams tests`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> ParStream.ofArray |> ParStream.map ((+)1) |> ParStream.toArray
                 let y = xs |> PSeq.map ((+)1) |> PSeq.toArray
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``ofList`` () =
+            Spec.ForAny<int list>(fun xs ->
+                let x = xs |> ParStream.ofList |> ParStream.map ((+)1) |> ParStream.toArray
+                let y = xs |> Seq.map ((+)1) |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]

@@ -26,7 +26,7 @@ type ParCollector<'T, 'R> =
 
 /// The Type of iteration source
 [<RequireQualifiedAccess>]
-type internal SourceType = Array | ResizeArray | Seq
+type internal SourceType = Array | FSharpList | ResizeArray | Seq
 
 /// Represents the internal implementation of a parallel Stream of values.
 type internal ParStreamImpl<'T> =    
@@ -56,12 +56,55 @@ type ParStream<'T> =
 module ParStream =
 
     let internal ParStream x = { Impl = x }
-    
-    let private getPartitions totalWorkers length =
-        [| 
-            for i in 0 .. totalWorkers - 1 ->
-                let i, j = length * i / totalWorkers, length * (i + 1) / totalWorkers in (i, j) 
-        |]
+
+    let private getPartitions (partitions : int) (length : int) : (int * int) [] =
+        if length < 0 then raise <| new ArgumentOutOfRangeException()
+        elif partitions < 1 then invalidArg "partitions" "invalid number of partitions."
+        elif length = 0 then [||] else
+
+        let chunkSize = length / partitions
+        let r = length % partitions
+        let ranges = new ResizeArray<int * int>()
+        let mutable i = 0
+        for p = 0 to partitions - 1 do
+            // add a padding element for every chunk 0 <= p < r
+            let j = i + chunkSize + if p < r then 1 else 0
+            if j > i then
+                let range = (i, j)
+                ranges.Add range
+            i <- j
+
+        ranges.ToArray()
+
+    // list partitioner:
+    // returns a list of ('T list * int) elements where the list is just a tail
+    // of the original list and the size of the current partition.
+    // For instance, partitioning [1;2;3;4] to 2 partitions gives [|([1;2;3;4], 2) ; ([3;4], 2)|]
+    // This means that no additional list allocations are made when partitioning the list.
+    let private getListPartitions totalWorkers (list : 'T list) : ('T list * int) [] =
+        let indices = getPartitions totalWorkers list.Length
+        let ra = new ResizeArray<'T list * int> ()
+        let rec aux iindex i s e rest =
+            if i = s then 
+                ra.Add(rest, e - s)
+                aux iindex (i + 1) s e rest.Tail
+
+            elif i = e then
+                let rec nextPartition iindex =
+                    if iindex = indices.Length - 1 then ()
+                    else
+                        let s',e' = indices.[iindex + 1]
+                        if s' = e' then nextPartition (iindex + 1)
+                        else
+                            aux (iindex + 1) i s' e' rest
+
+                nextPartition iindex
+            else
+                aux iindex (i + 1) s e (List.tail rest)
+
+        let s,e = indices.[0] 
+        aux 0 0 s e list
+        ra.ToArray()
 
 
     // generator functions
@@ -90,6 +133,35 @@ module ParStream =
                                                 ())
                     let tasks = partitions 
                                 |> Array.map (fun (s, e) -> createTask s e (collector.Iterator()))
+
+                    Task.WaitAll(tasks)
+                collector.Result }
+
+    /// <summary>Wraps list as a parallel stream.</summary>
+    /// <param name="source">The input list.</param>
+    /// <returns>The result parallel stream.</returns>
+    let ofList (source : 'T list) : ParStream<'T> =
+        ParStream
+         { new ParStreamImpl<'T> with
+            member self.DegreeOfParallelism = Environment.ProcessorCount
+            member self.SourceType = SourceType.FSharpList
+            member self.PreserveOrdering = false
+            member self.Stream () = Stream.ofList source
+            member self.Apply<'R> (collector : ParCollector<'T, 'R>) =
+                if not <| List.isEmpty source then 
+                    let partitions = getListPartitions collector.DegreeOfParallelism source
+                    let nextRef = ref true
+                    let createTask (list : 'T list) (e : int) (iter : ParIterator<'T>) =
+                        iter.Cts.Token.Register(fun _ -> nextRef := false) |> ignore 
+                        Task.Factory.StartNew(fun () ->
+                                                let rec aux i (rest : 'T list) =
+                                                    if i > 0 && !nextRef then 
+                                                        iter.Func rest.Head
+                                                        aux (i - 1) rest.Tail
+                                                        
+                                                aux e list)
+
+                    let tasks = partitions |> Array.map (fun (tl, e) -> createTask tl e (collector.Iterator()))
 
                     Task.WaitAll(tasks)
                 collector.Result }
@@ -127,7 +199,8 @@ module ParStream =
     /// <returns>The result parallel stream.</returns>
     let ofSeq (source : seq<'T>) : ParStream<'T> =
         match source with
-        | :? ('T[]) as array -> ofArray array
+        | :? ('T []) as array -> ofArray array
+        | :? ('T list) as list -> ofList list
         | :? ResizeArray<'T> as list -> ofResizeArray list
         | _ ->
           ParStream
@@ -259,7 +332,9 @@ module ParStream =
 
             if stream.PreserveOrdering then 
                 match stream.SourceType with
-                | SourceType.Array | SourceType.ResizeArray -> stream.Stream() |> streamf
+                | SourceType.Array 
+                | SourceType.FSharpList
+                | SourceType.ResizeArray -> stream.Stream() |> streamf
                 | SourceType.Seq -> 
                     let stream = unordered stream
                     stream.Apply collector
@@ -503,8 +578,10 @@ module ParStream =
         match stream.SourceType, stream.PreserveOrdering with
         | SourceType.Array, false -> toArray stream :> _
         | SourceType.ResizeArray, false -> toResizeArray stream :> _
+        | SourceType.FSharpList, false -> toArray stream :> _
         | SourceType.Array, true -> stream.Stream() |> Stream.toArray :> _
         | SourceType.ResizeArray, true -> stream.Stream() |> Stream.toResizeArray :> _
+        | SourceType.FSharpList, true -> stream.Stream() |> Stream.toArray :> _
         | SourceType.Seq, _ -> stream.Stream() |> Stream.toSeq
         
 
