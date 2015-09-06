@@ -6,8 +6,8 @@
 // Binaries that have XML documentation (in a corresponding generated XML file)
 let referenceBinaries = [ "Streams.Core.dll" ]
 // Web site location for the generated documentation
-let website = "http://nessos.github.io/Streams"
-let githubLink = "http://github.com/nessos/Streams"
+let website = "https://nessos.github.io/Streams"
+let githubLink = "https://github.com/nessos/Streams"
 
 // Specify more information about your project
 let info =
