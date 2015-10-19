@@ -1,8 +1,10 @@
+REDIRECTS: ON
 NUGET
   remote: https://nuget.org/api/v2
   specs:
-    FAKE (4.7.1)
+    FAKE (4.7.2)
     FsCheck (1.0.1) - framework: >= net45
     FSharp.Collections.ParallelSeq (1.0.2) - framework: >= net45
     NuGet.CommandLine (2.8.6)
     NUnit (2.6.4) - framework: >= net45
+    NUnit.Runners (2.6.4)

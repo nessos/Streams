@@ -78,17 +78,11 @@ let testAssemblies =
     ]
 
 Target "RunTests" (fun _ ->
-    let nunitVersion = GetPackageVersion "packages" "NUnit.Runners"
-    let nunitPath = sprintf "packages/NUnit.Runners.%s/tools" nunitVersion
-    ActivateFinalTarget "CloseTestRunner"
-
     testAssemblies
-    |> NUnit (fun p ->
+    |> NUnit (fun p -> 
         { p with
-            Framework = "v4.0.30319"
-            ToolPath = nunitPath
             DisableShadowCopy = true
-            TimeOut = TimeSpan.FromMinutes 20.
+            TimeOut = TimeSpan.FromMinutes 60.
             OutputFile = "TestResults.xml" })
 )
 

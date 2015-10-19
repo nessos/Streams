@@ -8,11 +8,11 @@
     <ProjectGuid>f3482666-f39c-4f49-8d0b-3583328d2c42</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Streams</RootNamespace>
-    <AssemblyName>Streams.Core</AssemblyName>
+    <AssemblyName>Streams</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>Streams.Core</Name>
     <TargetFrameworkProfile />
-    <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
+    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
