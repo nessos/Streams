@@ -46,7 +46,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Streams.Core\Streams.fsproj">
+    <ProjectReference Include="..\Streams\Streams.fsproj">
       <Project>{f3482666-f39c-4f49-8d0b-3583328d2c42}</Project>
       <Name>Streams</Name>
     </ProjectReference>

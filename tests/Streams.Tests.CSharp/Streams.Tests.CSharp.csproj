@@ -57,7 +57,7 @@
       <Project>{e6852495-8012-4694-bc0f-a5376cd84b1f}</Project>
       <Name>Streams.CSharp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\Streams.Core\Streams.fsproj">
+    <ProjectReference Include="..\..\src\Streams\Streams.fsproj">
       <Project>{f3482666-f39c-4f49-8d0b-3583328d2c42}</Project>
       <Name>Streams</Name>
     </ProjectReference>
