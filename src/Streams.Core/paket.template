@@ -1,0 +1,15 @@
+﻿type project
+id Streams
+description
+	A lightweight F#/C# library for efficient functional-style pipelines on streams of data.
+authors
+	Nick Palladinos, Kostas Rontogiannis
+copyright
+	Copyright 2015
+summary
+	A lightweight F#/C# library for efficient functional-style pipelines on streams of data.
+licenseurl https://github.com/nessos/Streams/blob/master/LICENSE.md
+projecturl http://nessos.github.io/Streams
+iconurl https://avatars1.githubusercontent.com/u/5538081
+tags
+	F#/C# Streams
