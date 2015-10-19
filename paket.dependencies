@@ -4,6 +4,7 @@ source https://www.nuget.org/api/v2/
 nuget Nuget.CommandLine
 nuget FsCheck 1.0.1 framework: >= net45
 nuget FSharp.Collections.ParallelSeq 1.0.2 framework: >= net45
+nuget FSharp.Formatting
 nuget NUnit 2.6.4 framework: >= net45
 nuget NUnit.Runners
 nuget FAKE

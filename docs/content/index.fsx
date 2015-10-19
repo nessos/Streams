@@ -3,8 +3,8 @@
 // it to define helpers that you do not want to show in the documentation.
 #I "../../bin/"
 
-#r "Streams.Core.dll"
-#r "../../packages/FSharp.Collections.ParallelSeq.1.0/lib/net40/FSharp.Collections.ParallelSeq.dll"
+#r "Streams.dll"
+#r "../../packages/FSharp.Collections.ParallelSeq/lib/net40/FSharp.Collections.ParallelSeq.dll"
 
 (**
 

@@ -1,3 +1,6 @@
+#### 0.4.0
+* Fix Stream.sortBy issue.
+
 #### 0.3.0
 * New combinators (scan, head, tryHead)
 * Fix the default Access level of SourceType

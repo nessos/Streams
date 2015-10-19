@@ -5,6 +5,12 @@ NUGET
     FAKE (4.7.2)
     FsCheck (1.0.1) - framework: >= net45
     FSharp.Collections.ParallelSeq (1.0.2) - framework: >= net45
+    FSharp.Compiler.Service (1.4.0.6)
+    FSharp.Formatting (2.12.0)
+      FSharp.Compiler.Service (1.4.0.6)
+      FSharpVSPowerTools.Core (2.1.0)
+    FSharpVSPowerTools.Core (2.1.0)
+      FSharp.Compiler.Service (>= 1.4.0.6)
     NuGet.CommandLine (2.8.6)
     NUnit (2.6.4) - framework: >= net45
     NUnit.Runners (2.6.4)
