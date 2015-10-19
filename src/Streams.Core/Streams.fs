@@ -746,7 +746,7 @@ module Stream =
     /// <param name="projection">A function to transform items of the input stream into comparable keys.</param>
     /// <param name="stream">The input stream.</param>
     /// <returns>The result stream.</returns>  
-    let inline sortBy<'T, 'Key when 'Key :> IComparable<'Key>> (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'T> =
+    let inline sortBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (stream : Stream<'T>) : Stream<'T> =
         let values = new List<'T>()
         let keys = new List<'Key>()
         stream |> iter (fun value -> keys.Add(projection value); values.Add(value));

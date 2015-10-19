@@ -8,7 +8,7 @@ type private MergeArrayType = FromArrayType | ToArrayType
 /// [omit]
 /// Helpers for parallel sorting.
 module Sort = 
-    let parallelSort<'Key, 'Value when 'Key :> IComparable<'Key>>
+    let parallelSort<'Key, 'Value when 'Key : comparison>
         (totalWorkers : int) (keys : 'Key[]) (array : 'Value[]) = 
             // Taken from Carl Nolan's parallel inplace merge
             // The merge of the two array
@@ -16,7 +16,7 @@ module Sort =
                 let mutable ptr1 = low1
                 let mutable ptr2 = high1
  
-                for ptr in low1..high2 do
+                for ptr = low1 to high2 do
                     if (ptr1 > low2) then
                         toArray.[ptr] <- fromArray.[ptr2]
                         toKeys.[ptr] <- fromKeys.[ptr2]
@@ -25,7 +25,7 @@ module Sort =
                         toArray.[ptr] <- fromArray.[ptr1]
                         toKeys.[ptr] <- fromKeys.[ptr1]
                         ptr1 <- ptr1 + 1
-                    elif (fromKeys.[ptr1].CompareTo(fromKeys.[ptr2]) <= 0) then
+                    elif fromKeys.[ptr1] <= fromKeys.[ptr2] then
                         toArray.[ptr] <- fromArray.[ptr1]
                         toKeys.[ptr] <- fromKeys.[ptr1]
                         ptr1 <- ptr1 + 1
@@ -33,7 +33,6 @@ module Sort =
                         toArray.[ptr] <- fromArray.[ptr2]
                         toKeys.[ptr] <- fromKeys.[ptr2]
                         ptr2 <- ptr2 + 1
-                ()
 
  
             // define the sort operation

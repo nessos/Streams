@@ -55,10 +55,10 @@ type public CSharpProxy =
                 interface System.Collections.IEnumerable with
                     member self.GetEnumerator() : IEnumerator = values.GetEnumerator() :> _ }) 
 
-    static member OrderBy<'T, 'Key when 'Key :> IComparable<'Key>>(stream : Stream<'T>, func : Func<'T, 'Key>) =
+    static member OrderBy<'T, 'Key when 'Key : comparison>(stream : Stream<'T>, func : Func<'T, 'Key>) =
         Stream.sortBy (fun x -> func.Invoke(x)) stream
 
-    static member OrderBy<'T, 'Key when 'Key :> IComparable<'Key>>(stream : ParStream<'T>, func : Func<'T, 'Key>) =
+    static member OrderBy<'T, 'Key when 'Key : comparison>(stream : ParStream<'T>, func : Func<'T, 'Key>) =
         ParStream.sortBy (fun x -> func.Invoke(x)) stream
 
     static member Sum(stream : Stream<int64>) = 
