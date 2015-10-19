@@ -1,28 +1,42 @@
-@import url(http://fonts.googleapis.com/css?family=Droid+Sans|Droid+Sans+Mono|Open+Sans:400,600,700);
+@import url(https://fonts.googleapis.com/css?family=Droid+Sans|Droid+Sans+Mono|Open+Sans:400,600,700);
 
 /*-------------------------------------------------------------------------- 
   Formatting for F# code snippets 
 /*--------------------------------------------------------------------------*/
 
 /* identifier */
-span.i { color:#d1d1d1; }
+span.i { color:#000000; }
 /* string */
-span.s { color:#d4b43c; }
+span.s { color:#a31515; }
 /* keywords */
-span.k { color:#4e98dc; }
+span.k { color:#0000ff; }
 /* comment */
-span.c { color:#96C71D; }
+span.c { color:#008000; }
 /* operators */
-span.o { color:#af75c1; }
+span.o { color:#000000; }
 /* numbers */
-span.n { color:#96C71D; }
+span.n { color:#000000; }
 /* line number */
-span.l { color:#80b0b0; }
+span.l { color:#96c2cd; }
+/* type or module */
+span.t { color:#2b91af; }
+/* function */
+span.f { color:#0000a0; }
+/* DU case or active pattern */
+span.p { color:#800080; }
+/* mutable var or ref cell */
+span.v { color:#000000; font-weight: bold; }
+/* printf formatters */
+span.pf { color:#2b91af; }
+/* escaped chars */
+span.e { color:#ff0080; }
+/* mutable var or ref cell */
+
 
 /* inactive code */
 span.inactive { color:#808080; }
 /* preprocessor */
-span.prep { color:#af75c1; }
+span.prep { color:#0000ff; }
 /* fsi output */
 span.fsi { color:#808080; }
 
@@ -35,12 +49,12 @@ span.omitted {
 }
 /* tool tip */
 div.tip {
-	background:#475b5f;
+	background:#e5e5e5;
   border-radius:4px;
-  font:11pt 'Droid Sans', arial, sans-serif;
+  font:9pt 'Droid Sans', arial, sans-serif;
 	padding:6px 8px 6px 8px;
 	display:none;
-  color:#d1d1d1;
+  color:#000000;
 }
 table.pre pre {
   padding:0px;
@@ -52,13 +66,16 @@ table.pre, pre.fssnip, pre {
   border:1px solid #d8d8d8;
   border-collapse:separate;
   white-space:pre;
-  font: 9pt 'Droid Sans Mono',consolas,monospace;
+  font: 10pt consolas,monospace;
   width:90%;
   margin:10px 20px 20px 20px;
-  background-color:#212d30;
+  background-color:#fdfdfd;
   padding:10px;
   border-radius:5px;
-  color:#d1d1d1;  
+  color:#000000;  
+}
+pre.fssnip code {
+  font: 9pt 'Droid Sans Mono',consolas,monospace;
 }
 table.pre pre {
   padding:0px;
@@ -92,6 +109,10 @@ pre {
 /* Format the heading - nicer spacing etc. */
 .masthead {
   overflow: hidden;
+}
+.masthead .muted a {
+  text-decoration:none;
+  color:#999999;
 }
 .masthead ul, .masthead li {
   margin-bottom:0px;
@@ -170,6 +191,17 @@ td.title, thead {
 .github-link:hover .hover { display:block; }
 .github-link .normal { display: block; }
 .github-link:hover .normal { display: none; }
+
+/*-------------------------------------------------------------------------- 
+  Links 
+/*--------------------------------------------------------------------------*/
+
+h1 a, h1 a:hover, h1 a:focus,
+h2 a, h2 a:hover, h2 a:focus,
+h3 a, h3 a:hover, h3 a:focus,
+h4 a, h4 a:hover, h4 a:focus,
+h5 a, h5 a:hover, h5 a:focus,
+h6 a, h6 a:hover, h6 a:focus { color : inherit; text-decoration : inherit; outline:none }
 
 /*-------------------------------------------------------------------------- 
   Additional formatting for the homepage 
