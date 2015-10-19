@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>Namespaces - Streams</title>
+    <title>ParIterator<'T> - Streams</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content=""/>
     <meta name="author" content="Nick Palladinos, Kostas Rontogiannis"/>
@@ -33,82 +33,67 @@
         <div class="span9" id="main">
           
 
-<h1>Streams</h1>
 
 
-  <h2>Nessos.Streams Namespace</h2>
-    <div>
-      <table class="table table-bordered type-list">
+<h1>ParIterator<'T></h1>
+<p>
+  <span>Namespace: Nessos.Streams</span><br />
+</p>
+<div class="xmldoc">
+<p>Represents the iteration function</p>
+
+
+</div>
+  <h3>Record Fields</h3>
+  <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Type</td><td>Description</td></tr>
+      <tr><td>Record Field</td><td>Description</td></tr>
     </thead>
     <tbody>
-        <tr>
-          <td class="type-name">
-            <a href="nessos-streams-parcollector-2.html">ParCollector<'T, 'R></a>
-          </td>
-          <td class="xmldoc"><p>Collects elements into a mutable result container.</p>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '97', 97)" onmouseover="showTip(event, '97', 97)">
+            Cts
+          </code>
+          <div class="tip" id="97">
+            <strong>Signature:</strong> CancellationTokenSource<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L15-15" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>The current CancellationTokenSource</p>
 
 
-</td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="nessos-streams-pariterator-1.html">ParIterator<'T></a>
-          </td>
-          <td class="xmldoc"><p>Represents the iteration function</p>
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '98', 98)" onmouseover="showTip(event, '98', 98)">
+            Func
+          </code>
+          <div class="tip" id="98">
+            <strong>Signature:</strong> &#39;T -&gt; unit<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L13-13" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>The composed continutation with 'T for the current value</p>
 
 
-</td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="nessos-streams-parstream-1.html">ParStream<'T></a>
-          </td>
-          <td class="xmldoc"><p>Represents a parallel Stream of values.</p>
 
-
-</td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="nessos-streams-stream-1.html">Stream<'T></a>
-          </td>
-          <td class="xmldoc"><p>Represents a Stream of values.</p>
-
-
-</td>
-        </tr>
+        </td>
+      </tr>
     </tbody>
   </table>
-  <table class="table table-bordered module-list">
-    <thead>
-      <tr><td>Module</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td class="module-name">
-            <a href="nessos-streams-parstream.html">ParStream</a>
-          </td>
-          <td class="xmldoc"><p>Provides basic operations on Parallel Streams.</p>
-
-
-</td>
-        </tr>
-        <tr>
-          <td class="module-name">
-            <a href="nessos-streams-stream.html">Stream</a>
-          </td>
-          <td class="xmldoc"><p>Provides basic operations on Streams.</p>
-
-
-</td>
-        </tr>
-    </tbody>
-  </table>
-
-    </div>
-  <h2>Nessos.Streams.Internals Namespace</h2>
 
         </div>
         <div class="span3">

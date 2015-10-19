@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Internals - Streams</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content=""/>
+    <meta name="author" content="Nick Palladinos, Kostas Rontogiannis"/>
+    
+    <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.8.23/jquery-ui.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet"/>
+
+    <link type="text/css" rel="stylesheet" href="https://nessos.github.io/Streams/content/style.css" />
+    <script type="text/javascript" src="https://nessos.github.io/Streams/content/tips.js"></script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="http://nessos.github.io">nessos</a></li>
+          <li><a href="https://github.com/nessos/Streams">github page</a></li>
+        </ul>
+        <h3 class="muted"><a href="https://nessos.github.io/Streams/index.html">Streams</a></h3>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="span9" id="main">
+          
+
+
+
+<h1>Internals</h1>
+<p>
+  <span>Namespace: Nessos.Streams</span><br />
+  <span>Parent Module: <a href="nessos-streams-parstream.html">ParStream</a></span>
+</p>
+<div class="xmldoc">
+<p>Internal entrypoints for compiled code.<br />
+Do not call these functions directly.</p>
+
+
+</div>
+
+<!-- Render nested types and modules, if there are any -->
+
+  <h3>Functions and values</h3>
+  <table class="table table-bordered member-list">
+    <thead>
+      <tr><td>Function or value</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '39', 39)" onmouseover="showTip(event, '39', 39)">
+            iterCont iterf resf stream
+          </code>
+          <div class="tip" id="39">
+            <strong>Signature:</strong> iterf:(CancellationTokenSource -&gt; &#39;T -&gt; unit) -&gt; resf:(unit -&gt; &#39;R) -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; &#39;R<br />
+                          <strong>Type parameters:</strong> 'T, 'R          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L377-377" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Public "internal" entrypoint to iterate an unordered parallel stream and collect a result.
+Do not call this function directly.</p>
+
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '40', 40)" onmouseover="showTip(event, '40', 40)">
+            looksLike streamOrig stream
+          </code>
+          <div class="tip" id="40">
+            <strong>Signature:</strong> streamOrig:ParStream&lt;&#39;?19813&gt; -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; ParStream&lt;&#39;T&gt;<br />
+                          <strong>Type parameters:</strong> '?19813, 'T          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L392-392" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Public "internal" entrypoint to make one stream look like another in terms of its parallel properties.
+Do not call this function directly.</p>
+
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '41', 41)" onmouseover="showTip(event, '41', 41)">
+            mapCont f stream
+          </code>
+          <div class="tip" id="41">
+            <strong>Signature:</strong> f:((&#39;R -&gt; unit) -&gt; &#39;T -&gt; unit) -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; ParStream&lt;&#39;R&gt;<br />
+                          <strong>Type parameters:</strong> 'R, 'T          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L299-299" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Public permanent entrypoint used to map over a parallel stream.
+Do not call this function directly.</p>
+
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '42', 42)" onmouseover="showTip(event, '42', 42)">
+            parallelIterateAndCollect (...)
+          </code>
+          <div class="tip" id="42">
+            <strong>Signature:</strong> streamf:(Stream&lt;&#39;T&gt; -&gt; &#39;R) -&gt; mkIterator:(unit -&gt; &#39;T -&gt; unit) -&gt; collectResult:(unit -&gt; &#39;R) -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; &#39;R<br />
+                          <strong>Type parameters:</strong> 'T, 'R          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L323-323" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Public permanent entrypoint used to implement fold etc. via uncancellable parallel iteration.
+Do not call this function directly.</p>
+
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '43', 43)" onmouseover="showTip(event, '43', 43)">
+            parallelSort stream keyArray valueArray
+          </code>
+          <div class="tip" id="43">
+            <strong>Signature:</strong> stream:ParStream&lt;&#39;?19816&gt; -&gt; keyArray:&#39;Key [] -&gt; valueArray:&#39;Value [] -&gt; unit<br />
+                          <strong>Type parameters:</strong> '?19816, 'Key, 'Value          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L396-396" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Public "internal" entrypoint to sort keys and values
+Do not call this function directly.</p>
+
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '44', 44)" onmouseover="showTip(event, '44', 44)">
+            unorderedCont streamf resf stream
+          </code>
+          <div class="tip" id="44">
+            <strong>Signature:</strong> streamf:(Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;U&gt;) -&gt; resf:(unit -&gt; ParStream&lt;&#39;U&gt;) -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; ParStream&lt;&#39;U&gt;<br />
+                          <strong>Type parameters:</strong> 'T, 'U          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L365-365" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Public "internal" entrypoint to ensure a stream can be processed in an unordered way.
+Do not call this function directly.</p>
+
+
+
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+        </div>
+        <div class="span3">
+          <a href="https://nessos.github.io/Streams/index.html">
+            <img src="https://nessos.github.io/Streams/img/nessos.png" alt="F# Project" style="width:150px;margin:10px" />
+          </a>
+          <ul class="nav nav-list" id="menu" style="margin-top: 20px;">
+            <li class="nav-header">Streams</li>
+            <li><a href="https://nessos.github.io/Streams/index.html">Home page</a></li>
+            <li class="divider"></li>
+            <li><a href="http://www.nuget.org/packages/Streams">Get Library via NuGet</a></li>
+            <li><a href="https://github.com/nessos/Streams">Source Code on GitHub</a></li>
+            <li><a href="https://github.com/nessos/Streams/blob/master/LICENSE.md">License</a></li>
+            <li><a href="https://github.com/nessos/Streams/blob/master/RELEASE_NOTES.md">Release Notes</a></li>
+
+            <!--<li class="nav-header">Getting Started</li>
+            <li><a href="https://nessos.github.io/Streams/runtime-deployment.html">Cluster Deployment Guide</a></li>
+            <li><a href="https://nessos.github.io/Streams/azure-tutorial.html">Azure Guide</a></li>
+            <li class="divider"></li>
+            <li><a target="_blank" href="http://skillsmatter.com/skillscasts/5157-mbrace-large-scale-distributed-computation-with-f">Video presentation</a></li>
+            <li><a target="_blank" href="https://nessos.github.io/Streams/mbrace-plos.pdf">PLOS'13 Publication</a></li>
+            -->
+            <li class="nav-header">Documentation</li>
+            <!--<li><a href="https://nessos.github.io/Streams/programming-model.html">Programming model</a></li>
+            <li><a href="https://nessos.github.io/Streams/client-api.html">Client API</a></li>
+            <li><a target="_blank" href="https://nessos.github.io/Streams/mbrace-manual.pdf">MBrace Manual</a></li> -->
+            <li><a href="https://nessos.github.io/Streams/reference/index.html">API Reference</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <a href="https://github.com/nessos/Streams"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"/></a>
+  </body>
+  </html>

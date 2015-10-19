@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>Namespaces - Streams</title>
+    <title>ParStream<'T> - Streams</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content=""/>
     <meta name="author" content="Nick Palladinos, Kostas Rontogiannis"/>
@@ -33,82 +33,72 @@
         <div class="span9" id="main">
           
 
-<h1>Streams</h1>
 
 
-  <h2>Nessos.Streams Namespace</h2>
-    <div>
-      <table class="table table-bordered type-list">
+<h1>ParStream<'T></h1>
+<p>
+  <span>Namespace: Nessos.Streams</span><br />
+</p>
+<div class="xmldoc">
+<p>Represents a parallel Stream of values.</p>
+
+
+</div>
+  <h3>Record Fields</h3>
+  <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Type</td><td>Description</td></tr>
+      <tr><td>Record Field</td><td>Description</td></tr>
     </thead>
     <tbody>
-        <tr>
-          <td class="type-name">
-            <a href="nessos-streams-parcollector-2.html">ParCollector<'T, 'R></a>
-          </td>
-          <td class="xmldoc"><p>Collects elements into a mutable result container.</p>
+      <tr>
+        <td class="member-name">
 
-
-</td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="nessos-streams-pariterator-1.html">ParIterator<'T></a>
-          </td>
-          <td class="xmldoc"><p>Represents the iteration function</p>
-
-
-</td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="nessos-streams-parstream-1.html">ParStream<'T></a>
-          </td>
-          <td class="xmldoc"><p>Represents a parallel Stream of values.</p>
-
-
-</td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="nessos-streams-stream-1.html">Stream<'T></a>
-          </td>
-          <td class="xmldoc"><p>Represents a Stream of values.</p>
-
-
-</td>
-        </tr>
+          <code onmouseout="hideTip(event, '99', 99)" onmouseover="showTip(event, '99', 99)">
+            Impl
+          </code>
+          <div class="tip" id="99">
+            <strong>Signature:</strong> ParStreamImpl&lt;&#39;T&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L46-46" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
     </tbody>
   </table>
-  <table class="table table-bordered module-list">
+  <h3>Instance members</h3>
+  <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Module</td><td>Description</td></tr>
+      <tr><td>Instance member</td><td>Description</td></tr>
     </thead>
     <tbody>
-        <tr>
-          <td class="module-name">
-            <a href="nessos-streams-parstream.html">ParStream</a>
-          </td>
-          <td class="xmldoc"><p>Provides basic operations on Parallel Streams.</p>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '100', 100)" onmouseover="showTip(event, '100', 100)">
+            Apply(collector)
+          </code>
+          <div class="tip" id="100">
+            <strong>Signature:</strong> collector:ParCollector&lt;&#39;T,&#39;R&gt; -&gt; &#39;R<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L52-52" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Applies the given collector to the parallel Stream.</p>
 
 
-</td>
-        </tr>
-        <tr>
-          <td class="module-name">
-            <a href="nessos-streams-stream.html">Stream</a>
-          </td>
-          <td class="xmldoc"><p>Provides basic operations on Streams.</p>
 
-
-</td>
-        </tr>
+        </td>
+      </tr>
     </tbody>
   </table>
-
-    </div>
-  <h2>Nessos.Streams.Internals Namespace</h2>
 
         </div>
         <div class="span3">

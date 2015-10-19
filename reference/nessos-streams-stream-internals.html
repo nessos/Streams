@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>Namespaces - Streams</title>
+    <title>Internals - Streams</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content=""/>
     <meta name="author" content="Nick Palladinos, Kostas Rontogiannis"/>
@@ -33,82 +33,98 @@
         <div class="span9" id="main">
           
 
-<h1>Streams</h1>
 
 
-  <h2>Nessos.Streams Namespace</h2>
-    <div>
-      <table class="table table-bordered type-list">
+<h1>Internals</h1>
+<p>
+  <span>Namespace: Nessos.Streams</span><br />
+  <span>Parent Module: <a href="nessos-streams-stream.html">Stream</a></span>
+</p>
+<div class="xmldoc">
+</div>
+
+<!-- Render nested types and modules, if there are any -->
+
+  <h3>Functions and values</h3>
+  <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Type</td><td>Description</td></tr>
+      <tr><td>Function or value</td><td>Description</td></tr>
     </thead>
     <tbody>
-        <tr>
-          <td class="type-name">
-            <a href="nessos-streams-parcollector-2.html">ParCollector<'T, 'R></a>
-          </td>
-          <td class="xmldoc"><p>Collects elements into a mutable result container.</p>
+      <tr>
+        <td class="member-name">
 
+          <code onmouseout="hideTip(event, '90', 90)" onmouseover="showTip(event, '90', 90)">
+            iterCancel f stream
+          </code>
+          <div class="tip" id="90">
+            <strong>Signature:</strong> f:((unit -&gt; unit) -&gt; &#39;T -&gt; unit) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; unit<br />
+                          <strong>Type parameters:</strong> 'T          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L132-132" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
 
-</td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="nessos-streams-pariterator-1.html">ParIterator<'T></a>
-          </td>
-          <td class="xmldoc"><p>Represents the iteration function</p>
+          <code onmouseout="hideTip(event, '91', 91)" onmouseover="showTip(event, '91', 91)">
+            iterCancelLink cts f stream
+          </code>
+          <div class="tip" id="91">
+            <strong>Signature:</strong> cts:CancellationTokenSource -&gt; f:(&#39;T -&gt; unit) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; unit<br />
+                          <strong>Type parameters:</strong> 'T          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L122-122" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
 
+          <code onmouseout="hideTip(event, '92', 92)" onmouseover="showTip(event, '92', 92)">
+            mapCont f stream
+          </code>
+          <div class="tip" id="92">
+            <strong>Signature:</strong> f:((&#39;?19660 -&gt; unit) -&gt; &#39;?19661 -&gt; unit) -&gt; stream:Stream&lt;&#39;?19661&gt; -&gt; Stream&lt;&#39;?19660&gt;<br />
+                          <strong>Type parameters:</strong> '?19660, '?19661          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L104-104" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
 
-</td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="nessos-streams-parstream-1.html">ParStream<'T></a>
-          </td>
-          <td class="xmldoc"><p>Represents a parallel Stream of values.</p>
-
-
-</td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="nessos-streams-stream-1.html">Stream<'T></a>
-          </td>
-          <td class="xmldoc"><p>Represents a Stream of values.</p>
-
-
-</td>
-        </tr>
+          <code onmouseout="hideTip(event, '93', 93)" onmouseover="showTip(event, '93', 93)">
+            mapContCancel f stream
+          </code>
+          <div class="tip" id="93">
+            <strong>Signature:</strong> f:((unit -&gt; unit) -&gt; (&#39;?19663 -&gt; unit) -&gt; &#39;?19664 -&gt; unit) -&gt; stream:Stream&lt;&#39;?19664&gt; -&gt; Stream&lt;&#39;?19663&gt;<br />
+                          <strong>Type parameters:</strong> '?19663, '?19664          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L112-112" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
     </tbody>
   </table>
-  <table class="table table-bordered module-list">
-    <thead>
-      <tr><td>Module</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td class="module-name">
-            <a href="nessos-streams-parstream.html">ParStream</a>
-          </td>
-          <td class="xmldoc"><p>Provides basic operations on Parallel Streams.</p>
-
-
-</td>
-        </tr>
-        <tr>
-          <td class="module-name">
-            <a href="nessos-streams-stream.html">Stream</a>
-          </td>
-          <td class="xmldoc"><p>Provides basic operations on Streams.</p>
-
-
-</td>
-        </tr>
-    </tbody>
-  </table>
-
-    </div>
-  <h2>Nessos.Streams.Internals Namespace</h2>
 
         </div>
         <div class="span3">
