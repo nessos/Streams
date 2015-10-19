@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.24606.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{A3121229-BC6C-470D-9D43-7E247631C01A}"
 	ProjectSection(SolutionItems) = preProject
@@ -59,7 +59,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "img", "img", "{A9BADA98-176
 		docs\files\img\nessos.png = docs\files\img\nessos.png
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Streams.Core", "src\Streams.Core\Streams.Core.fsproj", "{F3482666-F39C-4F49-8D0B-3583328D2C42}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Streams", "src\Streams.Core\Streams.fsproj", "{F3482666-F39C-4F49-8D0B-3583328D2C42}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streams.CSharp", "src\Streams.CSharp\Streams.CSharp.csproj", "{E6852495-8012-4694-BC0F-A5376CD84B1F}"
 EndProject
