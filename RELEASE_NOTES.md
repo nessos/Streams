@@ -1,3 +1,6 @@
+#### 0.4.1
+* New ParStream functinos sortByDescending/sortByUsing
+
 #### 0.4.0
 * Fix Stream.sortBy issue.
 
