@@ -177,6 +177,13 @@ type ``ParStreams tests`` () =
                 let y = xs |> Seq.map ((+) 1) |> Seq.sortBy id |> Seq.toArray
                 x = y).QuickCheckThrowOnFailure()
 
+        [<Test>]
+        member __.``sortByDescending`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let x = xs |> ParStream.ofArray |> ParStream.map ((+) 1) |> ParStream.sortByDescending id |> ParStream.toArray
+                let y = xs.Select(fun v -> v + 1).OrderByDescending(fun v -> v).ToArray()
+                x = y).QuickCheckThrowOnFailure()
+
 
         [<Test>]
         member __.``groupBy`` () =

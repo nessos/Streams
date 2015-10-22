@@ -3,13 +3,13 @@ open System
 open System.Threading.Tasks
 open System.Threading
 
-type private MergeArrayType = FromArrayType | ToArrayType 
+type MergeArrayType = FromArrayType | ToArrayType 
 
 /// [omit]
 /// Helpers for parallel sorting.
 module Sort = 
-    let parallelSort<'Key, 'Value when 'Key : comparison>
-        (totalWorkers : int) (keys : 'Key[]) (array : 'Value[]) = 
+    let inline parallelSort<'Key, 'Value when 'Key : comparison>
+        (totalWorkers : int) (descending : bool) (keys : 'Key[]) (array : 'Value[]) = 
             // Taken from Carl Nolan's parallel inplace merge
             // The merge of the two array
             let merge (toArray: 'Value [], toKeys : 'Key[]) (fromArray: 'Value [], fromKeys : 'Key[]) (low1: int) (low2: int) (high1: int) (high2: int) =
@@ -25,14 +25,25 @@ module Sort =
                         toArray.[ptr] <- fromArray.[ptr1]
                         toKeys.[ptr] <- fromKeys.[ptr1]
                         ptr1 <- ptr1 + 1
-                    elif fromKeys.[ptr1] <= fromKeys.[ptr2] then
-                        toArray.[ptr] <- fromArray.[ptr1]
-                        toKeys.[ptr] <- fromKeys.[ptr1]
-                        ptr1 <- ptr1 + 1
                     else
-                        toArray.[ptr] <- fromArray.[ptr2]
-                        toKeys.[ptr] <- fromKeys.[ptr2]
-                        ptr2 <- ptr2 + 1
+                        if descending then
+                            if  fromKeys.[ptr1] > fromKeys.[ptr2] then
+                                toArray.[ptr] <- fromArray.[ptr1]
+                                toKeys.[ptr] <- fromKeys.[ptr1]
+                                ptr1 <- ptr1 + 1             
+                            else
+                                toArray.[ptr] <- fromArray.[ptr2]
+                                toKeys.[ptr] <- fromKeys.[ptr2]
+                                ptr2 <- ptr2 + 1
+                        else
+                            if  fromKeys.[ptr1] <= fromKeys.[ptr2] then
+                                toArray.[ptr] <- fromArray.[ptr1]
+                                toKeys.[ptr] <- fromKeys.[ptr1]
+                                ptr1 <- ptr1 + 1
+                            else
+                                toArray.[ptr] <- fromArray.[ptr2]
+                                toKeys.[ptr] <- fromKeys.[ptr2]
+                                ptr2 <- ptr2 + 1
 
  
             // define the sort operation
@@ -75,6 +86,9 @@ module Sort =
                     // Sort the specified range - could implement QuickSort here
                     let sortLen = high - low + 1
                     Array.Sort(keys, array, low, sortLen)
+                    if descending then
+                        Array.Reverse(keys, low, sortLen)
+                        Array.Reverse(array, low, sortLen)
  
                     barrier.SignalAndWait()
  

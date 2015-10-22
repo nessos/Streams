@@ -45,7 +45,7 @@ type internal ParStreamImpl<'T> =
 type ParStream<'T> = 
     internal { Impl: ParStreamImpl<'T> }
     member internal x.Stream() = x.Impl.Stream()
-    member internal x.DegreeOfParallelism = x.Impl.DegreeOfParallelism
+    member x.DegreeOfParallelism = x.Impl.DegreeOfParallelism
     member internal x.PreserveOrdering = x.Impl.PreserveOrdering
     member internal x.SourceType = x.Impl.SourceType
     /// Applies the given collector to the parallel Stream.
@@ -341,6 +341,7 @@ module ParStream =
             else 
                 stream.Apply collector
 
+
         // Internal inlined code to implement fold in terms of parallelIterateAndCollect.
         let inline internal foldInlined folder combiner state (stream : ParStream<'T>) : 'State =
             let results = new List<'State ref>()
@@ -356,6 +357,26 @@ module ParStream =
                     for result in results do
                             acc <- combiner acc !result 
                     acc)
+
+        let inline internal collectKeyValues projection (stream : ParStream<'T>) = 
+            // explicit use of Tuple<ArrayCollector<'Key>, ArrayCollector<'T>> to avoid temp heap allocations of (ArrayCollector<'Key> * ArrayCollector<'T>) 
+            let keyValueTuple = 
+                stream |> foldInlined
+                    (fun (keyValueTuple : Tuple<ArrayCollector<'Key>, ArrayCollector<'T>>) value -> 
+                        let keyArray, valueArray = keyValueTuple.Item1, keyValueTuple.Item2
+                        keyArray.Add(projection value)
+                        valueArray.Add(value) 
+                        keyValueTuple)
+                    (fun leftKeyValueTuple rightKeyValueTuple ->
+                        let leftKeyArray, leftValueArray = leftKeyValueTuple.Item1, leftKeyValueTuple.Item2 
+                        let rightKeyArray, rightValueArray = rightKeyValueTuple.Item1, rightKeyValueTuple.Item2 
+                        leftKeyArray.AddRange(rightKeyArray)
+                        leftValueArray.AddRange(rightValueArray)
+                        leftKeyValueTuple) 
+                    (fun () -> new Tuple<_, _>(new ArrayCollector<'Key>(), new ArrayCollector<'T>())) 
+            let keyArray, valueArray = keyValueTuple.Item1, keyValueTuple.Item2
+            keyArray.ToArray(), valueArray.ToArray()
+
                         
         /// Public "internal" entrypoint to ensure a stream can be processed in an unordered way.
         /// Do not call this function directly.
@@ -390,15 +411,7 @@ module ParStream =
         /// Do not call this function directly.
         //
         let looksLike (streamOrig: ParStream<_>) (stream: ParStream<'T>) = stream |> withDegreeOfParallelism streamOrig.DegreeOfParallelism
-
-        /// Public "internal" entrypoint to sort keys and values
-        /// Do not call this function directly.
-        let parallelSort (stream: ParStream<_>) (keyArray: 'Key[]) (valueArray: 'Value[]) =
-            // Sort.parallel sort is known to cause hangs in linuxes
-            if System.Environment.OSVersion.Platform = System.PlatformID.Unix then
-                Array.Sort(keyArray, valueArray)
-            else 
-                Sort.parallelSort stream.DegreeOfParallelism keyArray valueArray
+            
 
     // Used to indicate that we don't want a closure to be curried
     let inline internal nocurry() = Unchecked.defaultof<unit>
@@ -646,28 +659,19 @@ module ParStream =
     /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
     /// <param name="stream">The input parallel stream.</param>
     /// <returns>The result parallel stream.</returns>    
-    let inline sortBy (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'T>  =
-        // explicit use of Tuple<ArrayCollector<'Key>, ArrayCollector<'T>> to avoid temp heap allocations of (ArrayCollector<'Key> * ArrayCollector<'T>) 
-        let keyValueTuple = 
-            stream |> Internals.foldInlined
-                (fun (keyValueTuple : Tuple<ArrayCollector<'Key>, ArrayCollector<'T>>) value -> 
-                    let keyArray, valueArray = keyValueTuple.Item1, keyValueTuple.Item2
-                    keyArray.Add(projection value)
-                    valueArray.Add(value) 
-                    keyValueTuple)
-                (fun leftKeyValueTuple rightKeyValueTuple ->
-                    let leftKeyArray, leftValueArray = leftKeyValueTuple.Item1, leftKeyValueTuple.Item2 
-                    let rightKeyArray, rightValueArray = rightKeyValueTuple.Item1, rightKeyValueTuple.Item2 
-                    leftKeyArray.AddRange(rightKeyArray)
-                    leftValueArray.AddRange(rightValueArray)
-                    leftKeyValueTuple) 
-                (fun () -> new Tuple<_, _>(new ArrayCollector<'Key>(), new ArrayCollector<'T>())) 
-        let keyArray, valueArray = keyValueTuple.Item1, keyValueTuple.Item2
-        let keyArray' = keyArray.ToArray()
-        let valueArray' = valueArray.ToArray()
-        // Sort.parallel sort is known to cause hangs in linuxes
-        Internals.parallelSort stream keyArray' valueArray'
-        valueArray' |> ofArray |> ordered |> Internals.looksLike stream
+    let inline sortBy<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'T>  =
+        let keyArray, valueArray = Internals.collectKeyValues projection stream
+        Sort.parallelSort stream.DegreeOfParallelism false keyArray valueArray
+        valueArray |> ofArray |> ordered |> Internals.looksLike stream
+
+    /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream ordered by keys in descending order.</summary>
+    /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
+    /// <param name="stream">The input parallel stream.</param>
+    /// <returns>The result parallel stream.</returns>    
+    let inline sortByDescending<'T, 'Key when 'Key : comparison> (projection : 'T -> 'Key) (stream : ParStream<'T>) : ParStream<'T>  =
+        let keyArray, valueArray = Internals.collectKeyValues projection stream
+        Sort.parallelSort stream.DegreeOfParallelism true keyArray valueArray
+        valueArray |> ofArray |> ordered |> Internals.looksLike stream
 
     /// <summary>Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and the result of the threading an accumulator.</summary>
     /// <param name="projection">A function to transform items from the input ParStream to keys.</param>
