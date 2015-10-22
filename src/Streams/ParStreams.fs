@@ -673,6 +673,15 @@ module ParStream =
         Sort.parallelSort stream.DegreeOfParallelism true keyArray valueArray
         valueArray |> ofArray |> ordered |> Internals.looksLike stream
 
+    /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream ordered using the given comparer for the keys.</summary>
+    /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
+    /// <param name="flow">The input parallel stream.</param>
+    /// <returns>The result parallel stream.</returns>
+    let inline sortByUsing<'T, 'Key> (projection : 'T -> 'Key) (comparer : IComparer<'Key>) (stream : ParStream<'T>) : ParStream<'T> =
+        let keyArray, valueArray = Internals.collectKeyValues projection stream
+        Sort.parallelSortWithComparer stream.DegreeOfParallelism comparer keyArray valueArray
+        valueArray |> ofArray |> ordered |> Internals.looksLike stream
+
     /// <summary>Applies a key-generating function to each element of a ParStream and return a ParStream yielding unique keys and the result of the threading an accumulator.</summary>
     /// <param name="projection">A function to transform items from the input ParStream to keys.</param>
     /// <param name="folder">A function that updates the state with each element from the ParStream.</param>

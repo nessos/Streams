@@ -9,6 +9,7 @@ namespace Nessos.Streams.Tests
 #endif
 
 open System.Linq
+open System.Collections.Generic
 open System.Threading
 open System.Collections.Generic
 open FsCheck
@@ -182,6 +183,14 @@ type ``ParStreams tests`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> ParStream.ofArray |> ParStream.map ((+) 1) |> ParStream.sortByDescending id |> ParStream.toArray
                 let y = xs.Select(fun v -> v + 1).OrderByDescending(fun v -> v).ToArray()
+                x = y).QuickCheckThrowOnFailure()
+
+        [<Test>]
+        member __.``sortByUsing`` () =
+            Spec.ForAny<int[]>(fun xs ->
+                let comparer = Comparer<int>.Default
+                let x = xs |> ParStream.ofArray |> ParStream.map ((+) 1) |> ParStream.sortByUsing id comparer |> ParStream.toArray
+                let y = xs.Select(fun v -> v + 1).OrderBy((fun v -> v), comparer).ToArray()
                 x = y).QuickCheckThrowOnFailure()
 
 
