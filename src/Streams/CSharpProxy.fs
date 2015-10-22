@@ -61,6 +61,12 @@ type public CSharpProxy =
     static member OrderBy<'T, 'Key when 'Key : comparison>(stream : ParStream<'T>, func : Func<'T, 'Key>) =
         ParStream.sortBy (fun x -> func.Invoke(x)) stream
 
+    static member OrderByDescending<'T, 'Key when 'Key : comparison>(stream : ParStream<'T>, func : Func<'T, 'Key>) =
+        ParStream.sortByDescending (fun x -> func.Invoke(x)) stream
+
+    static member OrderBy<'T, 'Key>(stream : ParStream<'T>, func : Func<'T, 'Key>, comparer : IComparer<'Key>) =
+        ParStream.sortByUsing (fun x -> func.Invoke(x)) comparer stream 
+
     static member Sum(stream : Stream<int64>) = 
         Stream.sum stream
 

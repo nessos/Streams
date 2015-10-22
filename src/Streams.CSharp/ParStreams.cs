@@ -86,6 +86,26 @@ namespace Nessos.Streams.CSharp
         }
 
 
+        /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream ordered by keys in descending order.</summary>
+        /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
+        /// <param name="stream">The input parallel stream.</param>
+        /// <returns>The result parallel stream.</returns>    
+        public static ParStream<TSource> OrderByDescending<TSource, TKey>(this ParStream<TSource> stream, Func<TSource, TKey> projection) where TKey : IComparable<TKey>
+        {
+            return CSharpProxy.OrderByDescending(stream, projection);
+        }
+
+        /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream ordered using the given comparer for the keys.</summary>
+        /// <param name="projection">A function to transform items of the input parallel stream into keys.</param>
+        /// <param name="comparer">A comparer for the keys.</param>
+        /// <param name="stream">The input parallel stream.</param>
+        /// <returns>The result parallel stream.</returns>
+        public static ParStream<TSource> OrderBy<TSource, TKey>(this ParStream<TSource> stream, Func<TSource, TKey> projection, IComparer<TKey> comparer) where TKey : IComparable<TKey>
+        {
+            return CSharpProxy.OrderBy(stream, projection, comparer);
+        }
+
+
         /// <summary>Applies a key-generating function to each element of the input parallel stream and yields a parallel stream of unique keys and a sequence of all elements that have each key.</summary>
         /// <param name="projection">A function to transform items of the input parallel stream into comparable keys.</param>
         /// <param name="stream">The input parallel stream.</param>
