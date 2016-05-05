@@ -235,6 +235,50 @@ module ParStream =
         | [| singleton |] -> ofSeq singleton
         | sources -> sources |> Seq.concat |> ofSeq
 
+    /// <summary>
+    ///     Creates a parallel stream from a seekable read stream factory
+    /// </summary>
+    /// <param name="mkStream">Seekable read stream factory</param>
+    let ofSystemStreamByLine (mkStream : unit -> #System.IO.Stream) : ParStream<string> =
+        ParStream
+         { new ParStreamImpl<string> with
+            member self.DegreeOfParallelism = Environment.ProcessorCount
+            member self.SourceType = SourceType.Seq
+            member self.PreserveOrdering = false
+            member self.Stream () = Stream.ofSystemStreamByLine (mkStream ())
+            member self.Apply<'R> (collector : ParCollector<string, 'R>) =
+                let stream = mkStream()
+                let cores = Environment.ProcessorCount
+                let N = stream.Length
+                if not stream.CanRead then invalidArg "mkStream" "not a read stream"
+                if not stream.CanSeek || N < 1024L * int64 cores then
+                    let lines = TextReaders.ReadLines(stream, disposeStream = true)
+                    let pSeq = ofSeq lines
+                    pSeq.Apply collector
+                else
+                    let nextRef = ref true
+                    let createTask s e (iter : ParIterator<string>) =
+                        iter.Cts.Token.Register(fun _ -> nextRef := false) |> ignore
+                        Task.Factory.StartNew(fun () ->
+                            let stream = if s = 0L then stream else mkStream()
+                            let lines = TextReaders.ReadLinesRanged(stream, s, e, disposeStream = true)
+                            for l in lines do iter.Func l)
+
+                    Array.splitByPartitionCountRange cores 0L N 
+                    |> Array.map (fun (s,e) -> createTask s e (collector.Iterator()))
+                    |> Task.WaitAll
+
+                    collector.Result }
+
+    /// <summary>
+    ///     Creates a ParStream instance by reading a file in parallel
+    /// </summary>
+    /// <param name="path">Local path to file</param>
+    let ofTextFileByLine (path : string) : ParStream<string> =
+        ofSystemStreamByLine (fun () -> System.IO.File.OpenRead path)
+
+
+
     // intermediate functions
 
     /// <summary>Returns a parallel stream with a new degree of parallelism.</summary>

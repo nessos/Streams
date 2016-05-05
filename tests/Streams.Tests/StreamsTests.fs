@@ -53,6 +53,25 @@ module ``Streams tests``  =
                 x = y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        let ``ofTextFileByLine`` () =
+            let path = System.IO.Path.GetTempFileName()
+            try
+                let seed = seq { 1L .. 1000000L }
+                System.IO.File.WriteAllLines(path, seed |> Seq.map (sprintf "This is file entry #%d"))
+
+                let result =
+                    Stream.ofTextFileByLine path
+                    |> Stream.map (fun line -> line.Split('#').[1])
+                    |> Stream.map int64
+                    |> Stream.sum
+
+                Assert.AreEqual(Seq.sum seed, result)
+
+            finally System.IO.File.Delete(path)
+
+
+
+        [<Test>]
         let ``generateInfinite`` () =
             Spec.ForAny<int>(fun n ->
                 // we use modulus here to keep the test duration somewhat short.

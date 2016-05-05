@@ -54,6 +54,23 @@ type ``ParStreams tests`` () =
                 set x = set y).QuickCheckThrowOnFailure()
 
         [<Test>]
+        member __.``ofTextFileByLine`` () =
+            let path = System.IO.Path.GetTempFileName()
+            try
+                let seed = [| 1L .. 10000000L |]
+                System.IO.File.WriteAllLines(path, seed |> Seq.map (sprintf "This is file entry #%d"))
+
+                let result =
+                    ParStream.ofTextFileByLine path
+                    |> ParStream.map (fun line -> line.Split('#').[1])
+                    |> ParStream.map int64
+                    |> ParStream.toArray
+
+                Assert.AreEqual(seed, result)
+
+            finally System.IO.File.Delete(path)
+
+        [<Test>]
         member __.``toSeq`` () =
             Spec.ForAny<int[]>(fun xs ->
                 let x = xs |> ParStream.ofSeq |> ParStream.map ((+)1) |> ParStream.toSeq

@@ -337,6 +337,23 @@ module Stream =
                  member __.Bulk() = bulk() 
                  member __.Iterator = iterator()  })
 
+    /// <summary>
+    ///     Produces a stream by sequentially reading a System.IO.Stream
+    ///     of text, splitting input by line separator.
+    /// </summary>
+    /// <param name="stream">Input System.IO.Stream.</param>
+    let ofSystemStreamByLine (stream : System.IO.Stream) : Stream<string> =
+        let lines = TextReaders.ReadLines(stream, disposeStream = true)
+        ofSeq lines
+
+    /// <summary>
+    ///     Produces a stream by sequentially reading a text file from given path.
+    ///     Text file entries are split by line separator.
+    /// </summary>
+    /// <param name="path">Path to local text file.</param>
+    let ofTextFileByLine (path : string) : Stream<string> =
+        ofSystemStreamByLine (System.IO.File.OpenRead(path))
+
     /// <summary>Produces an infinite Stream by calling the given function.</summary>
     /// <param name="generator">A function used to generate values.</param>
     /// <returns>The result stream.</returns>

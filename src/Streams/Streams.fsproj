@@ -51,6 +51,8 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Utils.fs" />
+    <Compile Include="TextReaders.fs" />
     <Compile Include="ArrayCollector.fs" />
     <Compile Include="Sort.fs" />
     <Compile Include="Streams.fs" />
