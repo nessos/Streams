@@ -99,30 +99,40 @@ type private StreamLineEnumerator(stream : Stream, disposeStream : bool, ?encodi
         member __.Reset () = raise <| new NotSupportedException("LineReader")
 
 type private RangedStreamLineEnumerator (stream : Stream, disposeStream : bool, beginPos : int64, endPos : int64, ?encoding : Encoding) =
+    let mutable numberOfLines = 0L
     let mutable currentLine = Unchecked.defaultof<string>
+    let mutable includeFirstLine = false
     do 
         if beginPos > endPos || endPos > stream.Length then raise <| new ArgumentOutOfRangeException("endPos")
-        ignore <| stream.Seek(beginPos, SeekOrigin.Begin)
+        // include first line if:
+        //   1. is the first line of the starting segment of a stream.
+        //   2. is any successive line that fits within the stream boundary.
+        if beginPos <> 0L then
+            stream.Seek(beginPos - 1L, SeekOrigin.Begin) |> ignore
+            if stream.ReadByte() = int '\n' then
+                includeFirstLine <- true
+        else 
+            includeFirstLine <- true
+
 
     let reader = new StreamLineReader(stream, ?encoding = encoding)
 
-    let rec readNext () =
+    let rec readNext () : bool =
         let bytesRead = reader.BytesRead
         if beginPos + bytesRead <= endPos then
             let line = reader.ReadLine()
             if line = null then
                 false
-
-            // include line if:
-            //   1. is the first line of the starting segment of a stream.
-            //   2. is any successive line that fits within the stream boundary.
-            elif (beginPos = 0L || bytesRead > 0L) then
-                currentLine <- line
-                true
             else
-                readNext()
+                numberOfLines <- numberOfLines + 1L
+                if numberOfLines = 1L && not includeFirstLine then
+                    readNext()
+                else
+                    currentLine <- line
+                    true
         else
             false
+        
 
     interface IEnumerator<string> with
         member __.Current = currentLine
