@@ -18,6 +18,9 @@ open NUnit.Framework
 open FSharp.Collections.ParallelSeq
 open Nessos.Streams
 
+// Helper type
+type Separator = N | R | RN
+
 [<TestFixture; Category("ParStreams.FSharp")>]
 type ``ParStreams tests`` () =
 
@@ -69,6 +72,29 @@ type ``ParStreams tests`` () =
                 Assert.AreEqual(seed, result)
 
             finally System.IO.File.Delete(path)
+
+        
+        [<Test>]
+        member __.``ofTextFileByLine Random`` () =
+            Spec.ForAny(fun (n : int64, s : Separator) -> 
+                let separator = 
+                    match s with
+                    | N -> "\n" 
+                    | R -> "\r"
+                    | RN -> "\r\n"
+                let n = if n = 0L then 1L else System.Math.Abs(n)
+                let path = System.IO.Path.GetTempFileName()
+                try
+                    let seed = [| 1L .. n |]
+                    System.IO.File.WriteAllText(path, seed |> Seq.map string |> Seq.toArray |> String.concat separator)
+
+                    let result =
+                        ParStream.ofTextFileByLine path
+                        |> ParStream.length
+
+                    Assert.AreEqual(seed.Length, result)
+
+                finally System.IO.File.Delete(path)).QuickCheckThrowOnFailure()
 
         [<Test>]
         member __.``toSeq`` () =
