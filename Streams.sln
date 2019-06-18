@@ -1,22 +1,22 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2002
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Streams", "src\Streams\Streams.fsproj", "{49B5C56A-9642-4330-9971-2A69A18D25F9}" 
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Streams", "src\Streams\Streams.fsproj", "{49B5C56A-9642-4330-9971-2A69A18D25F9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Streams.CSharp", "src\Streams.CSharp\Streams.CSharp.csproj", "{A396670D-10C7-465A-AAB5-029C9D238BDD}" 
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Streams.CSharp", "src\Streams.CSharp\Streams.CSharp.csproj", "{A396670D-10C7-465A-AAB5-029C9D238BDD}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Streams.Tests", "tests\Streams.Tests\Streams.Tests.fsproj", "{B67F119F-75E1-4C72-8727-4303CF94ACE8}" 
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Streams.Tests", "tests\Streams.Tests\Streams.Tests.fsproj", "{B67F119F-75E1-4C72-8727-4303CF94ACE8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Streams.Tests.CSharp", "tests\Streams.Tests.CSharp\Streams.Tests.CSharp.csproj", "{B1EB1987-9D31-4F36-8EBB-2BBB970F27CC}" 
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Streams.Tests.CSharp", "tests\Streams.Tests.CSharp\Streams.Tests.CSharp.csproj", "{B1EB1987-9D31-4F36-8EBB-2BBB970F27CC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{CA2F9EF8-BFFE-4AE8-A610-869DDCBD7CCD}" 
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{CA2F9EF8-BFFE-4AE8-A610-869DDCBD7CCD}"
 	ProjectSection(SolutionItems) = preProject
 		.paket\paket.exe = .paket\paket.exe
 		.paket\Paket.Restore.targets = .paket\Paket.Restore.targets
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{336DA892-DD3A-42C5-BDD4-FED9706146B1}" 
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{336DA892-DD3A-42C5-BDD4-FED9706146B1}"
 	ProjectSection(SolutionItems) = preProject
 		.dockerignore = .dockerignore
 		.gitattributes = .gitattributes
@@ -26,6 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.cmd = build.cmd
 		build.fsx = build.fsx
 		build.sh = build.sh
+		docker-build.sh = docker-build.sh
 		Dockerfile = Dockerfile
 		LICENSE.md = LICENSE.md
 		paket.dependencies = paket.dependencies
@@ -35,35 +36,35 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Streams.sln = Streams.sln
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{5FFE500C-6A09-4562-AE29-C88B0EA4AFFC}" 
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{5FFE500C-6A09-4562-AE29-C88B0EA4AFFC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{484656D6-1D35-4397-9B5D-C3D4B90B683B}" 
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{484656D6-1D35-4397-9B5D-C3D4B90B683B}"
 	ProjectSection(SolutionItems) = preProject
 		docs\content\index.fsx = docs\content\index.fsx
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files", "files", "{9E43C4AA-32AB-443C-AB01-E52B049BEFA9}" 
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files", "files", "{9E43C4AA-32AB-443C-AB01-E52B049BEFA9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "img", "img", "{47C3BB52-F139-4BF3-8B60-380574B8D54A}" 
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "img", "img", "{47C3BB52-F139-4BF3-8B60-380574B8D54A}"
 	ProjectSection(SolutionItems) = preProject
 		docs\files\img\fsharp.png = docs\files\img\fsharp.png
 		docs\files\img\nessos.png = docs\files\img\nessos.png
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{B0FB9072-9AF8-4A5C-B5C5-3007C96DA5DF}" 
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{B0FB9072-9AF8-4A5C-B5C5-3007C96DA5DF}"
 	ProjectSection(SolutionItems) = preProject
 		docs\tools\generate.fsx = docs\tools\generate.fsx
 		docs\tools\packages.config = docs\tools\packages.config
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{6131609F-DF8E-4F3A-88C0-D03DF6C79412}" 
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{6131609F-DF8E-4F3A-88C0-D03DF6C79412}"
 	ProjectSection(SolutionItems) = preProject
 		docs\tools\templates\template.cshtml = docs\tools\templates\template.cshtml
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9D3CEB5A-E71E-4A05-8812-2A9ABBD87ED7}" 
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9D3CEB5A-E71E-4A05-8812-2A9ABBD87ED7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{ACEA3668-AC17-4450-BF10-48DC2E35423A}" 
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{ACEA3668-AC17-4450-BF10-48DC2E35423A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -92,15 +93,15 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{49B5C56A-9642-4330-9971-2A69A18D25F9} = {9D3CEB5A-E71E-4A05-8812-2A9ABBD87ED7}
+		{A396670D-10C7-465A-AAB5-029C9D238BDD} = {9D3CEB5A-E71E-4A05-8812-2A9ABBD87ED7}
+		{B67F119F-75E1-4C72-8727-4303CF94ACE8} = {ACEA3668-AC17-4450-BF10-48DC2E35423A}
+		{B1EB1987-9D31-4F36-8EBB-2BBB970F27CC} = {ACEA3668-AC17-4450-BF10-48DC2E35423A}
 		{484656D6-1D35-4397-9B5D-C3D4B90B683B} = {5FFE500C-6A09-4562-AE29-C88B0EA4AFFC}
 		{9E43C4AA-32AB-443C-AB01-E52B049BEFA9} = {5FFE500C-6A09-4562-AE29-C88B0EA4AFFC}
 		{47C3BB52-F139-4BF3-8B60-380574B8D54A} = {9E43C4AA-32AB-443C-AB01-E52B049BEFA9}
 		{B0FB9072-9AF8-4A5C-B5C5-3007C96DA5DF} = {5FFE500C-6A09-4562-AE29-C88B0EA4AFFC}
 		{6131609F-DF8E-4F3A-88C0-D03DF6C79412} = {B0FB9072-9AF8-4A5C-B5C5-3007C96DA5DF}
-		{49B5C56A-9642-4330-9971-2A69A18D25F9} = {9D3CEB5A-E71E-4A05-8812-2A9ABBD87ED7}
-		{A396670D-10C7-465A-AAB5-029C9D238BDD} = {9D3CEB5A-E71E-4A05-8812-2A9ABBD87ED7}
-		{B67F119F-75E1-4C72-8727-4303CF94ACE8} = {ACEA3668-AC17-4450-BF10-48DC2E35423A}
-		{B1EB1987-9D31-4F36-8EBB-2BBB970F27CC} = {ACEA3668-AC17-4450-BF10-48DC2E35423A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9BE7A94-724F-497C-8F95-EC4F58D9ED6C}

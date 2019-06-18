@@ -8,5 +8,5 @@ All documentation and related material can be found [here](http://nessos.github.
 
 Head (branch `master`), Build & Unit tests
 
-* Windows/.NET [![Build status](https://ci.appveyor.com/api/projects/status/github/nessos/streams?branch=master)](https://ci.appveyor.com/project/nessos/streams)
-* Mac OS X/Mono 3.10 [![Build Status](https://travis-ci.org/nessos/Streams.png?branch=master)](https://travis-ci.org/nessos/Streams/branches)
+* Windows [![Build status](https://ci.appveyor.com/api/projects/status/63vtp5rl1bpt8qs3/branch/master?svg=true)](https://ci.appveyor.com/project/nessos/streams)
+* Docker [![Build Status](https://travis-ci.org/nessos/Streams.svg?branch=master)](https://travis-ci.org/nessos/Streams/branches)
