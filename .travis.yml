@@ -1,12 +1,8 @@
-language: objective-c
+os: linux
+language: bash
 
-env:
-  matrix:
-    - MONO_VERSION="3.10.0"
+services:
+  - docker
 
-install:
-  - wget "http://download.mono-project.com/archive/${MONO_VERSION}/macos-10-x86/MonoFramework-MDK-${MONO_VERSION}.macos10.xamarin.x86.pkg"
-  - sudo installer -pkg "MonoFramework-MDK-${MONO_VERSION}.macos10.xamarin.x86.pkg" -target /
-
-script: 
-  - ./build.sh -ef IgnoreCloudTests
+script:
+  - ./docker-build.sh Bundle

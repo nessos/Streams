@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FsCheck.Fluent;
+using FsCheck;
 using NUnit.Framework;
 using Nessos.Streams.CSharp;
 
@@ -17,7 +17,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void OfArray()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream().Select(i => i + 1).ToArray();
                 var y = xs.AsParallel().Select(i => i + 1).ToArray();
@@ -28,7 +28,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void OfList()
         {
-            Spec.ForAny<List<int>>(xs =>
+            Prop.ForAll<List<int>>(xs =>
             {
                 var x = xs.AsParStream().Select(i => i + 1).ToList();
                 var y = xs.AsParallel().Select(i => i + 1).ToList();
@@ -39,7 +39,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void OfEnumerable()
         {
-            Spec.ForAny<List<int>>(xs =>
+            Prop.ForAll<List<int>>(xs =>
             {
                 IEnumerable<int> _xs = xs;
                 var x = _xs.AsParStream().Select(i => i + 1).ToArray();
@@ -51,7 +51,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void Select()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream().Select(i => i + 1).ToArray();
                 var y = xs.AsParallel().Select(i => i + 1).ToArray();
@@ -62,7 +62,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void Where()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream().Where(i => i % 2 == 0).ToArray();
                 var y = xs.AsParallel().Where(i => i % 2 == 0).ToArray();
@@ -73,7 +73,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void SelectMany()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream().SelectMany(i => xs.AsStream()).ToArray();
                 var y = xs.AsParallel().SelectMany(i => xs).ToArray();
@@ -85,7 +85,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void Aggregate()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream().Select(i => i + 1).Aggregate(() => 0, (acc, i) => acc + i, (left, right) => left + right);
                 var y = xs.AsParallel().Select(i => i + 1).Aggregate(() => 0, (acc, i) => acc + i, (left, right) => left + right, i => i);
@@ -97,7 +97,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void Sum()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream().Select(i => i + 1).Sum();
                 var y = xs.AsParallel().Select(i => i + 1).Sum();
@@ -108,7 +108,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void Count()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream().Select(i => i + 1).Count();
                 var y = xs.AsParallel().Select(i => i + 1).Count();
@@ -119,7 +119,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void OrderBy()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream().Select(i => i + 1).OrderBy(i => i).ToArray();
                 var y = xs.AsParallel().Select(i => i + 1).OrderBy(i => i).ToArray();
@@ -130,7 +130,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void GroupBy()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream()
                           .Select(i => i + 1)
@@ -150,7 +150,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void FirstWithPredicate()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = 0;
                 try
@@ -177,7 +177,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void First()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = 0;
                 try
@@ -204,7 +204,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void FirstOrDefault()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream().Where(_x => _x == 1).FirstOrDefault();
                 var y = xs.AsParallel().Where(_x => _x == 1).FirstOrDefault();
@@ -215,7 +215,7 @@ namespace Nessos.Streams.Tests.CSharp
         [Test]
         public void FirstOrDefaultWithPredicate()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream().FirstOrDefault(i => i == 1);
                 var y = xs.AsParallel().FirstOrDefault(i => i == 1);
@@ -225,7 +225,7 @@ namespace Nessos.Streams.Tests.CSharp
 
         public void Any()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream().Any(i => i % 2 == 0);
                 var y = xs.AsParallel().Any(i => i % 2 == 0);
@@ -235,7 +235,7 @@ namespace Nessos.Streams.Tests.CSharp
 
         public void All()
         {
-            Spec.ForAny<int[]>(xs =>
+            Prop.ForAll<int[]>(xs =>
             {
                 var x = xs.AsParStream().All(i => i % 2 == 0);
                 var y = xs.AsParallel().All(i => i % 2 == 0);
@@ -245,7 +245,7 @@ namespace Nessos.Streams.Tests.CSharp
 
         public void IsEmpty()
         {
-            Spec.ForAny<int[]>((int[] xs) =>
+            Prop.ForAll<int[]>((int[] xs) =>
             {
                 var x = xs.AsParStream().IsEmpty<int>();
                 var y = xs.AsStream().IsEmpty<int>();

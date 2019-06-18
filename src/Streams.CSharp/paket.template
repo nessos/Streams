@@ -14,4 +14,7 @@ iconurl https://avatars1.githubusercontent.com/u/5538081
 tags
 	F#/C# Streams
 dependencies
-	Streams CURRENTVERSION
+	framework: net45
+		Streams CURRENTVERSION
+	framework: netstandard2.0
+		Streams CURRENTVERSION

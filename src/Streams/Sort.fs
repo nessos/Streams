@@ -16,7 +16,7 @@ module Sort =
         (totalWorkers : int) (descending : bool) (keys : 'Key[]) (array : 'Value[]) = 
             // Taken from Carl Nolan's parallel inplace merge
             // The merge of the two array
-            let merge (toArray: 'Value [], toKeys : 'Key[]) (fromArray: 'Value [], fromKeys : 'Key[]) (low1: int) (low2: int) (high1: int) (high2: int) =
+            let merge (toArray: 'Value []) (toKeys : 'Key[]) (fromArray: 'Value []) (fromKeys : 'Key[]) (low1: int) (low2: int) (high1: int) (high2: int) =
                 let mutable ptr1 = low1
                 let mutable ptr2 = high1
  
@@ -102,7 +102,9 @@ module Sort =
                                 barrier.RemoveParticipant()
                             else
                                 let newHigh = loopHigh + !partitionSize / 2
-                                merge (getMergeArray FromArrayType) (getMergeArray ToArrayType) low loopHigh (loopHigh + 1) newHigh
+                                let toArray, toKeys = getMergeArray FromArrayType
+                                let fromArray, fromKeys = getMergeArray ToArrayType
+                                merge toArray toKeys fromArray fromKeys low loopHigh (loopHigh + 1) newHigh
                                 barrier.SignalAndWait()
                                 loopArray (loopIdx + 1) (actionIdx >>> 1) newHigh
                     loopArray 0 index high
@@ -124,7 +126,7 @@ module Sort =
         (totalWorkers : int) (comparer : IComparer<'Key>) (keys : 'Key[]) (array : 'Value[]) = 
             // Taken from Carl Nolan's parallel inplace merge
             // The merge of the two array
-            let merge (toArray: 'Value [], toKeys : 'Key[]) (fromArray: 'Value [], fromKeys : 'Key[]) (low1: int) (low2: int) (high1: int) (high2: int) =
+            let merge (toArray: 'Value []) (toKeys : 'Key[]) (fromArray: 'Value []) (fromKeys : 'Key[]) (low1: int) (low2: int) (high1: int) (high2: int) =
                 let mutable ptr1 = low1
                 let mutable ptr2 = high1
  
@@ -196,7 +198,9 @@ module Sort =
                                 barrier.RemoveParticipant()
                             else
                                 let newHigh = loopHigh + !partitionSize / 2
-                                merge (getMergeArray FromArrayType) (getMergeArray ToArrayType) low loopHigh (loopHigh + 1) newHigh
+                                let toArray, toKeys = getMergeArray FromArrayType
+                                let fromArray, fromKeys = getMergeArray ToArrayType
+                                merge toArray toKeys fromArray fromKeys low loopHigh (loopHigh + 1) newHigh
                                 barrier.SignalAndWait()
                                 loopArray (loopIdx + 1) (actionIdx >>> 1) newHigh
                     loopArray 0 index high

@@ -13,7 +13,6 @@ open System.Collections.Generic
 open System.Threading
 open System.Collections.Generic
 open FsCheck
-open FsCheck.Fluent
 open NUnit.Framework
 open FSharp.Collections.ParallelSeq
 open Nessos.Streams

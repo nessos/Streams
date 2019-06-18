@@ -1,10 +1,19 @@
 redirects: on
 source https://www.nuget.org/api/v2/
+framework: net45, net461, netstandard2.0, netcoreapp2.2
+storage: off
+redirects: off
 
-nuget Nuget.CommandLine
-nuget FsCheck 1.0.1 framework: >= net45
-nuget FSharp.Collections.ParallelSeq 1.0.2 framework: >= net45
-nuget FSharp.Formatting
-nuget NUnit 2.6.4 framework: >= net45
-nuget NUnit.Runners
-nuget FAKE
+nuget FSharp.Core ~> 4.3.4
+nuget FsCheck ~> 2.14.0
+nuget FSharp.Collections.ParallelSeq >= 1.1.2
+nuget NUnit ~> 3.12.0
+nuget NUnit3TestAdapter ~> 3.12.0
+nuget Microsoft.Net.Test.SDK ~> 15.8.0
+
+group Build
+  source https://www.nuget.org/api/v2/
+  framework: net461
+  
+  nuget FAKE ~> 4.0
+  nuget FSharp.Formatting ~> 3.1.0

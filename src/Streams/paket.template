@@ -13,3 +13,8 @@ projecturl http://nessos.github.io/Streams
 iconurl https://avatars1.githubusercontent.com/u/5538081
 tags
 	F#/C# Streams
+dependencies
+	framework: net45
+		FSharp.Core >= LOCKEDVERSION
+	framework: netstandard2.0
+		FSharp.Core >= LOCKEDVERSION

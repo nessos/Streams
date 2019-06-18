@@ -2,8 +2,8 @@
 // FAKE build script 
 // --------------------------------------------------------------------------------------
 
-#I "packages/FAKE/tools"
-#r "packages/FAKE/tools/FakeLib.dll"
+#I "packages/build/FAKE/tools"
+#r "packages/build/FAKE/tools/FakeLib.dll"
 
 open Fake
 open Fake.Git
@@ -14,12 +14,12 @@ open System
 open System.IO
 
 let project = "Streams"
+let artifactsDir = __SOURCE_DIRECTORY__ @@ "artifacts"
 
 // --------------------------------------------------------------------------------------
 // Read release notes & version info from RELEASE_NOTES.md
 Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
 let release = parseReleaseNotes (IO.File.ReadAllLines "RELEASE_NOTES.md") 
-let nugetVersion = release.NugetVersion
 
 let gitHome = "https://github.com/nessos"
 let gitName = "Streams"
@@ -37,9 +37,9 @@ Target "AssemblyInfo" (fun _ ->
             Attribute.FileVersion release.AssemblyVersion
         ]
 
-    !! "./**/AssemblyInfo.fs"
+    !! "./src/**/AssemblyInfo.fs"
     |> Seq.iter (fun info -> CreateFSharpAssemblyInfo info attributes)
-    !! "./**/AssemblyInfo.cs"
+    !! "./src/**/AssemblyInfo.cs"
     |> Seq.iter (fun info -> CreateCSharpAssemblyInfo info attributes)
 )
 
@@ -49,7 +49,7 @@ Target "AssemblyInfo" (fun _ ->
 
 Target "Clean" (fun _ ->
     CleanDirs (!! "**/bin/Release/")
-    CleanDir "bin/"
+    CleanDir artifactsDir
 )
 
 //
@@ -59,35 +59,30 @@ Target "Clean" (fun _ ->
 let configuration = environVarOrDefault "Configuration" "Release"
 
 Target "Build" (fun _ ->
-    // Build the rest of the project
-    { BaseDirectory = __SOURCE_DIRECTORY__
-      Includes = [ project + ".sln" ]
-      Excludes = [] } 
-    |> MSBuild "" "Build" ["Configuration", configuration]
-    |> Log "AppBuild-Output: "
+    DotNetCli.Build(fun config ->
+        { config with
+            Project = project + ".sln"
+            Configuration = configuration }
+    )
 )
 
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner & kill test runner when complete
 
-let testAssemblies = 
+let testProjects = 
     [
-        yield "bin/Streams.Tests.exe"
-        yield "bin/Streams.Tests.CSharp.exe"
+        yield "tests/Streams.Tests/"
+        yield "tests/Streams.Tests.CSharp/"
     ]
 
 Target "RunTests" (fun _ ->
-    testAssemblies
-    |> NUnit (fun p -> 
-        { p with
-            DisableShadowCopy = true
-            TimeOut = TimeSpan.FromMinutes 60.
-            OutputFile = "TestResults.xml" })
-)
-
-FinalTarget "CloseTestRunner" (fun _ ->  
-    ProcessHelper.killProcess "nunit-agent.exe"
+    for proj in testProjects do
+        DotNetCli.Test (fun c ->
+            { c with
+                Project = proj
+                Configuration = configuration 
+                AdditionalArgs = ["--no-build"] })
 )
 
 //// --------------------------------------------------------------------------------------
@@ -97,12 +92,12 @@ Target "NuGet" (fun _ ->
     Paket.Pack (fun p -> 
         { p with 
             ToolPath = ".paket/paket.exe" 
-            OutputPath = "bin/"
+            OutputPath = artifactsDir
             Version = release.NugetVersion
             ReleaseNotes = toLines release.Notes })
 )
 
-Target "NuGetPush" (fun _ -> Paket.Push (fun p -> { p with WorkingDir = "bin/" }))
+Target "NuGetPush" (fun _ -> Paket.Push (fun p -> { p with WorkingDir = artifactsDir }))
 
 //// --------------------------------------------------------------------------------------
 //// Document generation
@@ -132,6 +127,7 @@ Target "Prepare" DoNothing
 Target "PrepareRelease" DoNothing
 Target "Default" DoNothing
 Target "Help" (fun _ -> PrintTargets())
+Target "Bundle" DoNothing
 
 "Clean"
   ==> "AssemblyInfo"
@@ -143,10 +139,13 @@ Target "Help" (fun _ -> PrintTargets())
 "Build"
   ==> "PrepareRelease" 
   ==> "NuGet"
-  ==> "GenerateDocs"
-  ==> "ReleaseDocs"
+  //==> "GenerateDocs"
+  ==> "Bundle"
+
+"Bundle"
+  //==> "ReleaseDocs"
   ==> "NuGetPush"
   ==> "Release"
 
-//// start build
+// start build
 RunTargetOrDefault "Default"

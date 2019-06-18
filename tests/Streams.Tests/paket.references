@@ -1,3 +1,5 @@
 FsCheck
 FSharp.Collections.ParallelSeq
 NUnit
+NUnit3TestAdapter
+Microsoft.Net.Test.SDK

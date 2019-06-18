@@ -1,2 +1,4 @@
 FsCheck
 NUnit
+NUnit3TestAdapter
+Microsoft.Net.Test.SDK

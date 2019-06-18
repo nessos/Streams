@@ -165,3 +165,7 @@ $RECYCLE.BIN/
 
 # Individual test run test results
 TestResults.xml
+
+.vs/
+paket-files/
+artifacts/

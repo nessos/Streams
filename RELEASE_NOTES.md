@@ -1,3 +1,6 @@
+#### 0.5.0
+* Target netstandard2.0
+
 #### 0.4.1
 * New ParStream functinos sortByDescending/sortByUsing
 

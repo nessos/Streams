@@ -407,18 +407,18 @@ module ParStream =
             let keyValueTuple = 
                 stream |> foldInlined
                     (fun (keyValueTuple : Tuple<ArrayCollector<'Key>, ArrayCollector<'T>>) value -> 
-                        let keyArray, valueArray = keyValueTuple.Item1, keyValueTuple.Item2
+                        let keyArray, valueArray = keyValueTuple
                         keyArray.Add(projection value)
                         valueArray.Add(value) 
                         keyValueTuple)
                     (fun leftKeyValueTuple rightKeyValueTuple ->
-                        let leftKeyArray, leftValueArray = leftKeyValueTuple.Item1, leftKeyValueTuple.Item2 
-                        let rightKeyArray, rightValueArray = rightKeyValueTuple.Item1, rightKeyValueTuple.Item2 
+                        let leftKeyArray, leftValueArray = leftKeyValueTuple
+                        let rightKeyArray, rightValueArray = rightKeyValueTuple
                         leftKeyArray.AddRange(rightKeyArray)
                         leftValueArray.AddRange(rightValueArray)
                         leftKeyValueTuple) 
                     (fun () -> new Tuple<_, _>(new ArrayCollector<'Key>(), new ArrayCollector<'T>())) 
-            let keyArray, valueArray = keyValueTuple.Item1, keyValueTuple.Item2
+            let keyArray, valueArray = keyValueTuple
             keyArray.ToArray(), valueArray.ToArray()
 
                         

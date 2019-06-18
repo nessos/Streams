@@ -10,9 +10,13 @@ namespace Nessos.Streams.Tests
 open System.Linq
 open System.Collections.Generic
 open FsCheck
-open FsCheck.Fluent
 open NUnit.Framework
 open Nessos.Streams
+
+
+type Spec =
+    static member ForAny<'T> (prop : 'T -> bool) = Prop.forAll Arb.from<'T> prop
+    static member ForAny<'T> (prop : 'T -> unit) = Prop.forAll Arb.from<'T> prop
 
 [<TestFixture; Category("Streams.FSharp")>]
 module ``Streams tests``  =
