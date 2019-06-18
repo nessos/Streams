@@ -1,12 +1,11 @@
 ﻿#time
 
-#r "../../bin/Streams.Core.dll"
-#r "../../bin/Streams.CSharp.dll"
+#I "bin/Debug/net461"
+#r "Streams.dll"
 
 open System
 open System.Linq
 open Nessos.Streams
-open Nessos.Streams.CSharp
 
 
 let refs = [| 1; 2; 3; 4 |]
