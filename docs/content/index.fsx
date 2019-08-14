@@ -38,18 +38,9 @@ For simple pipelines we have observed performance improvements of a factor of fo
 Important performance tip: Make sure that FSI is running with 64-bit option set to true and fsproj option prefer 32-bit is unchecked.
 *)
 
-open Nessos.Streams
-
 let data = [|1..10000000|] |> Array.map int64
 
 // Sequential
-
-// Real: 00:00:00.044, CPU: 00:00:00.046, GC gen0: 0, gen1: 0, gen2: 0
-data
-|> Stream.ofArray
-|> Stream.filter (fun x -> x % 2L = 0L)
-|> Stream.map (fun x -> x + 1L)
-|> Stream.sum
 
 // Real: 00:00:00.264, CPU: 00:00:00.265, GC gen0: 0, gen1: 0, gen2: 0
 data
@@ -63,21 +54,34 @@ data
 |> Array.map (fun x -> x + 1L)
 |> Array.sum
 
+
+type NStream = Nessos.Streams.Stream
+
+// Real: 00:00:00.044, CPU: 00:00:00.046, GC gen0: 0, gen1: 0, gen2: 0
+data
+|> NStream.ofArray
+|> NStream.filter (fun x -> x % 2L = 0L)
+|> NStream.map (fun x -> x + 1L)
+|> NStream.sum
+
 // Parallel
 open FSharp.Collections.ParallelSeq
-
-// Real: 00:00:00.017, CPU: 00:00:00.078, GC gen0: 0, gen1: 0, gen2: 0
-data
-|> ParStream.ofArray
-|> ParStream.filter (fun x -> x % 2L = 0L)
-|> ParStream.map (fun x -> x + 1L)
-|> ParStream.sum
 
 // Real: 00:00:00.045, CPU: 00:00:00.187, GC gen0: 0, gen1: 0, gen2: 0
 data
 |> PSeq.filter (fun x -> x % 2L = 0L)
 |> PSeq.map (fun x -> x + 1L)
 |> PSeq.sum
+
+
+type PStream = Nessos.Streams.ParStream
+
+// Real: 00:00:00.017, CPU: 00:00:00.078, GC gen0: 0, gen1: 0, gen2: 0
+data
+|> PStream.ofArray
+|> PStream.filter (fun x -> x % 2L = 0L)
+|> PStream.map (fun x -> x + 1L)
+|> PStream.sum
 
 (**
 ## References
