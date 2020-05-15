@@ -5,4 +5,4 @@ services:
   - docker
 
 script:
-  - ./docker-build.sh Bundle
+  - ./docker-build.sh -t Bundle

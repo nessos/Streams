@@ -1,15 +1,22 @@
-redirects: on
 source https://api.nuget.org/v3/index.json
-framework: net45, net472, netstandard2.0, netcoreapp3.1
+framework: netstandard2.0
 storage: none
-redirects: off
 
-nuget FSharp.Core ~> 4.3.4
-nuget FsCheck ~> 2.14.0
-nuget FSharp.Collections.ParallelSeq >= 1.1.2
-nuget NUnit ~> 3.12.0
-nuget NUnit3TestAdapter ~> 3.12.0
-nuget Microsoft.Net.Test.SDK ~> 15.8.0
+nuget FSharp.Core >= 4.3.4 lowest_matching:true
+nuget Microsoft.SourceLink.GitHub ~> 1.0.0 copy_local:true
+
+group Tests
+  source https://api.nuget.org/v3/index.json
+  framework: netcoreapp3.1, net472
+  storage: none
+
+  nuget FSharp.Core ~> 4.7.0
+  nuget Microsoft.Net.Test.SDK ~> 16.0
+  nuget FsCheck ~> 2.14.0
+  nuget NUnit ~> 3.12.0
+  nuget NUnit3TestAdapter ~> 3.12.0
+
+  nuget FSharp.Collections.ParallelSeq >= 1.1.2
 
 group Build
   source https://api.nuget.org/v3/index.json
