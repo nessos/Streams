@@ -1,5 +1,5 @@
 redirects: on
-source https://www.nuget.org/api/v2/
+source https://api.nuget.org/v3/index.json
 framework: net45, net472, netstandard2.0, netcoreapp3.1
 storage: none
 redirects: off
@@ -12,8 +12,17 @@ nuget NUnit3TestAdapter ~> 3.12.0
 nuget Microsoft.Net.Test.SDK ~> 15.8.0
 
 group Build
-  source https://www.nuget.org/api/v2/
-  framework: net461
-  
-  nuget FAKE ~> 4.0
-  nuget FSharp.Formatting ~> 3.1.0
+  source https://api.nuget.org/v3/index.json
+  generate_load_scripts: true
+  framework: netstandard2.0
+  storage: none
+
+  nuget Fake.Core.UserInput	    ~> 5.19.0
+  nuget Fake.Core.ReleaseNotes  ~> 5.19.0
+  nuget Fake.Core.Target        ~> 5.19.0
+  nuget Fake.IO.FileSystem      ~> 5.19.0
+  nuget Fake.DotNet.Cli	        ~> 5.19.0
+  nuget Fake.Tools.Git          ~> 5.19.0
+  nuget Fake.Api.Github         ~> 5.19.0
+
+  nuget FSharp.Formatting ~> 4.0 storage: packages

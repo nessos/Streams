@@ -1,0 +1,26 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!-- NuGet Metadata -->
+  <PropertyGroup>
+    <Description>A lightweight F#/C# library for efficient functional-style pipelines on streams of data.</Description>
+    <Authors>Nick Palladinos, Kostas Rontogiannis, Eirik Tsarpalis</Authors>
+    <Company>Nessos Information Technologies</Company>
+    <Copyright>\169 Nessos Information Technologies.</Copyright>
+    <PackageTags>F#/C# Streams</PackageTags>
+    <RepositoryUrl>https://github.com/nessos/Streams/</RepositoryUrl>
+    <PackageProjectUrl>http://nessos.github.io/Streams</PackageProjectUrl>
+    <PackageIconUrl>https://avatars1.githubusercontent.com/u/5538081</PackageIconUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <!-- SourceLink Options -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <!--<IncludeSymbols>true</IncludeSymbols>-->
+    <!--<SymbolPackageFormat>snupkg</SymbolPackageFormat>-->
+  </PropertyGroup>
+</Project>
