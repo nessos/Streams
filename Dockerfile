@@ -1,4 +1,4 @@
-FROM eiriktsarpalis/dotnet-sdk-mono:2.2.204-stretch
+FROM eiriktsarpalis/dotnet-sdk-mono:3.1.201-buster
 
 WORKDIR /app
 COPY . .

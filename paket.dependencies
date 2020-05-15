@@ -1,6 +1,6 @@
 redirects: on
 source https://www.nuget.org/api/v2/
-framework: net45, net461, netstandard2.0, netcoreapp2.2
+framework: net45, net472, netstandard2.0, netcoreapp3.1
 storage: none
 redirects: off
 
