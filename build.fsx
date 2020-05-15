@@ -176,11 +176,11 @@ Target.create "Release" ignore
 "Build"
   ==> "NuGet.Pack"
   ==> "NuGet.ValidateSourceLink"
-  //==> "GenerateDocs"
+  ==> "GenerateDocs"
   ==> "Bundle"
 
 "Bundle"
-  //==> "ReleaseDocs"
+  ==> "ReleaseDocs"
   ==> "ReleaseGitHub"
   ==> "NuGet.Push"
   ==> "Release"

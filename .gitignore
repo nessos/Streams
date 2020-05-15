@@ -169,3 +169,4 @@ TestResults.xml
 .vs/
 paket-files/
 artifacts/
+docs/output
