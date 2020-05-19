@@ -1,6 +1,5 @@
 # tools
 .vs
-.git
 .fake
 /packages/
 /paket-files/
