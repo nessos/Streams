@@ -11,7 +11,7 @@
 **/bin/
 
 # unused
-/docs
+/docs/output
 /examples
 /wiki
 /_wiki
