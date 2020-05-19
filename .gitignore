@@ -168,6 +168,7 @@ TestResults.xml
 
 .vs/
 .ionide/
+.paket
 paket-files/
 artifacts/
 docs/output

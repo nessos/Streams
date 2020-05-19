@@ -1,6 +1,8 @@
 # tools
 .vs
 .fake
+.paket
+.ionide
 /packages/
 /paket-files/
 
