@@ -175,7 +175,7 @@ Target.create "Release" ignore
 
 "Build"
   ==> "NuGet.Pack"
-  =?> ("NuGet.ValidateSourceLink", not Environment.isWindows) // don't fail on CRLF issues
+  ==> "NuGet.ValidateSourceLink"
   ==> "GenerateDocs"
   ==> "Bundle"
 
