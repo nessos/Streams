@@ -33,17 +33,14 @@
         <div class="span9" id="main">
           
 
-
-
 <h1>Internals</h1>
 <p>
   <span>Namespace: Nessos.Streams</span><br />
   <span>Parent Module: <a href="nessos-streams-parstream.html">ParStream</a></span>
-</p>
+  </p>
 <div class="xmldoc">
 <p>Internal entrypoints for compiled code.<br />
 Do not call these functions directly.</p>
-
 
 </div>
 
@@ -57,16 +54,15 @@ Do not call these functions directly.</p>
     <tbody>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '41', 41)" onmouseover="showTip(event, '41', 41)">
+          <code onmouseout="hideTip(event, '43', 43)" onmouseover="showTip(event, '43', 43)">
             iterCont iterf resf stream
           </code>
-          <div class="tip" id="41">
+          <div class="tip" id="43">
             <strong>Signature:</strong> iterf:(CancellationTokenSource -&gt; &#39;T -&gt; unit) -&gt; resf:(unit -&gt; &#39;R) -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; &#39;R<br />
-                          <strong>Type parameters:</strong> 'T, 'R          </div>
+                          <strong>Type parameters:</strong> 'T, 'R                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L398-398" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L442-442" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -74,21 +70,19 @@ Do not call these functions directly.</p>
 Do not call this function directly.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '42', 42)" onmouseover="showTip(event, '42', 42)">
+          <code onmouseout="hideTip(event, '44', 44)" onmouseover="showTip(event, '44', 44)">
             looksLike streamOrig stream
           </code>
-          <div class="tip" id="42">
-            <strong>Signature:</strong> streamOrig:ParStream&lt;&#39;?19840&gt; -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; ParStream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> '?19840, 'T          </div>
+          <div class="tip" id="44">
+            <strong>Signature:</strong> streamOrig:ParStream&lt;&#39;?15706&gt; -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; ParStream&lt;&#39;T&gt;<br />
+                          <strong>Type parameters:</strong> '?15706, 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L413-413" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L457-457" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -96,21 +90,19 @@ Do not call this function directly.</p>
 Do not call this function directly.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '43', 43)" onmouseover="showTip(event, '43', 43)">
+          <code onmouseout="hideTip(event, '45', 45)" onmouseover="showTip(event, '45', 45)">
             mapCont f stream
           </code>
-          <div class="tip" id="43">
+          <div class="tip" id="45">
             <strong>Signature:</strong> f:((&#39;R -&gt; unit) -&gt; &#39;T -&gt; unit) -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; ParStream&lt;&#39;R&gt;<br />
-                          <strong>Type parameters:</strong> 'R, 'T          </div>
+                          <strong>Type parameters:</strong> 'R, 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L299-299" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L343-343" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -118,21 +110,19 @@ Do not call this function directly.</p>
 Do not call this function directly.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '44', 44)" onmouseover="showTip(event, '44', 44)">
-            parallelIterateAndCollect (...)
+          <code onmouseout="hideTip(event, '46', 46)" onmouseover="showTip(event, '46', 46)">
+            parallelIterateAndCollect(...)
           </code>
-          <div class="tip" id="44">
+          <div class="tip" id="46">
             <strong>Signature:</strong> streamf:(Stream&lt;&#39;T&gt; -&gt; &#39;R) -&gt; mkIterator:(unit -&gt; &#39;T -&gt; unit) -&gt; collectResult:(unit -&gt; &#39;R) -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; &#39;R<br />
-                          <strong>Type parameters:</strong> 'T, 'R          </div>
+                          <strong>Type parameters:</strong> 'T, 'R                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L323-323" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L367-367" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -140,27 +130,24 @@ Do not call this function directly.</p>
 Do not call this function directly.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '45', 45)" onmouseover="showTip(event, '45', 45)">
+          <code onmouseout="hideTip(event, '47', 47)" onmouseover="showTip(event, '47', 47)">
             unorderedCont streamf resf stream
           </code>
-          <div class="tip" id="45">
+          <div class="tip" id="47">
             <strong>Signature:</strong> streamf:(Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;U&gt;) -&gt; resf:(unit -&gt; ParStream&lt;&#39;U&gt;) -&gt; stream:ParStream&lt;&#39;T&gt; -&gt; ParStream&lt;&#39;U&gt;<br />
-                          <strong>Type parameters:</strong> 'T, 'U          </div>
+                          <strong>Type parameters:</strong> 'T, 'U                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L386-386" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/ParStreams.fs#L430-430" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Public "internal" entrypoint to ensure a stream can be processed in an unordered way.
 Do not call this function directly.</p>
-
 
 
         </td>

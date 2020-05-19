@@ -33,15 +33,17 @@
         <div class="span9" id="main">
           
 
-
-
 <h1>Stream</h1>
 <p>
   <span>Namespace: Nessos.Streams</span><br />
+        <span>
+          Attributes:<br />
+[&lt;RequireQualifiedAccess&gt;]<br />
+          
+      </span>
 </p>
 <div class="xmldoc">
 <p>Provides basic operations on Streams.</p>
-
 
 </div>
 
@@ -57,7 +59,9 @@
           <td class="module-name">
             <a href="nessos-streams-stream-internals.html">Internals</a>
           </td>
-          <td class="xmldoc"></td>
+          <td class="xmldoc">
+          
+          </td>
         </tr>
     </tbody>
   </table>
@@ -72,352 +76,319 @@
     <tbody>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '46', 46)" onmouseover="showTip(event, '46', 46)">
-            cache(source)
+          <code onmouseout="hideTip(event, '48', 48)" onmouseover="showTip(event, '48', 48)">
+            Stream.cache(source)
           </code>
-          <div class="tip" id="46">
+          <div class="tip" id="48">
             <strong>Signature:</strong> source:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L494-494" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L511-511" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Creates a cached version of the input stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '47', 47)" onmouseover="showTip(event, '47', 47)">
-            cast(source)
+          <code onmouseout="hideTip(event, '49', 49)" onmouseover="showTip(event, '49', 49)">
+            Stream.cast(source)
           </code>
-          <div class="tip" id="47">
+          <div class="tip" id="49">
             <strong>Signature:</strong> source:IEnumerable -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L412-412" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L429-429" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Wraps an IEnumerable as a stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '48', 48)" onmouseover="showTip(event, '48', 48)">
-            choose(chooser stream)
+          <code onmouseout="hideTip(event, '50', 50)" onmouseover="showTip(event, '50', 50)">
+            Stream.choose chooser stream
           </code>
-          <div class="tip" id="48">
+          <div class="tip" id="50">
             <strong>Signature:</strong> chooser:(&#39;T -&gt; &#39;R option) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;R&gt;<br />
-                          <strong>Type parameters:</strong> 'T, 'R          </div>
+                          <strong>Type parameters:</strong> 'T, 'R                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L537-537" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L554-554" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Applies the given function to each element of the stream and returns the stream comprised of the results for each element where the function returns Some with some value.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '49', 49)" onmouseover="showTip(event, '49', 49)">
-            collect(f stream)
+          <code onmouseout="hideTip(event, '51', 51)" onmouseover="showTip(event, '51', 51)">
+            Stream.collect f stream
           </code>
-          <div class="tip" id="49">
+          <div class="tip" id="51">
             <strong>Signature:</strong> f:(&#39;T -&gt; Stream&lt;&#39;R&gt;) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;R&gt;<br />
-                          <strong>Type parameters:</strong> 'T, 'R          </div>
+                          <strong>Type parameters:</strong> 'T, 'R                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L488-488" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L505-505" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Transforms each element of the input stream to a new stream and flattens its elements.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '50', 50)" onmouseover="showTip(event, '50', 50)">
-            concat(streams)
+          <code onmouseout="hideTip(event, '52', 52)" onmouseover="showTip(event, '52', 52)">
+            Stream.concat(streams)
           </code>
-          <div class="tip" id="50">
-            <strong>Signature:</strong> streams:&#39;?19612 -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> '?19612, 'T          </div>
+          <div class="tip" id="52">
+            <strong>Signature:</strong> streams:&#39;?15771 -&gt; Stream&lt;&#39;T&gt;<br />
+                          <strong>Type parameters:</strong> '?15771, 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L590-590" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L607-607" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Concatenates a collection of streams.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '51', 51)" onmouseover="showTip(event, '51', 51)">
-            countBy(project stream)
+          <code onmouseout="hideTip(event, '53', 53)" onmouseover="showTip(event, '53', 53)">
+            Stream.countBy project stream
           </code>
-          <div class="tip" id="51">
+          <div class="tip" id="53">
             <strong>Signature:</strong> project:(&#39;T -&gt; &#39;Key) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;Key * int&gt;<br />
-                          <strong>Type parameters:</strong> 'T, 'Key          </div>
+                          <strong>Type parameters:</strong> 'T, 'Key                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L838-838" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L855-855" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and their frequency.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '52', 52)" onmouseover="showTip(event, '52', 52)">
-            empty
+          <code onmouseout="hideTip(event, '54', 54)" onmouseover="showTip(event, '54', 54)">
+            Stream.empty
           </code>
-          <div class="tip" id="52">
+          <div class="tip" id="54">
             <strong>Signature:</strong> Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L141-141" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L141-141" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>The empty stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '53', 53)" onmouseover="showTip(event, '53', 53)">
-            exists(predicate stream)
+          <code onmouseout="hideTip(event, '55', 55)" onmouseover="showTip(event, '55', 55)">
+            Stream.exists predicate stream
           </code>
-          <div class="tip" id="53">
+          <div class="tip" id="55">
             <strong>Signature:</strong> predicate:(&#39;T -&gt; bool) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; bool<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L884-884" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L901-901" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Tests if any element of the stream satisfies the given predicate.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '54', 54)" onmouseover="showTip(event, '54', 54)">
-            filter(predicate stream)
+          <code onmouseout="hideTip(event, '56', 56)" onmouseover="showTip(event, '56', 56)">
+            Stream.filter predicate stream
           </code>
-          <div class="tip" id="54">
+          <div class="tip" id="56">
             <strong>Signature:</strong> predicate:(&#39;T -&gt; bool) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L530-530" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L547-547" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Filters the elements of the input stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '55', 55)" onmouseover="showTip(event, '55', 55)">
-            find(predicate stream)
+          <code onmouseout="hideTip(event, '57', 57)" onmouseover="showTip(event, '57', 57)">
+            Stream.find predicate stream
           </code>
-          <div class="tip" id="55">
+          <div class="tip" id="57">
             <strong>Signature:</strong> predicate:(&#39;T -&gt; bool) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; &#39;T<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L855-855" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L872-872" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Returns the first element for which the given function returns true. Raises KeyNotFoundException if no such element exists.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '56', 56)" onmouseover="showTip(event, '56', 56)">
-            flatMap(f stream)
+          <code onmouseout="hideTip(event, '58', 58)" onmouseover="showTip(event, '58', 58)">
+            Stream.flatMap f stream
           </code>
-          <div class="tip" id="56">
+          <div class="tip" id="58">
             <strong>Signature:</strong> f:(&#39;T -&gt; Stream&lt;&#39;R&gt;) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;R&gt;<br />
-                          <strong>Type parameters:</strong> 'T, 'R          </div>
+                          <strong>Type parameters:</strong> 'T, 'R                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L473-473" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L490-490" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Transforms each element of the input stream to a new stream and flattens its elements.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '57', 57)" onmouseover="showTip(event, '57', 57)">
-            fold(folder state stream)
+          <code onmouseout="hideTip(event, '59', 59)" onmouseover="showTip(event, '59', 59)">
+            Stream.fold folder state stream
           </code>
-          <div class="tip" id="57">
+          <div class="tip" id="59">
             <strong>Signature:</strong> folder:(&#39;State -&gt; &#39;T -&gt; &#39;State) -&gt; state:&#39;State -&gt; stream:Stream&lt;&#39;T&gt; -&gt; &#39;State<br />
-                          <strong>Type parameters:</strong> 'State, 'T          </div>
+                          <strong>Type parameters:</strong> 'State, 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L690-690" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L707-707" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Applies a function to each element of the stream, threading an accumulator argument through the computation. If the input function is f and the elements are i0...iN, then this function computes f (... (f s i0)...) iN.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '58', 58)" onmouseover="showTip(event, '58', 58)">
-            foldBy(projection folder init source)
+          <code onmouseout="hideTip(event, '60', 60)" onmouseover="showTip(event, '60', 60)">
+            Stream.foldBy(...)
           </code>
-          <div class="tip" id="58">
+          <div class="tip" id="60">
             <strong>Signature:</strong> projection:(&#39;T -&gt; &#39;Key) -&gt; folder:(&#39;State -&gt; &#39;T -&gt; &#39;State) -&gt; init:(unit -&gt; &#39;State) -&gt; source:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;Key * &#39;State&gt;<br />
-                          <strong>Type parameters:</strong> 'T, 'Key, 'State          </div>
+                          <strong>Type parameters:</strong> 'T, 'Key, 'State                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L803-803" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L820-820" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Applies a state-updating function to a stream of inputs, grouped by key projection.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '59', 59)" onmouseover="showTip(event, '59', 59)">
-            forall(predicate stream)
+          <code onmouseout="hideTip(event, '61', 61)" onmouseover="showTip(event, '61', 61)">
+            Stream.forall predicate stream
           </code>
-          <div class="tip" id="59">
+          <div class="tip" id="61">
             <strong>Signature:</strong> predicate:(&#39;T -&gt; bool) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; bool<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L893-893" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L910-910" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Tests if all elements of the stream satisfy the given predicate.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '60', 60)" onmouseover="showTip(event, '60', 60)">
-            generateInfinite(generator)
+          <code onmouseout="hideTip(event, '62', 62)" onmouseover="showTip(event, '62', 62)">
+            Stream.generateInfinite(generator)
           </code>
-          <div class="tip" id="60">
+          <div class="tip" id="62">
             <strong>Signature:</strong> generator:(unit -&gt; &#39;T) -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L343-343" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L360-360" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Produces an infinite Stream by calling the given function.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '61', 61)" onmouseover="showTip(event, '61', 61)">
-            groupBy(projection source)
+          <code onmouseout="hideTip(event, '63', 63)" onmouseover="showTip(event, '63', 63)">
+            Stream.groupBy projection source
           </code>
-          <div class="tip" id="61">
+          <div class="tip" id="63">
             <strong>Signature:</strong> projection:(&#39;T -&gt; &#39;Key) -&gt; source:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;Key * seq&lt;&#39;T&gt;&gt;<br />
-                          <strong>Type parameters:</strong> 'T, 'Key          </div>
+                          <strong>Type parameters:</strong> 'T, 'Key                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L822-822" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L839-839" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Applies a key-generating function to each element of the input stream and yields a stream of unique keys and a sequence of all elements that have each key.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '62', 62)" onmouseover="showTip(event, '62', 62)">
-            groupUntil(inclusive predicate source)
+          <code onmouseout="hideTip(event, '64', 64)" onmouseover="showTip(event, '64', 64)">
+            Stream.groupUntil(...)
           </code>
-          <div class="tip" id="62">
+          <div class="tip" id="64">
             <strong>Signature:</strong> inclusive:bool -&gt; predicate:(&#39;T -&gt; bool) -&gt; source:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;T []&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L905-905" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L922-922" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -426,42 +397,38 @@ Elements not satisfying the predicate are included as final element in grouping
 or discarded depending on the 'inclusive' parameter.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '63', 63)" onmouseover="showTip(event, '63', 63)">
-            head(stream)
+          <code onmouseout="hideTip(event, '65', 65)" onmouseover="showTip(event, '65', 65)">
+            Stream.head(stream)
           </code>
-          <div class="tip" id="63">
+          <div class="tip" id="65">
             <strong>Signature:</strong> stream:Stream&lt;&#39;T&gt; -&gt; &#39;T<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L943-943" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L960-960" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Returns the first element of the stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '64', 64)" onmouseover="showTip(event, '64', 64)">
-            initInfinite(initializer)
+          <code onmouseout="hideTip(event, '66', 66)" onmouseover="showTip(event, '66', 66)">
+            Stream.initInfinite(initializer)
           </code>
-          <div class="tip" id="64">
+          <div class="tip" id="66">
             <strong>Signature:</strong> initializer:(int -&gt; &#39;T) -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L377-377" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L394-394" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -469,552 +436,539 @@ or discarded depending on the 'inclusive' parameter.</p>
 Indexing starts at 0, and continues until Int32.MaxValue</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '65', 65)" onmouseover="showTip(event, '65', 65)">
-            isEmpty(stream)
+          <code onmouseout="hideTip(event, '67', 67)" onmouseover="showTip(event, '67', 67)">
+            Stream.isEmpty(stream)
           </code>
-          <div class="tip" id="65">
+          <div class="tip" id="67">
             <strong>Signature:</strong> stream:Stream&lt;&#39;T&gt; -&gt; bool<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L954-954" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L971-971" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Returns true if the stream is empty and false otherwise.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '66', 66)" onmouseover="showTip(event, '66', 66)">
-            iter(f stream)
+          <code onmouseout="hideTip(event, '68', 68)" onmouseover="showTip(event, '68', 68)">
+            Stream.iter f stream
           </code>
-          <div class="tip" id="66">
+          <div class="tip" id="68">
             <strong>Signature:</strong> f:(&#39;T -&gt; unit) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; unit<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L679-679" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L696-696" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Applies the given function to each element of the stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '67', 67)" onmouseover="showTip(event, '67', 67)">
-            length(stream)
+          <code onmouseout="hideTip(event, '69', 69)" onmouseover="showTip(event, '69', 69)">
+            Stream.length(stream)
           </code>
-          <div class="tip" id="67">
+          <div class="tip" id="69">
             <strong>Signature:</strong> stream:Stream&lt;&#39;T&gt; -&gt; int<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L719-719" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L736-736" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Returns the total number of elements of the stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '68', 68)" onmouseover="showTip(event, '68', 68)">
-            map(f stream)
+          <code onmouseout="hideTip(event, '70', 70)" onmouseover="showTip(event, '70', 70)">
+            Stream.map f stream
           </code>
-          <div class="tip" id="68">
+          <div class="tip" id="70">
             <strong>Signature:</strong> f:(&#39;T -&gt; &#39;R) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;R&gt;<br />
-                          <strong>Type parameters:</strong> 'T, 'R          </div>
+                          <strong>Type parameters:</strong> 'T, 'R                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L458-458" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L475-475" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Transforms each element of the input stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '69', 69)" onmouseover="showTip(event, '69', 69)">
-            mapi(f stream)
+          <code onmouseout="hideTip(event, '71', 71)" onmouseover="showTip(event, '71', 71)">
+            Stream.mapi f stream
           </code>
-          <div class="tip" id="69">
+          <div class="tip" id="71">
             <strong>Signature:</strong> f:(int -&gt; &#39;T -&gt; &#39;R) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;R&gt;<br />
-                          <strong>Type parameters:</strong> 'T, 'R          </div>
+                          <strong>Type parameters:</strong> 'T, 'R                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L466-466" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L483-483" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Transforms each element of the input stream. The integer index passed to the function indicates the index (from 0) of element being transformed.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '70', 70)" onmouseover="showTip(event, '70', 70)">
-            maxBy(projection source)
+          <code onmouseout="hideTip(event, '72', 72)" onmouseover="showTip(event, '72', 72)">
+            Stream.maxBy projection source
           </code>
-          <div class="tip" id="70">
+          <div class="tip" id="72">
             <strong>Signature:</strong> projection:(&#39;T -&gt; &#39;Key) -&gt; source:Stream&lt;&#39;T&gt; -&gt; &#39;T<br />
-                          <strong>Type parameters:</strong> 'T, 'Key          </div>
+                          <strong>Type parameters:</strong> 'T, 'Key                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L761-761" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L778-778" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Locates the maximum element of the stream by given key.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '71', 71)" onmouseover="showTip(event, '71', 71)">
-            minBy(projection source)
+          <code onmouseout="hideTip(event, '73', 73)" onmouseover="showTip(event, '73', 73)">
+            Stream.minBy projection source
           </code>
-          <div class="tip" id="71">
+          <div class="tip" id="73">
             <strong>Signature:</strong> projection:(&#39;T -&gt; &#39;Key) -&gt; source:Stream&lt;&#39;T&gt; -&gt; &#39;T<br />
-                          <strong>Type parameters:</strong> 'T, 'Key          </div>
+                          <strong>Type parameters:</strong> 'T, 'Key                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L781-781" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L798-798" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Locates the minimum element of the stream by given key.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '72', 72)" onmouseover="showTip(event, '72', 72)">
-            ofArray(source)
+          <code onmouseout="hideTip(event, '74', 74)" onmouseover="showTip(event, '74', 74)">
+            Stream.ofArray(source)
           </code>
-          <div class="tip" id="72">
+          <div class="tip" id="74">
             <strong>Signature:</strong> source:&#39;T [] -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L172-172" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L172-172" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Wraps array as a stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '73', 73)" onmouseover="showTip(event, '73', 73)">
-            ofList(source)
+          <code onmouseout="hideTip(event, '75', 75)" onmouseover="showTip(event, '75', 75)">
+            Stream.ofList(source)
           </code>
-          <div class="tip" id="73">
+          <div class="tip" id="75">
             <strong>Signature:</strong> source:&#39;T list -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L211-211" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L211-211" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Wraps list as a stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '74', 74)" onmouseover="showTip(event, '74', 74)">
-            ofResizeArray(source)
+          <code onmouseout="hideTip(event, '76', 76)" onmouseover="showTip(event, '76', 76)">
+            Stream.ofResizeArray(source)
           </code>
-          <div class="tip" id="74">
+          <div class="tip" id="76">
             <strong>Signature:</strong> source:ResizeArray&lt;&#39;T&gt; -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L257-257" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L257-257" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Wraps ResizeArray as a stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '75', 75)" onmouseover="showTip(event, '75', 75)">
-            ofSeq(source)
+          <code onmouseout="hideTip(event, '77', 77)" onmouseover="showTip(event, '77', 77)">
+            Stream.ofSeq(source)
           </code>
-          <div class="tip" id="75">
+          <div class="tip" id="77">
             <strong>Signature:</strong> source:seq&lt;&#39;T&gt; -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L299-299" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L299-299" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Wraps seq as a stream.</p>
 
 
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+          <code onmouseout="hideTip(event, '78', 78)" onmouseover="showTip(event, '78', 78)">
+            Stream.ofSystemStreamByLine(stream)
+          </code>
+          <div class="tip" id="78">
+            <strong>Signature:</strong> stream:Stream -&gt; Stream&lt;string&gt;<br />
+                                  </div>
+        </td>
+        <td class="xmldoc">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L345-345" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Produces a stream by sequentially reading a System.IO.Stream
+of text, splitting input by line separator.</p>
+
 
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '76', 76)" onmouseover="showTip(event, '76', 76)">
-            pick(chooser stream)
+          <code onmouseout="hideTip(event, '79', 79)" onmouseover="showTip(event, '79', 79)">
+            Stream.ofTextFileByLine(path)
           </code>
-          <div class="tip" id="76">
-            <strong>Signature:</strong> chooser:(&#39;T -&gt; &#39;R option) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; &#39;R<br />
-                          <strong>Type parameters:</strong> 'T, 'R          </div>
+          <div class="tip" id="79">
+            <strong>Signature:</strong> path:string -&gt; Stream&lt;string&gt;<br />
+                                  </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L875-875" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L354-354" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Produces a stream by sequentially reading a text file from given path.
+Text file entries are split by line separator.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+          <code onmouseout="hideTip(event, '80', 80)" onmouseover="showTip(event, '80', 80)">
+            Stream.pick chooser stream
+          </code>
+          <div class="tip" id="80">
+            <strong>Signature:</strong> chooser:(&#39;T -&gt; &#39;R option) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; &#39;R<br />
+                          <strong>Type parameters:</strong> 'T, 'R                      </div>
+        </td>
+        <td class="xmldoc">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L892-892" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Applies the given function to successive elements, returning the first result where the function returns a Some value.
- Raises KeyNotFoundException when every item of the stream evaluates to None when the given function is applied.</p>
-
+Raises KeyNotFoundException when every item of the stream evaluates to None when the given function is applied.</p>
 
 
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '77', 77)" onmouseover="showTip(event, '77', 77)">
-            scan(folder state stream)
+          <code onmouseout="hideTip(event, '81', 81)" onmouseover="showTip(event, '81', 81)">
+            Stream.scan folder state stream
           </code>
-          <div class="tip" id="77">
+          <div class="tip" id="81">
             <strong>Signature:</strong> folder:(&#39;State -&gt; &#39;T -&gt; &#39;State) -&gt; state:&#39;State -&gt; stream:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;State&gt;<br />
-                          <strong>Type parameters:</strong> 'State, 'T          </div>
+                          <strong>Type parameters:</strong> 'State, 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L700-700" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L717-717" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Like Stream.fold, but computes on-demand and returns the stream of intermediate and final results</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '78', 78)" onmouseover="showTip(event, '78', 78)">
-            singleton(source)
+          <code onmouseout="hideTip(event, '82', 82)" onmouseover="showTip(event, '82', 82)">
+            Stream.singleton(source)
           </code>
-          <div class="tip" id="78">
+          <div class="tip" id="82">
             <strong>Signature:</strong> source:&#39;T -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L153-153" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L153-153" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Creates a singleton stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '79', 79)" onmouseover="showTip(event, '79', 79)">
-            skip(n stream)
+          <code onmouseout="hideTip(event, '83', 83)" onmouseover="showTip(event, '83', 83)">
+            Stream.skip n stream
           </code>
-          <div class="tip" id="79">
+          <div class="tip" id="83">
             <strong>Signature:</strong> n:int -&gt; stream:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L575-575" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L592-592" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Returns a stream that skips N elements of the input stream and then yields the remaining elements of the stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '80', 80)" onmouseover="showTip(event, '80', 80)">
-            sortBy(projection stream)
+          <code onmouseout="hideTip(event, '84', 84)" onmouseover="showTip(event, '84', 84)">
+            Stream.sortBy projection stream
           </code>
-          <div class="tip" id="80">
+          <div class="tip" id="84">
             <strong>Signature:</strong> projection:(&#39;T -&gt; &#39;Key) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T, 'Key          </div>
+                          <strong>Type parameters:</strong> 'T, 'Key                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L749-749" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L766-766" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Applies a key-generating function to each element of the input stream and yields a stream ordered by keys.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '81', 81)" onmouseover="showTip(event, '81', 81)">
-            sum(stream)
+          <code onmouseout="hideTip(event, '85', 85)" onmouseover="showTip(event, '85', 85)">
+            Stream.sum(stream)
           </code>
-          <div class="tip" id="81">
+          <div class="tip" id="85">
             <strong>Signature:</strong> stream:Stream&lt;^T&gt; -&gt; ^T<br />
-                          <strong>Type parameters:</strong> ^T          </div>
+                          <strong>Type parameters:</strong> ^T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L711-711" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L728-728" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Returns the sum of the elements.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '82', 82)" onmouseover="showTip(event, '82', 82)">
-            take(n stream)
+          <code onmouseout="hideTip(event, '86', 86)" onmouseover="showTip(event, '86', 86)">
+            Stream.take n stream
           </code>
-          <div class="tip" id="82">
+          <div class="tip" id="86">
             <strong>Signature:</strong> n:int -&gt; stream:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L544-544" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L561-561" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Returns the elements of the stream up to a specified count.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '83', 83)" onmouseover="showTip(event, '83', 83)">
-            takeWhile(pred stream)
+          <code onmouseout="hideTip(event, '87', 87)" onmouseover="showTip(event, '87', 87)">
+            Stream.takeWhile pred stream
           </code>
-          <div class="tip" id="83">
+          <div class="tip" id="87">
             <strong>Signature:</strong> pred:(&#39;T -&gt; bool) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; Stream&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L567-567" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L584-584" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Returns the elements of the stream while the given predicate returns true.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '84', 84)" onmouseover="showTip(event, '84', 84)">
-            toArray(stream)
+          <code onmouseout="hideTip(event, '88', 88)" onmouseover="showTip(event, '88', 88)">
+            Stream.toArray(stream)
           </code>
-          <div class="tip" id="84">
+          <div class="tip" id="88">
             <strong>Signature:</strong> stream:Stream&lt;&#39;T&gt; -&gt; &#39;T []<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L741-741" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L758-758" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Creates an array from the given stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '85', 85)" onmouseover="showTip(event, '85', 85)">
-            toResizeArray(stream)
+          <code onmouseout="hideTip(event, '89', 89)" onmouseover="showTip(event, '89', 89)">
+            Stream.toResizeArray(stream)
           </code>
-          <div class="tip" id="85">
+          <div class="tip" id="89">
             <strong>Signature:</strong> stream:Stream&lt;&#39;T&gt; -&gt; ResizeArray&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L735-735" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L752-752" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Creates an ResizeArray from the given stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '86', 86)" onmouseover="showTip(event, '86', 86)">
-            toSeq(stream)
+          <code onmouseout="hideTip(event, '90', 90)" onmouseover="showTip(event, '90', 90)">
+            Stream.toSeq(stream)
           </code>
-          <div class="tip" id="86">
+          <div class="tip" id="90">
             <strong>Signature:</strong> stream:Stream&lt;&#39;T&gt; -&gt; seq&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L725-725" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L742-742" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Creates an Seq from the given stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '87', 87)" onmouseover="showTip(event, '87', 87)">
-            tryFind(predicate stream)
+          <code onmouseout="hideTip(event, '91', 91)" onmouseover="showTip(event, '91', 91)">
+            Stream.tryFind predicate stream
           </code>
-          <div class="tip" id="87">
+          <div class="tip" id="91">
             <strong>Signature:</strong> predicate:(&#39;T -&gt; bool) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; &#39;T option<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L845-845" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L862-862" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Returns the first element for which the given function returns true. Returns None if no such element exists.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '88', 88)" onmouseover="showTip(event, '88', 88)">
-            tryHead(stream)
+          <code onmouseout="hideTip(event, '92', 92)" onmouseover="showTip(event, '92', 92)">
+            Stream.tryHead(stream)
           </code>
-          <div class="tip" id="88">
+          <div class="tip" id="92">
             <strong>Signature:</strong> stream:Stream&lt;&#39;T&gt; -&gt; &#39;T option<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L931-931" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L948-948" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Returns the first element of the stream.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '89', 89)" onmouseover="showTip(event, '89', 89)">
-            tryPick(chooser stream)
+          <code onmouseout="hideTip(event, '93', 93)" onmouseover="showTip(event, '93', 93)">
+            Stream.tryPick chooser stream
           </code>
-          <div class="tip" id="89">
+          <div class="tip" id="93">
             <strong>Signature:</strong> chooser:(&#39;T -&gt; &#39;R option) -&gt; stream:Stream&lt;&#39;T&gt; -&gt; &#39;R option<br />
-                          <strong>Type parameters:</strong> 'T, 'R          </div>
+                          <strong>Type parameters:</strong> 'T, 'R                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L864-864" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L881-881" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Applies the given function to successive elements, returning the first result where the function returns a Some value.</p>
 
 
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
-
-          <code onmouseout="hideTip(event, '90', 90)" onmouseover="showTip(event, '90', 90)">
-            zipWith(f first second)
+          <code onmouseout="hideTip(event, '94', 94)" onmouseover="showTip(event, '94', 94)">
+            Stream.zipWith f first second
           </code>
-          <div class="tip" id="90">
+          <div class="tip" id="94">
             <strong>Signature:</strong> f:(&#39;T -&gt; &#39;S -&gt; &#39;R) -&gt; first:Stream&lt;&#39;T&gt; -&gt; second:Stream&lt;&#39;S&gt; -&gt; Stream&lt;&#39;R&gt;<br />
-                          <strong>Type parameters:</strong> 'T, 'S, 'R          </div>
+                          <strong>Type parameters:</strong> 'T, 'S, 'R                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L638-638" class="github-link">
+                      <a href="https://github.com/nessos/Streams/tree/master/src/Streams/Streams.fs#L655-655" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Applies a specified function to the corresponding elements of two streams, producing a stream of the results.</p>
-
 
 
         </td>
