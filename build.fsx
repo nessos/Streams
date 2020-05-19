@@ -175,7 +175,7 @@ Target.create "Release" ignore
 
 "Build"
   ==> "NuGet.Pack"
-  ==> "NuGet.ValidateSourceLink"
+  //==> "NuGet.ValidateSourceLink"
   ==> "GenerateDocs"
   ==> "Bundle"
 
