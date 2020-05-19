@@ -167,6 +167,7 @@ $RECYCLE.BIN/
 TestResults.xml
 
 .vs/
+.ionide/
 paket-files/
 artifacts/
 docs/output
