@@ -1,19 +1,35 @@
-redirects: on
-source https://www.nuget.org/api/v2/
-framework: net45, net461, netstandard2.0, netcoreapp2.2
+source https://api.nuget.org/v3/index.json
+framework: netstandard2.0
 storage: none
-redirects: off
 
-nuget FSharp.Core ~> 4.3.4
-nuget FsCheck ~> 2.14.0
-nuget FSharp.Collections.ParallelSeq >= 1.1.2
-nuget NUnit ~> 3.12.0
-nuget NUnit3TestAdapter ~> 3.12.0
-nuget Microsoft.Net.Test.SDK ~> 15.8.0
+nuget FSharp.Core >= 4.3.4 lowest_matching:true
+nuget Microsoft.SourceLink.GitHub ~> 1.0.0 copy_local:true
+
+group Tests
+  source https://api.nuget.org/v3/index.json
+  framework: netcoreapp3.1, net472
+  storage: none
+
+  nuget FSharp.Core ~> 4.7.0
+  nuget Microsoft.Net.Test.SDK ~> 16.0
+  nuget FsCheck ~> 2.14.0
+  nuget NUnit ~> 3.12.0
+  nuget NUnit3TestAdapter ~> 3.12.0
+
+  nuget FSharp.Collections.ParallelSeq >= 1.1.2
 
 group Build
-  source https://www.nuget.org/api/v2/
-  framework: net461
-  
-  nuget FAKE ~> 4.0
-  nuget FSharp.Formatting ~> 3.1.0
+  source https://api.nuget.org/v3/index.json
+  generate_load_scripts: true
+  framework: netstandard2.0
+  storage: none
+
+  nuget Fake.Core.UserInput	    ~> 5.19.0
+  nuget Fake.Core.ReleaseNotes  ~> 5.19.0
+  nuget Fake.Core.Target        ~> 5.19.0
+  nuget Fake.IO.FileSystem      ~> 5.19.0
+  nuget Fake.DotNet.Cli	        ~> 5.19.0
+  nuget Fake.Tools.Git          ~> 5.19.0
+  nuget Fake.Api.Github         ~> 5.19.0
+
+  nuget FSharp.Formatting ~> 4.0 storage: packages

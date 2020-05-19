@@ -12,7 +12,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Streams.Tests.CSharp", "tes
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{CA2F9EF8-BFFE-4AE8-A610-869DDCBD7CCD}"
 	ProjectSection(SolutionItems) = preProject
-		.paket\paket.exe = .paket\paket.exe
 		.paket\Paket.Restore.targets = .paket\Paket.Restore.targets
 	EndProjectSection
 EndProject
@@ -26,14 +25,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.cmd = build.cmd
 		build.fsx = build.fsx
 		build.sh = build.sh
+		Directory.Build.props = Directory.Build.props
 		docker-build.sh = docker-build.sh
 		Dockerfile = Dockerfile
+		global.json = global.json
 		LICENSE.md = LICENSE.md
 		paket.dependencies = paket.dependencies
 		paket.lock = paket.lock
 		README.md = README.md
 		RELEASE_NOTES.md = RELEASE_NOTES.md
-		Streams.sln = Streams.sln
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{5FFE500C-6A09-4562-AE29-C88B0EA4AFFC}"
@@ -54,7 +54,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{B0FB9072-9AF8-4A5C-B5C5-3007C96DA5DF}"
 	ProjectSection(SolutionItems) = preProject
 		docs\tools\generate.fsx = docs\tools\generate.fsx
-		docs\tools\packages.config = docs\tools\packages.config
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{6131609F-DF8E-4F3A-88C0-D03DF6C79412}"

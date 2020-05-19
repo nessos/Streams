@@ -1,8 +1,7 @@
 @echo off
 
-.paket\paket.exe restore -v
-if errorlevel 1 (
-  exit /b %errorlevel%
-)
+export PAKET_SKIP_RESTORE_TARGETS=true
 
-packages\build\FAKE\tools\FAKE.exe build.fsx %*
+dotnet tool restore
+dotnet paket restore
+dotnet fake run build.fsx %*

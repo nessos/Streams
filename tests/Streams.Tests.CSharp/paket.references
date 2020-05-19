@@ -1,4 +1,6 @@
-FsCheck
-NUnit
-NUnit3TestAdapter
-Microsoft.Net.Test.SDK
+group Tests
+  FSharp.Core
+  FsCheck
+  NUnit
+  NUnit3TestAdapter
+  Microsoft.Net.Test.SDK

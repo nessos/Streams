@@ -1,8 +1,12 @@
+#### 0.6.0
+* Remove net45 target.
+* add sourcelink support.
+
 #### 0.5.0
 * Target netstandard2.0
 
 #### 0.4.1
-* New ParStream functinos sortByDescending/sortByUsing
+* New ParStream functions sortByDescending/sortByUsing
 
 #### 0.4.0
 * Fix Stream.sortBy issue.
