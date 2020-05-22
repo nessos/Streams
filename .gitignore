@@ -172,3 +172,5 @@ TestResults.xml
 paket-files/
 artifacts/
 docs/output
+
+BenchmarkDotNet.Artifacts

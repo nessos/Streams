@@ -1,12 +1,20 @@
 (*** hide ***)
 // This block of code is omitted in the generated HTML documentation. Use 
 // it to define helpers that you do not want to show in the documentation.
-#I "../../bin/"
-
+#I "../../src/Streams/bin/Release/netstandard2.0"
 #r "Streams.dll"
-#r "../../packages/FSharp.Collections.ParallelSeq/lib/net40/FSharp.Collections.ParallelSeq.dll"
+
+open Nessos.Streams
 
 (**
+
+<style type="text/css">
+    <!-- BenchmarkDotNet table style -->
+	.bdn table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	.bdn td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	.bdn tr { background-color: #fff; border-top: 1px solid #ccc; }
+	.bdn tr:nth-child(even) { background: #f8f8f8; }
+</style>
 
 # Streams
 
@@ -34,52 +42,27 @@ The main design behind Streams is inspired by Java 8 Streams and is based on the
 
 The main difference between LINQ/Seq and Streams is that LINQ is about composing external iterators (Enumerable/Enumerator) and  Streams is based on the continuation-passing-style composition of internal iterators.
 
-For simple pipelines we have observed performance improvements of a factor of four and for more complex pipelines the performance gains are even greater.
-Important performance tip: Make sure that FSI is running with 64-bit option set to true and fsproj option prefer 32-bit is unchecked.
+## Example pipeline
+
 *)
 
 open Nessos.Streams
 
-let data = [|1..10000000|] |> Array.map int64
-
-// Sequential
-
-// Real: 00:00:00.044, CPU: 00:00:00.046, GC gen0: 0, gen1: 0, gen2: 0
-data
+[|1L .. 10000000L|]
 |> Stream.ofArray
 |> Stream.filter (fun x -> x % 2L = 0L)
 |> Stream.map (fun x -> x + 1L)
+|> Stream.sortBy id
+|> Stream.take 99
 |> Stream.sum
 
-// Real: 00:00:00.264, CPU: 00:00:00.265, GC gen0: 0, gen1: 0, gen2: 0
-data
-|> Seq.filter (fun x -> x % 2L = 0L)
-|> Seq.map (fun x -> x + 1L)
-|> Seq.sum
-
-// Real: 00:00:00.217, CPU: 00:00:00.202, GC gen0: 0, gen1: 0, gen2: 0
-data
-|> Array.filter (fun x -> x % 2L = 0L)
-|> Array.map (fun x -> x + 1L)
-|> Array.sum
-
-// Parallel
-open FSharp.Collections.ParallelSeq
-
-// Real: 00:00:00.017, CPU: 00:00:00.078, GC gen0: 0, gen1: 0, gen2: 0
-data
-|> ParStream.ofArray
-|> ParStream.filter (fun x -> x % 2L = 0L)
-|> ParStream.map (fun x -> x + 1L)
-|> ParStream.sum
-
-// Real: 00:00:00.045, CPU: 00:00:00.187, GC gen0: 0, gen1: 0, gen2: 0
-data
-|> PSeq.filter (fun x -> x % 2L = 0L)
-|> PSeq.map (fun x -> x + 1L)
-|> PSeq.sum
-
 (**
+
+## Performance
+
+The Streams library provides performance benefits compared to other LINQ-style combinator libraries.
+Please see the benchmarks in [Performance.md](https://github.com/nessos/Streams/blob/master/docs/Performance.md) for more information.
+
 ## References
 
 * [Clash of the Lambdas](http://arxiv.org/abs/1406.6631)

@@ -17,6 +17,7 @@ group Tests
   nuget NUnit3TestAdapter ~> 3.12.0
 
   nuget FSharp.Collections.ParallelSeq >= 1.1.2
+  nuget BenchmarkDotNet ~> 0.12.1
 
 group Build
   source https://api.nuget.org/v3/index.json

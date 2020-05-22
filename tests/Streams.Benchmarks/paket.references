@@ -1,0 +1,4 @@
+﻿group Tests
+  FSharp.Core
+  BenchmarkDotNet
+  FSharp.Collections.ParallelSeq
