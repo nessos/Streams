@@ -690,7 +690,7 @@ NUGET
       System.Threading.Tasks.Extensions (>= 4.5.2)
       System.ValueTuple (>= 4.5)
     BenchmarkDotNet.Annotations (0.12.1)
-    CommandLineParser (2.8)
+    CommandLineParser (2.4.3)
     FsCheck (2.14.2)
       FSharp.Core (>= 4.2.3)
     FSharp.Collections.ParallelSeq (1.1.3)
