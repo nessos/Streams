@@ -169,8 +169,9 @@ TestResults.xml
 .vs/
 .ionide/
 .paket/load
-paket-files/
-artifacts/
+paket-files
+artifacts
 docs/output
+temp
 
 BenchmarkDotNet.Artifacts
