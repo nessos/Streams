@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="SimpleBenchmark.fs" />
-    <Compile Include="ParallelBenchmark.fs" />
+    <Compile Include="ComplexBenchmark.fs" />
     <Compile Include="Program.fs" />
     <None Include="paket.references" />
   </ItemGroup>

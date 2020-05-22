@@ -1,12 +1,13 @@
 ﻿namespace Nessos.Streams.Benchmarks
 
 open System.Linq
+open System.Threading
 open Nessos.Streams
 open BenchmarkDotNet.Attributes
 open FSharp.Collections.ParallelSeq
 
 [<MemoryDiagnoser>]
-type SimpleBenchmarkSeq() =
+type ComplexBenchmarkSequential() =
 
     let data = [|1L..10000000L|]
 
@@ -14,6 +15,9 @@ type SimpleBenchmarkSeq() =
     member _.LinqPipeline() =
         data.Where(fun x -> x % 2L = 0L)
             .Select(fun x -> x + 1L)
+            .OrderBy(fun x -> x)
+            .Take(100)
+            .Select(fun x -> x % 17L)
             .Sum()
         |> ignore
 
@@ -22,6 +26,9 @@ type SimpleBenchmarkSeq() =
         data
         |> Seq.filter (fun x -> x % 2L = 0L)
         |> Seq.map (fun x -> x + 1L)
+        |> Seq.sortBy id
+        |> Seq.take 100
+        |> Seq.map (fun x -> x % 17L)
         |> Seq.sum
         |> ignore
     
@@ -31,11 +38,14 @@ type SimpleBenchmarkSeq() =
         |> Stream.ofArray
         |> Stream.filter (fun x -> x % 2L = 0L)
         |> Stream.map (fun x -> x + 1L)
+        |> Stream.sortBy id
+        |> Stream.take 100
+        |> Stream.map (fun x -> x % 17L)
         |> Stream.sum
         |> ignore
 
 [<MemoryDiagnoser>]
-type SimpleBenchmarkParallel() =
+type ComplexBenchmarkParallel() =
 
     let data = [|1L..10000000L|]
 
@@ -44,6 +54,9 @@ type SimpleBenchmarkParallel() =
         data.AsParallel()
             .Where(fun x -> x % 2L = 0L)
             .Select(fun x -> x + 1L)
+            .OrderBy(fun x -> x)
+            .Take(100)
+            .Select(fun x -> x % 17L)
             .Sum()
         |> ignore
 
@@ -53,6 +66,9 @@ type SimpleBenchmarkParallel() =
         data
         |> PSeq.filter (fun x -> x % 2L = 0L)
         |> PSeq.map (fun x -> x + 1L)
+        |> PSeq.sortBy id
+        |> PSeq.takeWhile(fun _ -> Interlocked.Increment &count < 100)
+        |> PSeq.map (fun x -> x % 17L)
         |> PSeq.sum
         |> ignore
     
@@ -62,5 +78,8 @@ type SimpleBenchmarkParallel() =
         |> ParStream.ofArray
         |> ParStream.filter (fun x -> x % 2L = 0L)
         |> ParStream.map (fun x -> x + 1L)
+        |> ParStream.sortBy id
+        |> ParStream.take 100
+        |> ParStream.map (fun x -> x % 17L)
         |> ParStream.sum
         |> ignore
